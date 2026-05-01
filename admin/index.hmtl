@@ -1,63 +1,1364 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IE">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
   <title>Bin Men FC Admin</title>
+  <!--
+  Executive summary
+  - Single-file admin console for a small static site on GitHub Pages. No build step.
+  - Uses Firebase compat libraries (window.firebase) for zero-tooling deployment.
+  - Client-side passcode gate with optional "remember me" session.
+  - Lists Firestore reviews in real time, searches/filter/sorts client-side, and renders with infinite scroll.
+  - Deletes the Firestore review document and then attempts to delete its associated Firebase Storage image.
+  - Includes accessible modal dialogs, focus states, animated progress bars, toast notifications, inline SVG icons, and a dark contrast-friendly theme.
 
+  Deployment
+  1) Save this file as /admin/index.html in your GitHub Pages publishing source.
+  2) Add an empty /.nojekyll file at the root of the publishing source.
+  3) In GitHub -> Settings -> Pages, confirm the correct source branch/folder is selected.
+  4) Use the exact Firebase config and exact storageBucket value from Firebase Console -> Project settings.
+  5) Publish Firestore and Storage rules shown in the "Deployment, rules, and troubleshooting" panel below.
+  6) Wait for GitHub Pages deployment, then hard refresh /admin/ or /admin/index.html.
+
+  Important security note
+  - The passcode below is visible in source/DevTools. It is a convenience gate only.
+  - Real production security requires Firebase Authentication + admin custom claims + locked-down Security Rules.
+
+  Changelog
+  - v1.0.0 (2026-04-30): initial release.
+  -->
   <style>
+    :root {
+      --bg: #071017;
+      --bg-2: #0a1621;
+      --panel: rgba(11, 19, 28, 0.87);
+      --panel-2: rgba(9, 16, 24, 0.95);
+      --line: rgba(155, 184, 215, 0.15);
+      --line-strong: rgba(133, 162, 195, 0.28);
+      --text: #edf7ff;
+      --text-2: #c4d4e6;
+      --muted: #8ea3bb;
+      --accent: #6fe7d4;
+      --accent-2: #7aa2ff;
+      --accent-3: #9f7cff;
+      --danger: #ff6c81;
+      --warning: #ffca6b;
+      --success: #73f7b4;
+      --ring: rgba(111, 231, 212, 0.55);
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --maxw: 1380px;
+      --fast: 160ms ease;
+      --med: 240ms ease;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #0b0f0d;
-      color: white;
-      text-align: center;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(122, 162, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 100% 0%, rgba(111, 231, 212, 0.15), transparent 26%),
+        radial-gradient(circle at 50% 100%, rgba(159, 124, 255, 0.14), transparent 28%),
+        linear-gradient(180deg, #071017 0%, #09131d 100%);
+      background-attachment: fixed;
+      letter-spacing: 0.01em;
     }
 
-    h1 {
-      margin-top: 30px;
-      font-size: 40px;
+    body.app-locked { overflow: hidden; }
+
+    img {
+      display: block;
+      max-width: 100%;
     }
 
-    .review {
-      background: #121a15;
-      border: 1px solid #243228;
-      border-radius: 18px;
-      padding: 18px;
-      margin: 20px auto;
-      width: 90%;
-      max-width: 600px;
-    }
-
-    .review img {
-      width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
     }
 
     button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      background: red;
-      color: white;
+      border: 0;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .hidden { display: none !important; }
+
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--ring);
+      outline-offset: 3px;
+      border-radius: 12px;
+    }
+
+    .shell {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(180deg, rgba(20, 34, 48, 0.96), rgba(10, 17, 26, 0.98)),
+        radial-gradient(circle at 25% 25%, rgba(111, 231, 212, 0.08), transparent 30%);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(180deg, black, transparent);
+      pointer-events: none;
+    }
+
+    .hero-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(111, 231, 212, 0.24);
+      background: rgba(111, 231, 212, 0.08);
+      color: var(--accent);
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(2rem, 2.6vw, 3.35rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 68ch;
+      color: var(--text-2);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .helper-row {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn,
+    .btn-ghost,
+    .btn-danger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 14px;
+      transition: transform var(--fast), border-color var(--fast), background var(--fast), opacity var(--fast), box-shadow var(--fast);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .btn:hover,
+    .btn-ghost:hover,
+    .btn-danger:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, rgba(111, 231, 212, 0.18), rgba(122, 162, 255, 0.16));
+      border: 1px solid rgba(111, 231, 212, 0.32);
+      color: var(--text);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+    }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, rgba(255, 108, 129, 0.16), rgba(255, 108, 129, 0.08));
+      border: 1px solid rgba(255, 108, 129, 0.34);
+      color: #fff2f5;
+    }
+
+    .btn[disabled],
+    .btn-ghost[disabled],
+    .btn-danger[disabled] {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .stats {
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: rgba(7, 14, 21, 0.64);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      min-height: 112px;
+    }
+
+    .stat-card .label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .stat-card .value {
+      margin-top: 10px;
+      font-size: clamp(1.5rem, 2vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .stat-card .sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .toolbar {
+      margin-top: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .toolbar-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) 200px 200px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(6, 11, 16, 0.85);
+      color: var(--text);
+      transition: border-color var(--fast), background var(--fast), box-shadow var(--fast);
+    }
+
+    .input.search {
+      padding-left: 44px;
+      padding-right: 44px;
+    }
+
+    .input::placeholder {
+      color: #7f96ad;
+    }
+
+    .input:hover,
+    .select:hover {
+      border-color: var(--line-strong);
+    }
+
+    .field-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      color: var(--text);
+      transition: background var(--fast), border-color var(--fast), transform var(--fast);
+      font-weight: 700;
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, rgba(111, 231, 212, 0.14), rgba(122, 162, 255, 0.18));
+      border-color: rgba(111, 231, 212, 0.38);
+      color: #f5fbff;
+    }
+
+    .chip:hover {
+      transform: translateY(-1px);
+    }
+
+    .chip-count,
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line);
+      color: var(--text-2);
+    }
+
+    .meta-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .notice {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: linear-gradient(180deg, rgba(255, 202, 107, 0.08), rgba(255, 202, 107, 0.02));
+      border-color: rgba(255, 202, 107, 0.22);
+    }
+
+    .notice strong {
+      color: #ffe3a2;
+    }
+
+    details.panel summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+
+    details.panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.panel[open] summary {
+      margin-bottom: 14px;
+    }
+
+    .details-body {
+      display: grid;
+      gap: 14px;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    .details-body p {
+      margin: 0;
+    }
+
+    .details-body pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: auto;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(3, 6, 10, 0.9);
+      color: #dce8f4;
+      font-size: 0.89rem;
+      line-height: 1.55;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 0 8px;
+      border-radius: 8px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .content {
+      margin-top: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 260px;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(12, 21, 31, 0.94), rgba(7, 14, 21, 0.98));
+      box-shadow: var(--shadow);
+      transition: transform var(--med), box-shadow var(--med), border-color var(--med);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.42);
+    }
+
+    .card-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      background:
+        linear-gradient(135deg, rgba(111, 231, 212, 0.2), rgba(122, 162, 255, 0.22));
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #f2fbff;
+    }
+
+    .card .name {
+      font-weight: 800;
+      font-size: 1rem;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .card .date {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .card-id {
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .card-text {
+      margin: 0;
+      color: var(--text-2);
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .thumb {
+      position: relative;
+      width: 100%;
+      padding: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #050a10;
+    }
+
+    .thumb img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      transition: transform 300ms ease;
+    }
+
+    .thumb:hover img,
+    .thumb:focus-visible img {
+      transform: scale(1.025);
+    }
+
+    .thumb-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #eefbff;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .card-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .inline-diagnostics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .diagnostic-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 48px 22px;
+      color: var(--muted);
+      background: rgba(8, 14, 22, 0.8);
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .empty h2 {
+      margin: 12px 0 8px;
+      font-size: 1.4rem;
+      color: var(--text);
+    }
+
+    .empty p {
+      margin: 0 auto;
+      max-width: 60ch;
+      line-height: 1.65;
+    }
+
+    .sentinel {
+      height: 10px;
+    }
+
+    .load-more-wrap {
+      text-align: center;
+    }
+
+    #loadMoreBtn { display: none; margin-inline: auto; }
+
+    .footer-note {
+      padding: 8px 2px 36px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .top-progress {
+      position: fixed;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 3px;
+      z-index: 80;
+      pointer-events: none;
+    }
+
+    .top-progress-bar {
+      width: 0%;
+      height: 100%;
+      opacity: 0;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent), #8cf3ff);
+      box-shadow: 0 0 20px rgba(111, 231, 212, 0.5);
+      transition: width 250ms ease, opacity 250ms ease;
+    }
+
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(111, 231, 212, 0.12), transparent 28%),
+        radial-gradient(circle at 100% 0%, rgba(122, 162, 255, 0.12), transparent 28%),
+        linear-gradient(180deg, rgba(4, 9, 14, 0.95), rgba(4, 9, 14, 0.98));
+      backdrop-filter: blur(8px);
+    }
+
+    .login-card {
+      width: min(560px, 100%);
+      padding: 28px;
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(17, 28, 41, 0.94), rgba(8, 14, 22, 0.98));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .login-card h2 {
+      margin: 16px 0 8px;
+      font-size: clamp(1.7rem, 2vw, 2.3rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .login-card p {
+      margin: 0;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    .login-form {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .login-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 14px;
+    }
+
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      color: var(--text-2);
+      font-size: 0.95rem;
+    }
+
+    .checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .error-banner {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 108, 129, 0.28);
+      background: rgba(255, 108, 129, 0.1);
+      color: #ffd2da;
+      line-height: 1.5;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(12px);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      animation: fadeIn 180ms ease both;
+    }
+
+    .modal {
+      width: min(680px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      border-radius: 26px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(14, 23, 34, 0.99), rgba(7, 13, 20, 0.99));
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 20px 20px 0;
+    }
+
+    .modal h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .modal p {
+      margin: 8px 0 0;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    .modal-body {
+      padding: 18px 20px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .close-x {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      color: var(--text);
+      flex: 0 0 auto;
+    }
+
+    .destructive-preview {
+      display: grid;
+      gap: 8px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      padding: 14px;
+      color: var(--text-2);
+      line-height: 1.55;
+    }
+
+    .progress {
+      width: 100%;
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent), var(--success));
+      box-shadow: 0 0 18px rgba(111, 231, 212, 0.45);
+      transition: width 220ms ease;
+    }
+
+    .status-copy {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .lightbox-img {
+      width: 100%;
+      max-height: min(70vh, 800px);
+      object-fit: contain;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--line);
+    }
+
+    .toast-wrap {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 100;
+      display: grid;
+      gap: 10px;
+      width: min(420px, calc(100vw - 32px));
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px 14px 14px 12px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(17, 28, 41, 0.98), rgba(9, 15, 23, 0.98));
+      color: var(--text);
+      box-shadow: 0 26px 70px rgba(0,0,0,0.44);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: toastIn 180ms ease forwards;
+    }
+
+    .toast.success { border-color: rgba(115, 247, 180, 0.3); }
+    .toast.error { border-color: rgba(255, 108, 129, 0.3); }
+    .toast.warning { border-color: rgba(255, 202, 107, 0.3); }
+
+    .toast-title {
+      font-weight: 800;
+      margin: 0 0 2px;
+    }
+
+    .toast-msg {
+      color: var(--text-2);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .toast-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    svg.icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1100px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 920px) {
+      .hero-row,
+      .toolbar-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell { padding: 16px; }
+      .hero,
+      .panel,
+      .card,
+      .login-card { padding: 18px; }
+      .stats {
+        grid-template-columns: 1fr;
+      }
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .modal-head,
+      .modal-body {
+        padding-inline: 16px;
+      }
+      .field-actions,
+      .modal-actions {
+        justify-content: stretch;
+      }
+      .modal-actions > * {
+        flex: 1 1 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+      }
     }
   </style>
 </head>
+<body class="app-locked">
+  <div class="top-progress" aria-hidden="true">
+    <div id="topProgressBar" class="top-progress-bar"></div>
+  </div>
 
-<body>
+  <section id="loginScreen" class="login-screen" aria-labelledby="loginTitle">
+    <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle" aria-describedby="loginDesc">
+      <span class="badge">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 4v5c0 5-2.8 8-7 9-4.2-1-7-4-7-9V7l7-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.2 12.2 1.8 1.8 3.8-4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Admin access
+      </span>
+      <h2 id="loginTitle">Bin Men FC admin mode</h2>
+      <p id="loginDesc">Enter the admin password to unlock review moderation. You can optionally remember this device for seven days. This is a client-side convenience gate, not true server-enforced authentication.</p>
+      <div id="loginError" class="error-banner" role="alert"></div>
 
-  <h1>Admin Panel</h1>
-  <div id="reviewsList">Loading...</div>
+      <form id="loginForm" class="login-form" novalidate>
+        <div class="field">
+          <label for="passwordInput">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M6 11V8a6 6 0 0 1 12 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="4" y="11" width="16" height="10" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="16" r="1.2" fill="currentColor"/></svg>
+            </span>
+            <input id="passwordInput" class="input search" type="password" inputmode="text" autocomplete="current-password" placeholder="Enter admin password" aria-describedby="loginMeta" />
+          </div>
+        </div>
+
+        <label class="checkbox">
+          <input id="rememberMe" type="checkbox" />
+          <span>Remember me on this device for 7 days</span>
+        </label>
+
+        <button id="loginButton" class="btn" type="submit">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="m13 7 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Enter admin mode
+        </button>
+      </form>
+
+      <div id="loginMeta" class="login-meta">
+        <span class="pill">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/></svg>
+          Persistent session uses localStorage
+        </span>
+        <span class="pill">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 3s6 2.2 6 7.5S12 21 12 21 6 15.8 6 10.5 12 3 12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="10.5" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg>
+          Password is visible in source
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div id="appShell" class="shell hidden">
+    <header class="hero">
+      <div class="hero-row">
+        <div>
+          <span class="badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.8 4.8 6.4v5.4c0 4.8 2.7 8 7.2 9.4 4.5-1.4 7.2-4.6 7.2-9.4V6.4L12 2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 11.9 11.3 13.7 14.9 9.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Admin dashboard
+          </span>
+          <h1>Moderate reviews with a fast, static, no-build admin console</h1>
+          <p>This admin page is optimised for a small GitHub Pages site. It listens to Firestore in real time, searches and filters locally, renders progressively with infinite scroll, shows images in a lightbox, and gives you safe confirmation before destructive actions.</p>
+          <div class="helper-row" aria-label="Hints">
+            <span class="pill"><span class="kbd">/</span> Focus search</span>
+            <span class="pill"><span class="kbd">Esc</span> Close modal</span>
+            <span class="pill"><span class="kbd">Tab</span> Clear focus order and visible rings</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button id="refreshBtn" class="btn-ghost" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11a8 8 0 1 1-2.34-5.66L20 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 4v4h-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Refresh
+          </button>
+          <button id="logoutBtn" class="btn-ghost" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 7V5.5A2.5 2.5 0 0 0 12.5 3h-5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h5a2.5 2.5 0 0 0 2.5-2.5V17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 12h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="m17 7 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+
+      <div class="stats" aria-label="Dashboard stats">
+        <article class="stat-card">
+          <div class="label">
+            <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="m7 9 5 3 5-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            Total reviews
+          </div>
+          <div id="statTotal" class="value">0</div>
+          <div id="statTotalSub" class="sub">All review documents currently loaded.</div>
+        </article>
+
+        <article class="stat-card">
+          <div class="label">
+            <svg class="icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="m7 14 2.8-2.8a1 1 0 0 1 1.4 0L14 14l1.8-1.8a1 1 0 0 1 1.4 0L20 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/></svg>
+            Reviews with images
+          </div>
+          <div id="statImages" class="value">0</div>
+          <div class="sub">Count of reviews carrying a stored image URL.</div>
+        </article>
+
+        <article class="stat-card">
+          <div class="label">
+            <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M4 7h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="3" width="16" height="18" rx="3" stroke="currentColor" stroke-width="1.7"/></svg>
+            Visible after filters
+          </div>
+          <div id="statVisible" class="value">0</div>
+          <div id="statVisibleSub" class="sub">Updates as you search, filter and sort.</div>
+        </article>
+
+        <article class="stat-card">
+          <div class="label">
+            <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2.5 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12a9 9 0 1 1-2.64-6.36" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M21 4v6h-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Last sync
+          </div>
+          <div id="statSync" class="value">—</div>
+          <div class="sub">Updated every time Firestore pushes a snapshot.</div>
+        </article>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="panel">
+        <div class="toolbar-grid">
+          <div class="field">
+            <label for="searchInput">Search reviews</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </span>
+              <input id="searchInput" class="input search" type="search" placeholder="Search by name, text, or document ID" autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="sortSelect">Sort</label>
+            <select id="sortSelect" class="select">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="name-desc">Name Z-A</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="pageSizeSelect">Chunk size</label>
+            <select id="pageSizeSelect" class="select">
+              <option value="12">12 cards</option>
+              <option value="18">18 cards</option>
+              <option value="24">24 cards</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-actions" style="margin-top: 14px;">
+          <div class="chip-group" role="tablist" aria-label="Quick filters">
+            <button class="chip active" type="button" data-chip="all" aria-pressed="true">
+              All
+              <span id="chipCountAll" class="chip-count">0</span>
+            </button>
+            <button class="chip" type="button" data-chip="with-image" aria-pressed="false">
+              With image
+              <span id="chipCountWithImage" class="chip-count">0</span>
+            </button>
+            <button class="chip" type="button" data-chip="without-image" aria-pressed="false">
+              Text only
+              <span id="chipCountWithoutImage" class="chip-count">0</span>
+            </button>
+          </div>
+
+          <div class="meta-line" aria-live="polite">
+            <span id="visibleCountLine">0 visible</span>
+            <span id="renderedCountLine">0 rendered</span>
+            <span id="firebaseStateLine">Waiting for first snapshot…</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel notice">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 2.6 19.2A1.3 1.3 0 0 0 3.7 21h16.6a1.3 1.3 0 0 0 1.1-1.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>
+        <div>
+          <strong>Security limitation.</strong> The password gate only changes what this page shows. It does not secure Firebase by itself. Anyone who can inspect the client can discover the passcode and your configuration. For real production security, use Firebase Authentication plus admin custom claims and locked-down Firestore and Storage rules.
+        </div>
+      </div>
+
+      <details class="panel">
+        <summary>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/><path d="M8 9h8M8 12h8M8 15h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          Deployment, rules, and troubleshooting
+        </summary>
+        <div class="details-body">
+          <p><strong>GitHub Pages:</strong> save this file as <span class="mono">/admin/index.html</span>, make sure your selected Pages source contains that path, and add an empty <span class="mono">.nojekyll</span> file in the root of the publishing source. Visit <span class="mono">/admin/</span> after the deployment finishes. If you use a custom domain, keep the custom domain configured in repository settings, not just with a root <span class="mono">CNAME</span> file.</p>
+
+          <p><strong>Recommended secure rules</strong> — requires Firebase Authentication and an <span class="mono">admin</span> custom claim. This is the version you should use for real production enforcement.</p>
+<pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /reviews/{docId} {
+      allow read: if true;
+      allow create: if true; // tighten if you later lock public submissions down
+      allow update, delete: if isAdmin();
+    }
+  }
+}</pre>
+
+<pre>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /reviews/{allPaths=**} {
+      allow read: if true;
+      allow create: if request.resource != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin();
+    }
+  }
+}</pre>
+
+          <p><strong>Temporary passcode-only rules</strong> — this works with the page exactly as written, but it is <strong>not secure</strong> because Firebase cannot see your local password prompt.</p>
+<pre>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /reviews/{docId} {
+      allow read, create, update, delete: if true;
+    }
+  }
+}</pre>
+
+<pre>rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /reviews/{allPaths=**} {
+      allow read: if true;
+      allow create: if request.resource != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if true;
+    }
+  }
+}</pre>
+
+          <p><strong>Troubleshooting:</strong> if image operations fail, verify the exact <span class="mono">storageBucket</span> value from Firebase Console; newer default buckets typically use <span class="mono">PROJECT_ID.firebasestorage.app</span> while older projects may still use <span class="mono">PROJECT_ID.appspot.com</span>. If you intentionally use raw Google Cloud Storage URLs or custom fetch requests instead of the Firebase SDK, configure bucket CORS in Google Cloud as well.</p>
+        </div>
+      </details>
+    </section>
+
+    <main class="content">
+      <section id="emptyState" class="empty hidden" aria-live="polite">
+        <svg class="icon" style="width: 40px; height: 40px; margin: 0 auto;" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8.5 15.5 2.5-2.5 2 2 3.5-3.5 2.5 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="8.2" cy="9.2" r="1.3" fill="currentColor"/></svg>
+        <h2>No reviews match the current filters</h2>
+        <p>Try clearing the search box, switching quick filters, or checking that the <span class="mono">reviews</span> collection is readable under your current Firestore rules.</p>
+      </section>
+
+      <section id="cardsGrid" class="grid" aria-live="polite" aria-busy="true"></section>
+
+      <div class="sentinel" id="sentinel" aria-hidden="true"></div>
+
+      <div class="load-more-wrap">
+        <button id="loadMoreBtn" class="btn-ghost" type="button">Load more reviews</button>
+      </div>
+
+      <p class="footer-note">This console is intentionally self-contained for static hosting. For a truly secure admin workflow, replace the client-side passcode with Firebase Authentication, set an admin custom claim server-side, and lock both Firestore and Storage rules to authenticated admins only.</p>
+    </main>
+  </div>
+
+  <div id="confirmModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmDesc">
+      <div class="modal-head">
+        <div>
+          <h3 id="confirmTitle">Delete this review?</h3>
+          <p id="confirmDesc">This removes the review document first, then it attempts to remove the image from Firebase Storage. If image deletion fails, the review will still be gone and you can clean up the file later.</p>
+        </div>
+        <button class="close-x" type="button" data-close-modal="confirmModal" aria-label="Close dialog">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="deletePreview" class="destructive-preview"></div>
+        <div class="progress" aria-hidden="true"><span id="deleteProgressBar"></span></div>
+        <div id="deleteStatus" class="status-copy">Waiting for confirmation.</div>
+        <div class="modal-actions">
+          <button id="cancelDeleteBtn" class="btn-ghost" type="button" data-close-modal="confirmModal">Cancel</button>
+          <button id="confirmDeleteBtn" class="btn-danger" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 11v5M14 11v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 7l1 12.2A2 2 0 0 0 9 21h6a2 2 0 0 0 2-1.8L18 7M9 7V5.7A1.7 1.7 0 0 1 10.7 4h2.6A1.7 1.7 0 0 1 15 5.7V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Delete review
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="imageModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="imageTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="imageTitle">Review image preview</h3>
+          <p id="imageMeta">Open preview for the selected review image.</p>
+        </div>
+        <button class="close-x" type="button" data-close-modal="imageModal" aria-label="Close image preview">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img id="lightboxImage" class="lightbox-img" alt="" />
+      </div>
+    </div>
+  </div>
+
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
   <script>
+    "use strict";
+
+    /*
+      This file intentionally uses the compat/window style Firebase scripts so it can run as a
+      single static HTML page on GitHub Pages with no build tooling.
+      Long term, Firebase recommends moving to the modular SDK.
+    */
+
     const ADMIN_PASSWORD = "liam";
+    const SESSION_KEY = "binmen_admin_session_v1";
+    const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+    const DEFAULT_PAGE_SIZE = 12;
 
     const firebaseConfig = {
       apiKey: "AIzaSyBx1W3gp9LdFyN3dDtRUoZm52o6P2DLJso",
@@ -68,71 +1369,921 @@
       appId: "1:960901793838:web:eeee2926789e3e846d77bf"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
 
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    function checkPassword() {
-      const password = prompt("Enter admin password:");
+    const state = {
+      reviews: [],
+      filtered: [],
+      rendered: 0,
+      pageSize: DEFAULT_PAGE_SIZE,
+      quickFilter: "all",
+      unsubReviews: null,
+      selectedReview: null,
+      deleteInFlight: false,
+      observer: null,
+      activeModalId: null,
+      modalRestoreFocus: null
+    };
 
-      if (password !== ADMIN_PASSWORD) {
-        alert("Wrong password");
-        window.location.href = "/";
+    const el = {
+      body: document.body,
+      loginScreen: document.getElementById("loginScreen"),
+      loginForm: document.getElementById("loginForm"),
+      loginButton: document.getElementById("loginButton"),
+      loginError: document.getElementById("loginError"),
+      passwordInput: document.getElementById("passwordInput"),
+      rememberMe: document.getElementById("rememberMe"),
+      appShell: document.getElementById("appShell"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      logoutBtn: document.getElementById("logoutBtn"),
+      searchInput: document.getElementById("searchInput"),
+      sortSelect: document.getElementById("sortSelect"),
+      pageSizeSelect: document.getElementById("pageSizeSelect"),
+      chipButtons: Array.from(document.querySelectorAll("[data-chip]")),
+      chipCountAll: document.getElementById("chipCountAll"),
+      chipCountWithImage: document.getElementById("chipCountWithImage"),
+      chipCountWithoutImage: document.getElementById("chipCountWithoutImage"),
+      statTotal: document.getElementById("statTotal"),
+      statTotalSub: document.getElementById("statTotalSub"),
+      statImages: document.getElementById("statImages"),
+      statVisible: document.getElementById("statVisible"),
+      statVisibleSub: document.getElementById("statVisibleSub"),
+      statSync: document.getElementById("statSync"),
+      visibleCountLine: document.getElementById("visibleCountLine"),
+      renderedCountLine: document.getElementById("renderedCountLine"),
+      firebaseStateLine: document.getElementById("firebaseStateLine"),
+      cardsGrid: document.getElementById("cardsGrid"),
+      emptyState: document.getElementById("emptyState"),
+      sentinel: document.getElementById("sentinel"),
+      loadMoreBtn: document.getElementById("loadMoreBtn"),
+      topProgressBar: document.getElementById("topProgressBar"),
+      confirmModal: document.getElementById("confirmModal"),
+      imageModal: document.getElementById("imageModal"),
+      deletePreview: document.getElementById("deletePreview"),
+      deleteProgressBar: document.getElementById("deleteProgressBar"),
+      deleteStatus: document.getElementById("deleteStatus"),
+      cancelDeleteBtn: document.getElementById("cancelDeleteBtn"),
+      confirmDeleteBtn: document.getElementById("confirmDeleteBtn"),
+      lightboxImage: document.getElementById("lightboxImage"),
+      imageMeta: document.getElementById("imageMeta"),
+      toastWrap: document.getElementById("toastWrap")
+    };
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    function init() {
+      bindEvents();
+      if (restoreSession()) {
+        unlockAdmin(false);
+      } else {
+        showLogin();
       }
     }
 
-    function loadReviews() {
-      db.collection("reviews")
-        .orderBy("time", "desc")
-        .onSnapshot(snapshot => {
-          const container = document.getElementById("reviewsList");
-          container.innerHTML = "";
+    function bindEvents() {
+      el.loginForm.addEventListener("submit", handleLogin);
+      el.refreshBtn.addEventListener("click", () => {
+        toast("Refreshing reviews…", "info", 1700);
+        loadReviews(true);
+      });
+      el.logoutBtn.addEventListener("click", logout);
 
-          snapshot.forEach(doc => {
-            const data = doc.data();
+      el.searchInput.addEventListener("input", debounce(applyFilters, 120));
+      el.sortSelect.addEventListener("change", applyFilters);
+      el.pageSizeSelect.addEventListener("change", () => {
+        state.pageSize = Number(el.pageSizeSelect.value) || DEFAULT_PAGE_SIZE;
+        resetAndRender();
+      });
 
-            const div = document.createElement("div");
-            div.className = "review";
-
-            div.innerHTML = `
-              <b>${data.name}</b><br>
-              ${data.text}
-              ${data.image ? `<img src="${data.image}">` : ""}
-              <button onclick="deleteReview('${doc.id}', '${data.image || ""}')">Delete</button>
-            `;
-
-            container.appendChild(div);
-          });
+      el.chipButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setQuickFilter(btn.dataset.chip || "all");
+          applyFilters();
         });
+      });
+
+      el.loadMoreBtn.addEventListener("click", renderMore);
+      el.cancelDeleteBtn.addEventListener("click", () => closeModal("confirmModal"));
+      el.confirmDeleteBtn.addEventListener("click", performDelete);
+
+      document.querySelectorAll("[data-close-modal]").forEach((btn) => {
+        btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close-modal")));
+      });
+
+      [el.confirmModal, el.imageModal].forEach((modal) => {
+        modal.addEventListener("mousedown", (event) => {
+          if (event.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+
+      document.addEventListener("keydown", handleGlobalKeys);
+      setupInfiniteObserver();
+      state.pageSize = Number(el.pageSizeSelect.value) || DEFAULT_PAGE_SIZE;
     }
 
-    async function deleteReview(id, imageUrl) {
-      const confirmDelete = confirm("Delete this review?");
-      if (!confirmDelete) return;
+    function handleGlobalKeys(event) {
+      const modal = getOpenModal();
+      if (event.key === "Escape" && modal) {
+        event.preventDefault();
+        closeModal(modal.id);
+        return;
+      }
+
+      if (event.key === "/" && !isTextInput(event.target)) {
+        event.preventDefault();
+        el.searchInput.focus();
+        el.searchInput.select();
+      }
+
+      if (event.key === "Tab" && modal) {
+        trapFocus(event, modal);
+      }
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      const password = el.passwordInput.value.trim();
+      const remember = el.rememberMe.checked;
+
+      if (password !== ADMIN_PASSWORD) {
+        showLoginError("Incorrect password. Enter the configured admin password to continue.");
+        toast("Incorrect admin password.", "error");
+        el.passwordInput.focus();
+        el.passwordInput.select();
+        return;
+      }
+
+      clearLoginError();
+      saveSession(remember);
+      unlockAdmin(true);
+      el.passwordInput.value = "";
+    }
+
+    function unlockAdmin(showToast) {
+      el.body.classList.remove("app-locked");
+      el.loginScreen.classList.add("hidden");
+      el.appShell.classList.remove("hidden");
+      loadReviews(false);
+      window.setTimeout(() => el.searchInput.focus(), 30);
+      if (showToast) {
+        toast("Admin mode unlocked.", "success");
+      }
+    }
+
+    function showLogin() {
+      el.body.classList.add("app-locked");
+      el.appShell.classList.add("hidden");
+      el.loginScreen.classList.remove("hidden");
+      window.setTimeout(() => el.passwordInput.focus(), 30);
+    }
+
+    function logout() {
+      clearSession();
+      if (typeof state.unsubReviews === "function") {
+        state.unsubReviews();
+        state.unsubReviews = null;
+      }
+      state.reviews = [];
+      state.filtered = [];
+      state.rendered = 0;
+      state.selectedReview = null;
+      el.cardsGrid.innerHTML = "";
+      showLogin();
+      toast("Logged out and session cleared.", "info");
+    }
+
+    function saveSession(remember) {
+      const payload = JSON.stringify({
+        version: 1,
+        expiresAt: Date.now() + SESSION_TTL_MS
+      });
+
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
+
+      if (remember) {
+        localStorage.setItem(SESSION_KEY, payload);
+      } else {
+        sessionStorage.setItem(SESSION_KEY, payload);
+      }
+    }
+
+    function restoreSession() {
+      const sessionValue = sessionStorage.getItem(SESSION_KEY);
+      const localValue = localStorage.getItem(SESSION_KEY);
+      const raw = sessionValue || localValue;
+      if (!raw) return false;
 
       try {
-        await db.collection("reviews").doc(id).delete();
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.expiresAt || Date.now() > parsed.expiresAt) {
+          clearSession();
+          return false;
+        }
+        return true;
+      } catch (error) {
+        clearSession();
+        return false;
+      }
+    }
 
-        if (imageUrl) {
+    function clearSession() {
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
+    }
+
+    function loadReviews(forceRestart) {
+      loadingBarStart();
+      el.cardsGrid.setAttribute("aria-busy", "true");
+      el.firebaseStateLine.textContent = "Connecting to Firestore…";
+
+      if (forceRestart && typeof state.unsubReviews === "function") {
+        state.unsubReviews();
+        state.unsubReviews = null;
+      }
+
+      if (typeof state.unsubReviews === "function") {
+        // Already listening.
+        loadingBarDone();
+        el.cardsGrid.setAttribute("aria-busy", "false");
+        return;
+      }
+
+      state.unsubReviews = db.collection("reviews").onSnapshot(
+        (snapshot) => {
+          state.reviews = snapshot.docs.map((doc) => mapReview(doc));
+          applyFilters();
+
+          el.firebaseStateLine.textContent = "Live snapshot connected.";
+          el.statSync.textContent = formatTimeOnly(Date.now());
+          el.cardsGrid.setAttribute("aria-busy", "false");
+          loadingBarDone();
+        },
+        (error) => {
+          console.error("Firestore listen failed:", error);
+          el.cardsGrid.setAttribute("aria-busy", "false");
+          loadingBarDone();
+          handleFirebaseError(error, "Could not load reviews from Firestore.");
+        }
+      );
+    }
+
+    function mapReview(doc) {
+      const data = doc.data() || {};
+      return {
+        id: doc.id,
+        name: stringOrFallback(data.name, "Unknown reviewer"),
+        text: stringOrFallback(data.text, ""),
+        image: stringOrFallback(data.image, ""),
+        time: normaliseTime(data.time),
+        rawTime: data.time
+      };
+    }
+
+    function applyFilters() {
+      const query = el.searchInput.value.trim().toLowerCase();
+      const sortValue = el.sortSelect.value;
+
+      state.filtered = state.reviews
+        .filter((review) => {
+          const quickFilterMatch = (
+            state.quickFilter === "all" ||
+            (state.quickFilter === "with-image" && !!review.image) ||
+            (state.quickFilter === "without-image" && !review.image)
+          );
+
+          if (!quickFilterMatch) return false;
+
+          if (!query) return true;
+
+          const haystack = [
+            review.id,
+            review.name,
+            review.text,
+            formatDate(review.time),
+            formatTimeOnly(review.time)
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return haystack.includes(query);
+        })
+        .sort((a, b) => {
+          if (sortValue === "oldest") return a.time - b.time;
+          if (sortValue === "name-asc") return a.name.localeCompare(b.name, "en");
+          if (sortValue === "name-desc") return b.name.localeCompare(a.name, "en");
+          return b.time - a.time;
+        });
+
+      updateStats();
+      resetAndRender();
+    }
+
+    function updateStats() {
+      const imageCount = state.reviews.filter((review) => !!review.image).length;
+      const noImageCount = state.reviews.length - imageCount;
+
+      el.chipCountAll.textContent = String(state.reviews.length);
+      el.chipCountWithImage.textContent = String(imageCount);
+      el.chipCountWithoutImage.textContent = String(noImageCount);
+
+      el.statTotal.textContent = numberFormat(state.reviews.length);
+      el.statTotalSub.textContent = state.reviews.length === 1
+        ? "1 review document currently loaded."
+        : `${numberFormat(state.reviews.length)} review documents currently loaded.`;
+
+      el.statImages.textContent = numberFormat(imageCount);
+      el.statVisible.textContent = numberFormat(state.filtered.length);
+      el.statVisibleSub.textContent = state.filtered.length === state.reviews.length
+        ? "All currently loaded reviews are visible."
+        : "Current search/filter results.";
+
+      el.visibleCountLine.textContent = `${numberFormat(state.filtered.length)} visible`;
+      el.renderedCountLine.textContent = `${numberFormat(Math.min(state.rendered, state.filtered.length))} rendered`;
+    }
+
+    function resetAndRender() {
+      state.rendered = 0;
+      el.cardsGrid.innerHTML = "";
+      renderMore();
+    }
+
+    function renderMore() {
+      const nextSlice = state.filtered.slice(state.rendered, state.rendered + state.pageSize);
+      nextSlice.forEach((review) => {
+        el.cardsGrid.appendChild(buildReviewCard(review));
+      });
+
+      state.rendered += nextSlice.length;
+      el.renderedCountLine.textContent = `${numberFormat(Math.min(state.rendered, state.filtered.length))} rendered`;
+
+      const hasAny = state.filtered.length > 0;
+      const hasMore = state.rendered < state.filtered.length;
+      el.emptyState.classList.toggle("hidden", hasAny);
+      el.loadMoreBtn.style.display = hasMore ? "inline-flex" : "none";
+
+      if (!hasAny) {
+        el.firebaseStateLine.textContent = state.reviews.length
+          ? "No results match the current filters."
+          : "No review documents are currently available.";
+      } else {
+        el.firebaseStateLine.textContent = hasMore
+          ? "Scroll down to load more cards."
+          : "All visible review cards have been rendered.";
+      }
+    }
+
+    function buildReviewCard(review) {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.tabIndex = 0;
+
+      const head = document.createElement("div");
+      head.className = "card-head";
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = initialsFor(review.name);
+
+      const meta = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = review.name;
+
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = formatDate(review.time);
+
+      meta.appendChild(name);
+      meta.appendChild(date);
+
+      const id = document.createElement("div");
+      id.className = "card-id mono";
+      id.textContent = review.id;
+
+      head.appendChild(avatar);
+      head.appendChild(meta);
+      head.appendChild(id);
+
+      const text = document.createElement("p");
+      text.className = "card-text";
+      text.textContent = review.text || "No review text supplied.";
+
+      card.appendChild(head);
+      card.appendChild(text);
+
+      const safeUrl = sanitiseImageUrl(review.image);
+      if (safeUrl) {
+        const thumb = document.createElement("button");
+        thumb.type = "button";
+        thumb.className = "thumb";
+        thumb.setAttribute("aria-label", `Open image preview for review by ${review.name}`);
+        thumb.addEventListener("click", () => openImageModal(review, safeUrl));
+
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.alt = `Review image from ${review.name}`;
+        img.src = safeUrl;
+
+        const badge = document.createElement("div");
+        badge.className = "thumb-badge";
+        badge.textContent = "Preview";
+
+        thumb.appendChild(img);
+        thumb.appendChild(badge);
+        card.appendChild(thumb);
+      }
+
+      const footer = document.createElement("div");
+      footer.className = "card-footer";
+
+      const diagnostics = document.createElement("div");
+      diagnostics.className = "inline-diagnostics";
+
+      const timePill = document.createElement("span");
+      timePill.className = "diagnostic-pill";
+      timePill.textContent = review.time ? formatTimeOnly(review.time) : "No timestamp";
+
+      const imagePill = document.createElement("span");
+      imagePill.className = "diagnostic-pill";
+      imagePill.textContent = safeUrl ? "Image attached" : "Text only";
+
+      diagnostics.appendChild(timePill);
+      diagnostics.appendChild(imagePill);
+
+      const actions = document.createElement("div");
+      actions.style.display = "flex";
+      actions.style.gap = "10px";
+      actions.style.flexWrap = "wrap";
+
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "btn-ghost";
+      copyBtn.innerHTML = iconCopy() + "<span>Copy ID</span>";
+      copyBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(review.id);
+          toast("Document ID copied to clipboard.", "success");
+        } catch (error) {
+          toast("Could not copy the document ID.", "warning");
+        }
+      });
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "btn-danger";
+      deleteBtn.innerHTML = iconTrash() + "<span>Delete</span>";
+      deleteBtn.addEventListener("click", () => openDeleteModal(review));
+
+      actions.appendChild(copyBtn);
+      actions.appendChild(deleteBtn);
+
+      footer.appendChild(diagnostics);
+      footer.appendChild(actions);
+      card.appendChild(footer);
+
+      return card;
+    }
+
+    function openDeleteModal(review) {
+      state.selectedReview = review;
+      el.deletePreview.innerHTML = `
+        <strong>${escapeHtml(review.name)}</strong>
+        <div>${escapeHtml(review.text || "No review text supplied.")}</div>
+        <div class="mono">Document ID: ${escapeHtml(review.id)}</div>
+        <div>${review.image ? "Associated image detected and will be deleted if permitted by Storage rules." : "No associated image detected."}</div>
+      `;
+      setDeleteProgress(0);
+      setDeleteStatus("Waiting for confirmation.");
+      el.confirmDeleteBtn.disabled = false;
+      el.cancelDeleteBtn.disabled = false;
+      openModal("confirmModal", el.confirmDeleteBtn);
+    }
+
+    async function performDelete() {
+      if (!state.selectedReview || state.deleteInFlight) return;
+
+      state.deleteInFlight = true;
+      el.confirmDeleteBtn.disabled = true;
+      el.cancelDeleteBtn.disabled = true;
+
+      try {
+        setDeleteProgress(18);
+        setDeleteStatus("Deleting Firestore document…");
+        await db.collection("reviews").doc(state.selectedReview.id).delete();
+
+        let storageDeleted = true;
+        if (state.selectedReview.image) {
+          setDeleteProgress(60);
+          setDeleteStatus("Firestore document removed. Deleting Storage image…");
           try {
-            const ref = storage.refFromURL(imageUrl);
-            await ref.delete();
-          } catch (e) {
-            console.log("Image delete failed");
+            await deleteStorageFileByUrl(state.selectedReview.image);
+          } catch (storageError) {
+            storageDeleted = false;
+            console.warn("Storage image delete failed:", storageError);
           }
         }
 
-        alert("Deleted");
+        setDeleteProgress(100);
+
+        if (storageDeleted) {
+          setDeleteStatus("Delete complete.");
+          toast("Review deleted successfully.", "success");
+        } else {
+          setDeleteStatus("Review deleted, but the image could not be removed.");
+          toast("Review deleted, but the Storage image could not be removed.", "warning", 5200);
+        }
+
+        window.setTimeout(() => closeModal("confirmModal"), 420);
       } catch (error) {
-        console.error(error);
-        alert("Error deleting");
+        console.error("Delete failed:", error);
+        handleFirebaseError(error, "Delete failed.");
+        el.confirmDeleteBtn.disabled = false;
+        el.cancelDeleteBtn.disabled = false;
+        setDeleteStatus("Delete failed. Check permissions and bucket configuration.");
+      } finally {
+        state.deleteInFlight = false;
       }
     }
 
-    checkPassword();
-    loadReviews();
-  </script>
+    async function deleteStorageFileByUrl(fileUrl) {
+      if (!fileUrl) return;
 
+      try {
+        await storage.refFromURL(fileUrl).delete();
+        return;
+      } catch (firstError) {
+        const path = extractStoragePath(fileUrl);
+        if (!path) throw firstError;
+        await storage.ref(path).delete();
+      }
+    }
+
+    function extractStoragePath(fileUrl) {
+      try {
+        if (fileUrl.startsWith("gs://")) {
+          const withoutScheme = fileUrl.replace(/^gs:\/\//, "");
+          const parts = withoutScheme.split("/");
+          parts.shift(); // bucket name
+          return decodeURIComponent(parts.join("/"));
+        }
+
+        const url = new URL(fileUrl);
+
+        // Firebase download URL format: /v0/b/<bucket>/o/<encodedPath>
+        const firebaseMatch = url.pathname.match(/\/o\/(.+)$/);
+        if (firebaseMatch && firebaseMatch[1]) {
+          return decodeURIComponent(firebaseMatch[1]);
+        }
+
+        // GCS public URL format: /<bucket>/<path>
+        const parts = url.pathname.split("/").filter(Boolean);
+        if ((url.hostname === "storage.googleapis.com" || url.hostname.endsWith(".storage.googleapis.com")) && parts.length >= 2) {
+          parts.shift(); // bucket
+          return decodeURIComponent(parts.join("/"));
+        }
+      } catch (error) {
+        return "";
+      }
+      return "";
+    }
+
+    function openImageModal(review, safeUrl) {
+      el.lightboxImage.src = safeUrl;
+      el.lightboxImage.alt = `Review image from ${review.name}`;
+      el.imageMeta.textContent = `${review.name} • ${formatDate(review.time)}`;
+      openModal("imageModal");
+    }
+
+    function openModal(modalId, focusTarget) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      state.activeModalId = modalId;
+      state.modalRestoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      el.body.classList.add("app-locked");
+
+      const target = focusTarget || modal.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+      if (target && target.focus) {
+        window.setTimeout(() => target.focus(), 20);
+      }
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+
+      if (modalId === "imageModal") {
+        el.lightboxImage.src = "";
+        el.lightboxImage.alt = "";
+        el.imageMeta.textContent = "Open preview for the selected review image.";
+      }
+
+      if (modalId === "confirmModal") {
+        state.selectedReview = null;
+        setDeleteProgress(0);
+        setDeleteStatus("Waiting for confirmation.");
+      }
+
+      state.activeModalId = null;
+
+      if (getOpenModal()) {
+        return;
+      }
+
+      if (!el.loginScreen.classList.contains("hidden")) {
+        el.body.classList.add("app-locked");
+      } else {
+        el.body.classList.remove("app-locked");
+      }
+
+      if (state.modalRestoreFocus && state.modalRestoreFocus.focus) {
+        state.modalRestoreFocus.focus();
+      }
+    }
+
+    function getOpenModal() {
+      return document.querySelector(".modal-backdrop.open");
+    }
+
+    function trapFocus(event, modal) {
+      const focusable = Array.from(
+        modal.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")
+      ).filter((node) => !node.hasAttribute("disabled"));
+
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function showLoginError(message) {
+      el.loginError.textContent = message;
+      el.loginError.style.display = "block";
+    }
+
+    function clearLoginError() {
+      el.loginError.textContent = "";
+      el.loginError.style.display = "none";
+    }
+
+    function setQuickFilter(filter) {
+      state.quickFilter = filter;
+      el.chipButtons.forEach((button) => {
+        const active = button.dataset.chip === filter;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    function setupInfiniteObserver() {
+      if (!("IntersectionObserver" in window)) return;
+
+      state.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && state.rendered < state.filtered.length) {
+            renderMore();
+          }
+        });
+      }, {
+        rootMargin: "300px 0px 300px 0px"
+      });
+
+      state.observer.observe(el.sentinel);
+    }
+
+    function loadingBarStart() {
+      el.topProgressBar.style.opacity = "1";
+      el.topProgressBar.style.width = "18%";
+      window.requestAnimationFrame(() => {
+        el.topProgressBar.style.width = "72%";
+      });
+    }
+
+    function loadingBarDone() {
+      el.topProgressBar.style.width = "100%";
+      window.setTimeout(() => {
+        el.topProgressBar.style.opacity = "0";
+        el.topProgressBar.style.width = "0%";
+      }, 220);
+    }
+
+    function setDeleteProgress(percent) {
+      el.deleteProgressBar.style.width = Math.max(0, Math.min(100, percent)) + "%";
+    }
+
+    function setDeleteStatus(message) {
+      el.deleteStatus.textContent = message;
+    }
+
+    function toast(message, type, duration) {
+      const kind = type || "info";
+      const ms = typeof duration === "number" ? duration : 3400;
+
+      const item = document.createElement("div");
+      item.className = "toast " + kind;
+
+      const title = kind === "success"
+        ? "Success"
+        : kind === "error"
+          ? "Error"
+          : kind === "warning"
+            ? "Warning"
+            : "Notice";
+
+      item.innerHTML = `
+        <div aria-hidden="true">${kind === "success" ? iconCheck() : kind === "error" ? iconAlert() : kind === "warning" ? iconWarning() : iconInfo()}</div>
+        <div>
+          <div class="toast-title">${title}</div>
+          <div class="toast-msg">${escapeHtml(message)}</div>
+        </div>
+        <button class="toast-close" type="button" aria-label="Dismiss notification">${iconClose()}</button>
+      `;
+
+      const closeButton = item.querySelector(".toast-close");
+      closeButton.addEventListener("click", () => removeToast(item));
+
+      el.toastWrap.appendChild(item);
+      window.setTimeout(() => removeToast(item), ms);
+    }
+
+    function removeToast(node) {
+      if (!node || !node.parentNode) return;
+      node.style.opacity = "0";
+      node.style.transform = "translateY(8px)";
+      window.setTimeout(() => {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }, 150);
+    }
+
+    function handleFirebaseError(error, fallbackMessage) {
+      const code = String(error && error.code || "");
+      let message = fallbackMessage || "Something went wrong.";
+
+      if (code.includes("permission-denied")) {
+        message = "Permission denied. Check Firestore or Storage rules.";
+      } else if (code.includes("failed-precondition")) {
+        message = "Firestore reported a failed precondition. If the console gives you an index link, create the required index and wait for it to finish building.";
+      } else if (code.includes("unavailable")) {
+        message = "The Firebase service is temporarily unavailable. Try again in a moment.";
+      } else if (code.includes("storage/bucket-not-found")) {
+        message = "Storage bucket not found. Check the exact storageBucket value in firebaseConfig.";
+      } else if (code.includes("storage/project-not-found")) {
+        message = "Storage project not found. Verify that Cloud Storage is enabled for this Firebase project.";
+      } else if (code.includes("storage/object-not-found")) {
+        message = "The review document was deleted, but the image file could not be found in Storage.";
+      } else if (code.includes("storage/unauthorized")) {
+        message = "Storage denied the request. Check your Storage Security Rules.";
+      } else if (code.includes("storage/unknown")) {
+        message = "Cloud Storage returned an unknown error. Verify the bucket, URL, rules, and any CORS setup if you use raw GCS URLs.";
+      }
+
+      toast(message, code.includes("permission") || code.includes("failed") ? "error" : "warning", 5200);
+    }
+
+    function normaliseTime(value) {
+      if (!value) return 0;
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      if (typeof value === "string") {
+        const parsedNumber = Number(value);
+        if (Number.isFinite(parsedNumber) && parsedNumber > 0) return parsedNumber;
+        const parsedDate = Date.parse(value);
+        return Number.isFinite(parsedDate) ? parsedDate : 0;
+      }
+      if (typeof value.toMillis === "function") {
+        try { return value.toMillis(); } catch (error) {}
+      }
+      if (typeof value.seconds === "number") {
+        return value.seconds * 1000;
+      }
+      return 0;
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return "Unknown date";
+      try {
+        return new Intl.DateTimeFormat("en-IE", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        }).format(new Date(timestamp));
+      } catch (error) {
+        return new Date(timestamp).toLocaleString("en-IE");
+      }
+    }
+
+    function formatTimeOnly(timestamp) {
+      if (!timestamp) return "—";
+      try {
+        return new Intl.DateTimeFormat("en-IE", {
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(new Date(timestamp));
+      } catch (error) {
+        return "—";
+      }
+    }
+
+    function sanitiseImageUrl(url) {
+      if (!url) return "";
+      try {
+        const parsed = new URL(url, window.location.href);
+        return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+      } catch (error) {
+        return "";
+      }
+    }
+
+    function initialsFor(name) {
+      const cleaned = String(name || "").trim();
+      if (!cleaned) return "??";
+      const parts = cleaned.split(/\s+/).slice(0, 2);
+      return parts.map((part) => part[0] || "").join("").toUpperCase();
+    }
+
+    function numberFormat(value) {
+      return new Intl.NumberFormat("en-IE").format(value || 0);
+    }
+
+    function stringOrFallback(value, fallback) {
+      return typeof value === "string" ? value : fallback;
+    }
+
+    function isTextInput(target) {
+      return target instanceof HTMLElement && (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      );
+    }
+
+    function debounce(fn, wait) {
+      let timer = null;
+      return function debounced() {
+        const context = this;
+        const args = arguments;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => fn.apply(context, args), wait);
+      };
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function iconCopy() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="5" y="5" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/></svg>`;
+    }
+
+    function iconTrash() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 11v5M14 11v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 7l1 12.2A2 2 0 0 0 9 21h6a2 2 0 0 0 2-1.8L18 7M9 7V5.7A1.7 1.7 0 0 1 10.7 4h2.6A1.7 1.7 0 0 1 15 5.7V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+
+    function iconCheck() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="m8.6 12.2 2.2 2.2 4.6-5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+
+    function iconAlert() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 2.6 19.2A1.3 1.3 0 0 0 3.7 21h16.6a1.3 1.3 0 0 0 1.1-1.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>`;
+    }
+
+    function iconWarning() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5A7.5 7.5 0 0 0 4.5 12 7.5 7.5 0 0 0 12 19.5 7.5 7.5 0 0 0 19.5 12 7.5 7.5 0 0 0 12 4.5Z" stroke="currentColor" stroke-width="1.7"/><path d="M12 8.5v4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>`;
+    }
+
+    function iconInfo() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.5V16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg>`;
+    }
+
+    function iconClose() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`;
+    }
+  </script>
 </body>
 </html>

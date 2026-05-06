@@ -1,30 +1,43 @@
+<!--
+Minimal public homepage for Bin Men FC.
+Assumption: hero.jpg exists but is intentionally unused here; the gallery uses only photo1.jpg..photo4.jpg.
+If uploads fail, re-check the exact storageBucket value.
+-->
 <!DOCTYPE html>
 <html lang="en-IE">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
   <title>Bin Men Football Club</title>
 
   <style>
     :root {
-      --bg: #06100c;
-      --panel: rgba(10, 18, 14, 0.9);
-      --panel2: rgba(13, 25, 17, 0.95);
-      --line: rgba(126, 172, 142, 0.18);
-      --line2: rgba(126, 172, 142, 0.35);
-      --text: #f2fff6;
-      --muted: #bdd0c4;
-      --soft: #8da397;
-      --green: #54e88d;
-      --green2: #a3ffc9;
-      --darkgreen: #07140c;
-      --shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
-      --radius: 28px;
+      --bg: #07100c;
+      --bg-2: #0b1611;
+      --panel: rgba(10, 18, 14, 0.92);
+      --panel-2: rgba(8, 13, 10, 0.96);
+      --line: rgba(126, 169, 141, 0.16);
+      --line-strong: rgba(126, 169, 141, 0.34);
+      --text: #f2fcf5;
+      --text-2: #cbdbd0;
+      --muted: #90a59a;
+      --accent: #55e98f;
+      --accent-2: #9dfdc8;
+      --danger: #ff748b;
+      --warning: #ffd56f;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --ring: rgba(85, 233, 143, 0.55);
+      --content: 1120px;
+      --fast: 160ms ease;
+      --med: 240ms ease;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html {
       scroll-behavior: smooth;
@@ -32,21 +45,18 @@
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(84, 232, 141, 0.12), transparent 30%),
-        radial-gradient(circle at top right, rgba(163, 255, 201, 0.08), transparent 28%),
-        linear-gradient(180deg, #06100c 0%, #091610 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(85, 233, 143, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(157, 253, 200, 0.06), transparent 24%),
+        linear-gradient(180deg, #06100c 0%, #09140f 100%);
+      background-attachment: fixed;
+      letter-spacing: 0.01em;
     }
 
     body.modal-open {
       overflow: hidden;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
     }
 
     img {
@@ -54,413 +64,260 @@
       max-width: 100%;
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     button,
     input,
     textarea {
       font: inherit;
+      color: inherit;
     }
 
     button {
+      border: 0;
       cursor: pointer;
-      border: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--ring);
+      outline-offset: 3px;
+      border-radius: 12px;
+    }
+
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
     }
 
     .container {
-      width: min(1180px, calc(100% - 32px));
+      width: min(var(--content), calc(100% - 28px));
       margin: 0 auto;
     }
 
-    .topbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 50;
-      background: rgba(5, 12, 8, 0.72);
-      backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .nav {
-      min-height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
+    .top {
+      padding: 36px 0 20px;
     }
 
     .brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 12px;
       font-weight: 900;
-      letter-spacing: 0.06em;
       text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
     }
 
     .crest {
       width: 44px;
       height: 44px;
-      border-radius: 50%;
       display: grid;
       place-items: center;
-      color: var(--green);
-      background: rgba(84, 232, 141, 0.1);
-      border: 1px solid rgba(84, 232, 141, 0.28);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .nav-link,
-    .btn {
-      min-height: 44px;
-      padding: 0 16px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      transition: 0.2s ease;
-    }
-
-    .nav-link {
-      color: var(--muted);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
-    }
-
-    .nav-link:hover {
-      color: var(--text);
-      border-color: var(--line2);
-      transform: translateY(-1px);
-    }
-
-    .btn {
-      background: linear-gradient(135deg, var(--green), var(--green2));
-      color: #06100c;
-      box-shadow: 0 18px 40px rgba(84, 232, 141, 0.22);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 22px 48px rgba(84, 232, 141, 0.28);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-end;
-      padding: 110px 0 44px;
-      background:
-        linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.82)),
-        url("hero.jpg") center / cover no-repeat;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 18% 20%, rgba(84, 232, 141, 0.22), transparent 30%),
-        radial-gradient(circle at 82% 12%, rgba(163, 255, 201, 0.15), transparent 26%);
-      pointer-events: none;
-    }
-
-    .hero-card {
-      position: relative;
-      z-index: 2;
-      padding: 34px;
-      border-radius: 34px;
-      background: linear-gradient(180deg, rgba(9, 18, 13, 0.76), rgba(6, 13, 9, 0.94));
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap: 28px;
-      align-items: end;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 18px;
-      padding: 9px 14px;
-      border-radius: 999px;
-      color: var(--green2);
-      background: rgba(84, 232, 141, 0.12);
-      border: 1px solid rgba(84, 232, 141, 0.28);
-      font-size: 0.86rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(3rem, 8vw, 6.7rem);
-      line-height: 0.9;
-      letter-spacing: -0.07em;
-      text-transform: uppercase;
-    }
-
-    .hero p {
-      margin: 20px 0 0;
-      max-width: 660px;
-      color: var(--muted);
-      font-size: 1.08rem;
-      line-height: 1.75;
-    }
-
-    .hero-actions {
-      margin-top: 24px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .side-card {
-      padding: 22px;
-      border-radius: 24px;
-      background: rgba(255,255,255,0.045);
-      border: 1px solid var(--line);
-    }
-
-    .side-card h2,
-    .side-card h3 {
-      margin: 0 0 10px;
-      font-size: 1.15rem;
-      letter-spacing: -0.03em;
-    }
-
-    .side-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.98rem;
-      line-height: 1.65;
+      border-radius: 50%;
+      color: var(--accent);
+      background: rgba(85, 233, 143, 0.10);
+      border: 1px solid rgba(85, 233, 143, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
     }
 
     .section {
-      padding: 82px 0;
+      padding: 26px 0 58px;
     }
 
     .section-title {
-      margin: 0;
-      text-align: center;
-      font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
       line-height: 1;
-      letter-spacing: -0.055em;
+      letter-spacing: -0.05em;
     }
 
-    .section-subtitle {
-      max-width: 720px;
-      margin: 14px auto 36px;
-      text-align: center;
-      color: var(--muted);
-      line-height: 1.75;
-      font-size: 1.02rem;
+    .section-copy {
+      margin: 0 0 22px;
+      color: var(--text-2);
+      line-height: 1.7;
+      font-size: 0.98rem;
     }
 
-    .about {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 20px;
-      align-items: stretch;
-    }
-
-    .glass {
-      padding: 28px;
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--panel2), rgba(7, 14, 10, 0.96));
+    .panel {
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
     }
 
-    .glass h2 {
-      margin: 0 0 12px;
-      font-size: clamp(1.8rem, 3.5vw, 2.7rem);
-      line-height: 1.05;
-      letter-spacing: -0.05em;
-    }
-
-    .glass p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.78;
-    }
-
-    .stats {
+    .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      height: 100%;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
     }
 
-    .stat {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 150px;
-      padding: 20px;
-      border-radius: 24px;
-      background: rgba(255,255,255,0.045);
-      border: 1px solid var(--line);
-    }
-
-    .stat span {
-      color: var(--soft);
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      font-weight: 900;
-    }
-
-    .stat strong {
-      margin-top: 10px;
-      font-size: 2rem;
-      letter-spacing: -0.05em;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-
-    .tile {
+    .gallery-tile {
       position: relative;
+      min-height: 300px;
       overflow: hidden;
-      border-radius: 26px;
+      padding: 0;
+      border-radius: 24px;
       border: 1px solid var(--line);
       background: #030805;
       box-shadow: var(--shadow);
-      min-height: 330px;
-      padding: 0;
+      transition: transform var(--med), border-color var(--med), box-shadow var(--med);
     }
 
-    .tile img {
+    .gallery-tile:hover,
+    .gallery-tile:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: 0 34px 90px rgba(0,0,0,0.46);
+    }
+
+    .gallery-tile img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: 0.35s ease;
+      transition: transform 320ms ease;
     }
 
-    .tile:hover img {
-      transform: scale(1.045);
+    .gallery-tile:hover img,
+    .gallery-tile:focus-visible img {
+      transform: scale(1.035);
     }
 
-    .tile-caption {
+    .gallery-caption {
       position: absolute;
       left: 12px;
       right: 12px;
       bottom: 12px;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(0,0,0,0.52);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.12);
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.48);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
     }
 
-    .tile-caption strong {
+    .gallery-caption strong {
       display: block;
-      font-size: 1rem;
+      font-size: 0.98rem;
+      letter-spacing: -0.02em;
     }
 
-    .tile-caption span {
+    .gallery-caption span {
       display: block;
       margin-top: 3px;
       color: rgba(255,255,255,0.76);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
     .reviews-grid {
       display: grid;
-      grid-template-columns: 430px 1fr;
-      gap: 20px;
+      grid-template-columns: 400px 1fr;
+      gap: 18px;
       align-items: start;
     }
 
     .form-card,
-    .reviews-card {
-      padding: 26px;
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--panel2), rgba(7, 14, 10, 0.98));
+    .list-card {
+      padding: 22px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
     }
 
-    .form-card h3,
-    .reviews-card h3 {
+    .card-title {
       margin: 0 0 8px;
-      font-size: 1.45rem;
-      letter-spacing: -0.04em;
+      font-size: 1.3rem;
+      letter-spacing: -0.03em;
     }
 
-    .form-card p,
-    .reviews-card p {
-      margin: 0;
-      color: var(--muted);
+    .card-copy {
+      margin: 0 0 14px;
+      color: var(--text-2);
+      font-size: 0.95rem;
       line-height: 1.65;
     }
 
     .field {
-      margin-top: 16px;
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
     }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--muted);
+    .field label {
+      color: var(--text-2);
       font-weight: 800;
-      font-size: 0.94rem;
+      font-size: 0.92rem;
     }
 
-    input,
-    textarea {
+    .field small {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.86rem;
+    }
+
+    .input,
+    .textarea,
+    .search {
       width: 100%;
       border-radius: 16px;
       border: 1px solid var(--line);
-      background: rgba(3, 8, 5, 0.78);
+      background: rgba(3, 8, 5, 0.82);
       color: var(--text);
+      transition: border-color var(--fast), box-shadow var(--fast), background var(--fast);
+    }
+
+    .input,
+    .search {
+      min-height: 48px;
+      padding: 0 14px;
+    }
+
+    .textarea {
+      min-height: 136px;
       padding: 14px;
-      outline: none;
-      transition: 0.18s ease;
-    }
-
-    input:focus,
-    textarea:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 4px rgba(84, 232, 141, 0.12);
-    }
-
-    textarea {
-      min-height: 140px;
       resize: vertical;
       line-height: 1.6;
     }
 
-    input[type="file"] {
-      border-style: dashed;
-      color: var(--muted);
+    .input:hover,
+    .textarea:hover,
+    .search:hover {
+      border-color: var(--line-strong);
+    }
+
+    .input:focus,
+    .textarea:focus,
+    .search:focus {
+      outline: none;
+      border-color: rgba(85, 233, 143, 0.45);
+      box-shadow: 0 0 0 4px rgba(85, 233, 143, 0.10);
+    }
+
+    .file-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px dashed rgba(85, 233, 143, 0.30);
+      background: rgba(3, 8, 5, 0.7);
+      color: var(--text-2);
+      transition: border-color var(--fast), background var(--fast);
+    }
+
+    .file-input:hover,
+    .file-input:focus {
+      border-color: rgba(85, 233, 143, 0.5);
+      background: rgba(3, 8, 5, 0.9);
     }
 
     .preview {
@@ -468,39 +325,79 @@
       margin-top: 14px;
       padding: 12px;
       border-radius: 20px;
-      border: 1px dashed rgba(84, 232, 141, 0.35);
-      background: rgba(84, 232, 141, 0.055);
+      border: 1px dashed rgba(85, 233, 143, 0.34);
+      background: rgba(85, 233, 143, 0.055);
     }
 
-    .preview img {
+    .preview-frame {
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #030805;
+    }
+
+    .preview-frame img {
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
-      border-radius: 16px;
     }
 
     .preview-row {
       margin-top: 10px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 10px;
-      align-items: center;
-      color: var(--muted);
-      font-size: 0.9rem;
+      flex-wrap: wrap;
+      color: var(--text-2);
+      font-size: 0.88rem;
     }
 
-    .small-btn {
-      padding: 10px 12px;
+    .ghost-btn,
+    .submit-btn,
+    .load-more-btn {
+      min-height: 46px;
+      padding: 0 16px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      border: 1px solid var(--line);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       font-weight: 800;
+      transition: transform var(--fast), background var(--fast), border-color var(--fast), opacity var(--fast);
+    }
+
+    .ghost-btn:hover,
+    .submit-btn:hover,
+    .load-more-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .ghost-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #05110a;
+      box-shadow: 0 18px 40px rgba(85, 233, 143, 0.18);
+    }
+
+    .submit-btn:disabled,
+    .ghost-btn:disabled,
+    .load-more-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
     }
 
     .progress-wrap {
       display: none;
-      margin-top: 16px;
+      margin-top: 14px;
     }
 
     .progress {
@@ -508,40 +405,50 @@
       height: 11px;
       overflow: hidden;
       border-radius: 999px;
-      background: rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
       border: 1px solid var(--line);
     }
 
-    .progress span {
+    .progress > span {
       display: block;
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, var(--green), var(--green2));
-      transition: width 0.2s ease;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), #ddfff0);
+      transition: width 220ms ease;
+      box-shadow: 0 0 16px rgba(85, 233, 143, 0.35);
     }
 
     .status {
       min-height: 24px;
       margin-top: 10px;
-      color: var(--green2);
-      font-weight: 800;
-      font-size: 0.94rem;
-    }
-
-    .post-btn {
-      width: 100%;
-      margin-top: 10px;
-      min-height: 52px;
+      color: var(--accent-2);
+      font-weight: 700;
+      font-size: 0.93rem;
+      line-height: 1.45;
     }
 
     .toolbar {
       display: grid;
       gap: 12px;
-      margin-top: 18px;
+      margin-top: 6px;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
     }
 
     .search {
-      min-height: 48px;
+      padding-left: 42px;
+      padding-right: 14px;
     }
 
     .filters {
@@ -551,26 +458,36 @@
     }
 
     .chip {
-      padding: 10px 14px;
+      min-height: 38px;
+      padding: 0 14px;
       border-radius: 999px;
-      color: var(--muted);
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
       border: 1px solid var(--line);
-      font-weight: 900;
-      transition: 0.18s ease;
+      color: var(--text-2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 800;
+      transition: transform var(--fast), background var(--fast), border-color var(--fast), color var(--fast);
     }
 
-    .chip.active,
     .chip:hover {
-      color: var(--green2);
-      border-color: rgba(84, 232, 141, 0.34);
-      background: rgba(84, 232, 141, 0.09);
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
     }
 
-    .reviews-meta {
+    .chip.active {
+      background: rgba(85, 233, 143, 0.09);
+      border-color: rgba(85, 233, 143, 0.28);
+      color: var(--accent-2);
+    }
+
+    .meta {
       margin-top: 12px;
-      color: var(--soft);
-      font-size: 0.92rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
 
     .reviews-list {
@@ -583,13 +500,14 @@
       padding: 18px;
       border-radius: 22px;
       border: 1px solid var(--line);
-      background: rgba(3, 8, 5, 0.72);
-      transition: 0.22s ease;
+      background: rgba(3, 8, 5, 0.76);
+      transition: transform var(--med), border-color var(--med), box-shadow var(--med);
     }
 
     .review:hover {
-      border-color: var(--line2);
       transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: 0 24px 58px rgba(0,0,0,0.26);
     }
 
     .review-head {
@@ -600,116 +518,140 @@
     }
 
     .avatar {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       display: grid;
       place-items: center;
       border-radius: 50%;
-      background: rgba(84, 232, 141, 0.14);
-      color: var(--green2);
-      border: 1px solid rgba(84, 232, 141, 0.25);
+      background: rgba(85, 233, 143, 0.12);
+      border: 1px solid rgba(85, 233, 143, 0.24);
+      color: var(--accent-2);
       font-weight: 900;
+      flex: 0 0 auto;
     }
 
     .review-name {
       font-weight: 900;
+      line-height: 1.15;
     }
 
     .review-date {
       margin-top: 3px;
-      color: var(--soft);
-      font-size: 0.88rem;
+      color: var(--muted);
+      font-size: 0.86rem;
     }
 
     .review-text {
-      color: var(--muted);
+      color: var(--text-2);
       line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .review-photo {
+    .review-image-btn {
+      position: relative;
       margin-top: 14px;
-      width: min(320px, 100%);
-      border-radius: 18px;
+      width: min(300px, 100%);
+      padding: 0;
       overflow: hidden;
+      border-radius: 18px;
       border: 1px solid var(--line);
       background: #030805;
-      padding: 0;
     }
 
-    .review-photo img {
+    .review-image-btn img {
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
-      transition: 0.25s ease;
+      transition: transform 300ms ease;
     }
 
-    .review-photo:hover img {
-      transform: scale(1.035);
+    .review-image-btn:hover img,
+    .review-image-btn:focus-visible img {
+      transform: scale(1.03);
+    }
+
+    .review-image-badge {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.54);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #f4fff8;
+      font-size: 0.78rem;
+      font-weight: 800;
     }
 
     .empty {
       display: none;
       margin-top: 18px;
       padding: 26px;
-      text-align: center;
       border-radius: 22px;
-      border: 1px dashed var(--line2);
-      color: var(--soft);
-      background: rgba(255,255,255,0.035);
-    }
-
-    .load-more {
-      display: none;
-      margin: 18px auto 0;
-      padding: 13px 18px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      border: 1px solid var(--line);
-      font-weight: 900;
-    }
-
-    footer {
-      padding: 36px 0 52px;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
       text-align: center;
-      color: var(--soft);
-      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .load-more-wrap {
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .load-more-btn {
+      display: none;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .sentinel {
+      height: 10px;
+    }
+
+    .footer {
+      padding: 30px 0 44px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.92rem;
     }
 
     .modal-backdrop {
-      display: none;
       position: fixed;
       inset: 0;
       z-index: 100;
-      padding: 20px;
+      display: none;
       align-items: center;
       justify-content: center;
+      padding: 18px;
       background: rgba(0,0,0,0.72);
       backdrop-filter: blur(12px);
     }
 
     .modal-backdrop.open {
       display: flex;
+      animation: fadeIn 160ms ease both;
     }
 
     .modal {
       width: min(920px, 100%);
-      max-height: 90vh;
+      max-height: calc(100vh - 36px);
       overflow: auto;
-      border-radius: 28px;
-      background: var(--panel2);
-      border: 1px solid var(--line2);
-      box-shadow: var(--shadow);
       padding: 18px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(12, 22, 16, 0.98), rgba(7, 13, 10, 0.99));
+      border: 1px solid var(--line-strong);
+      box-shadow: var(--shadow);
     }
 
     .modal-top {
       display: flex;
-      justify-content: space-between;
-      gap: 14px;
       align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       margin-bottom: 14px;
     }
 
@@ -718,337 +660,294 @@
       letter-spacing: -0.03em;
     }
 
-    .close {
+    .close-btn {
       width: 42px;
       height: 42px;
+      display: inline-grid;
+      place-items: center;
       border-radius: 14px;
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
+      background: rgba(255,255,255,0.05);
       border: 1px solid var(--line);
-      font-size: 1.2rem;
+      color: var(--text);
+      font-size: 1.1rem;
     }
 
-    .modal img {
+    .modal-img {
       width: 100%;
-      max-height: 75vh;
+      max-height: 76vh;
       object-fit: contain;
       border-radius: 20px;
       background: #030805;
+      border: 1px solid var(--line);
     }
 
     .toast-wrap {
       position: fixed;
       right: 16px;
       bottom: 16px;
-      z-index: 150;
-      width: min(390px, calc(100vw - 32px));
+      z-index: 130;
+      width: min(380px, calc(100vw - 32px));
       display: grid;
       gap: 10px;
+      pointer-events: none;
     }
 
     .toast {
+      pointer-events: auto;
       padding: 14px 16px;
       border-radius: 18px;
       background: rgba(10, 18, 14, 0.98);
-      border: 1px solid var(--line2);
+      border: 1px solid var(--line-strong);
       color: var(--text);
       box-shadow: var(--shadow);
-      animation: pop 0.18s ease;
+      animation: toastIn 180ms ease;
     }
 
-    @keyframes pop {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .toast.success { border-color: rgba(85, 233, 143, 0.3); }
+    .toast.warning { border-color: rgba(255, 213, 111, 0.3); }
+    .toast.error { border-color: rgba(255, 116, 139, 0.3); }
+
+    .kbd-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    svg.icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 980px) {
-      .hero-grid,
-      .about,
+      .gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .reviews-grid {
         grid-template-columns: 1fr;
       }
+    }
 
-      .gallery {
-        grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 640px) {
+      .container {
+        width: min(var(--content), calc(100% - 20px));
       }
 
-      .stats {
+      .gallery-grid {
         grid-template-columns: 1fr;
+      }
+
+      .top {
+        padding-top: 22px;
+      }
+
+      .panel,
+      .form-card,
+      .list-card {
+        padding: 18px;
       }
     }
 
-    @media (max-width: 650px) {
-      .container {
-        width: min(100% - 20px, 1180px);
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        transition-duration: 1ms !important;
       }
 
-      .nav {
-        align-items: flex-start;
-        padding: 12px 0;
-        flex-direction: column;
-      }
-
-      .nav-links {
-        width: 100%;
-      }
-
-      .nav-link {
-        flex: 1;
-      }
-
-      .hero {
-        padding-top: 150px;
-      }
-
-      .hero-card {
-        padding: 22px;
-      }
-
-      .gallery {
-        grid-template-columns: 1fr;
-      }
-
-      .tile {
-        min-height: 310px;
-      }
+      html { scroll-behavior: auto; }
     }
   </style>
 </head>
-
 <body>
+  <main class="container">
+    <header class="top" aria-label="Site title">
+      <div class="brand">
+        <span class="crest" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3 4.5 6.8v5.5c0 4.7 2.8 7.7 7.5 9.2 4.7-1.5 7.5-4.5 7.5-9.2V6.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="m8.8 12.2 2 2 4.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>Bin Men Football Club</span>
+      </div>
+    </header>
 
-  <header class="topbar">
-    <div class="container nav">
-      <a href="#home" class="brand">
-        <span class="crest">BM</span>
-        <span>Bin Men FC</span>
-      </a>
+    <section class="section" aria-labelledby="galleryHeading">
+      <h1 id="galleryHeading" class="section-title">Gallery</h1>
+      <p class="section-copy">Four moments from the club.</p>
 
-      <nav class="nav-links">
-        <a class="nav-link" href="#club">Club</a>
-        <a class="nav-link" href="#gallery">Photos</a>
-        <a class="nav-link" href="#reviews">Reviews</a>
-      </nav>
-    </div>
-  </header>
+      <div class="gallery-grid">
+        <button class="gallery-tile" type="button" data-lightbox-src="photo1.jpg" data-lightbox-title="Matchday Focus" data-lightbox-desc="Ready from the first whistle.">
+          <img src="photo1.jpg" alt="Bin Men FC photo 1" loading="lazy" decoding="async" />
+          <span class="gallery-caption">
+            <strong>Matchday Focus</strong>
+            <span>Ready from the first whistle</span>
+          </span>
+        </button>
 
-  <main id="home">
+        <button class="gallery-tile" type="button" data-lightbox-src="photo2.jpg" data-lightbox-title="The Lads" data-lightbox-desc="Together for the day.">
+          <img src="photo2.jpg" alt="Bin Men FC photo 2" loading="lazy" decoding="async" />
+          <span class="gallery-caption">
+            <strong>The Lads</strong>
+            <span>Together for the day</span>
+          </span>
+        </button>
 
-    <section class="hero">
-      <div class="container">
-        <div class="hero-card">
-          <span class="tag">Official Team Page</span>
+        <button class="gallery-tile" type="button" data-lightbox-src="photo3.jpg" data-lightbox-title="Touchline Energy" data-lightbox-desc="Noise, football and good company.">
+          <img src="photo3.jpg" alt="Bin Men FC photo 3" loading="lazy" decoding="async" />
+          <span class="gallery-caption">
+            <strong>Touchline Energy</strong>
+            <span>Noise, football and good company</span>
+          </span>
+        </button>
 
-          <div class="hero-grid">
-            <div>
-              <h1>Bin Men<br>Football Club</h1>
-              <p>
-                The home of Bin Men FC — team photos, matchday memories, supporter messages,
-                and the moments that make the club what it is.
-              </p>
-
-              <div class="hero-actions">
-                <a class="btn" href="#reviews">Leave a Review</a>
-                <a class="nav-link" href="#gallery">View Photos</a>
-              </div>
-            </div>
-
-            <div class="side-card">
-              <h2>Built on team spirit</h2>
-              <p>
-                From kick-off to full time, Bin Men FC is about effort, laughs, loyalty,
-                and turning every match into a story worth remembering.
-              </p>
-            </div>
-          </div>
-        </div>
+        <button class="gallery-tile" type="button" data-lightbox-src="photo4.jpg" data-lightbox-title="Full-Time Scenes" data-lightbox-desc="One for the memory bank.">
+          <img src="photo4.jpg" alt="Bin Men FC photo 4" loading="lazy" decoding="async" />
+          <span class="gallery-caption">
+            <strong>Full-Time Scenes</strong>
+            <span>One for the memory bank</span>
+          </span>
+        </button>
       </div>
     </section>
 
-    <section class="section" id="club">
-      <div class="container">
-        <div class="about">
-          <div class="glass">
-            <h2>More than just a team.</h2>
-            <p>
-              Bin Men FC is where the lads come together, put in a shift, and make memories
-              on and off the pitch. This page keeps the best moments in one place — photos,
-              messages, and everything worth saving from matchday.
-            </p>
+    <section class="section" aria-labelledby="reviewsHeading">
+      <h2 id="reviewsHeading" class="section-title">Reviews</h2>
+      <p class="section-copy">Leave a message for the club, with an optional photo.</p>
+
+      <div class="reviews-grid">
+        <section class="form-card" aria-labelledby="postHeading">
+          <h3 id="postHeading" class="card-title">Post a review</h3>
+          <p class="card-copy">Name, message, optional photo.</p>
+
+          <form id="reviewForm" novalidate>
+            <div class="field">
+              <label for="nameInput">Name</label>
+              <input id="nameInput" class="input" type="text" maxlength="60" autocomplete="name" placeholder="Your name" />
+            </div>
+
+            <div class="field">
+              <label for="reviewInput">Message</label>
+              <textarea id="reviewInput" class="textarea" maxlength="1200" placeholder="Write your message..."></textarea>
+            </div>
+
+            <div class="field">
+              <label for="imageInput">Photo</label>
+              <input id="imageInput" class="file-input" type="file" accept="image/*" aria-describedby="imageHelp" />
+              <small id="imageHelp">Optional · image only · under 2MB</small>
+            </div>
+
+            <div id="previewBox" class="preview" aria-live="polite">
+              <div class="preview-frame">
+                <img id="previewImage" alt="" />
+              </div>
+              <div class="preview-row">
+                <span id="previewText">Selected image</span>
+                <button id="clearImageButton" class="ghost-btn" type="button">Remove</button>
+              </div>
+            </div>
+
+            <div id="progressWrap" class="progress-wrap">
+              <div class="progress">
+                <span id="progressBar"></span>
+              </div>
+            </div>
+
+            <div id="statusText" class="status" role="status" aria-live="polite"></div>
+
+            <button id="postButton" class="submit-btn" type="submit">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 11.5 20 4l-4 16-4.5-5L4 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M11.5 15 20 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <span id="postButtonLabel">Post review</span>
+            </button>
+          </form>
+        </section>
+
+        <section class="list-card" aria-labelledby="latestHeading">
+          <h3 id="latestHeading" class="card-title">Latest</h3>
+          <p class="card-copy">Live posts from the club and supporters.</p>
+
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/>
+                <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <input id="searchInput" class="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search reviews" aria-label="Search reviews" />
+            </div>
+
+            <div class="filters" role="tablist" aria-label="Review filters">
+              <button class="chip active" type="button" data-filter="all" aria-pressed="true">All</button>
+              <button class="chip" type="button" data-filter="photos" aria-pressed="false">With photos</button>
+              <button class="chip" type="button" data-filter="text" aria-pressed="false">Text only</button>
+            </div>
           </div>
 
-          <div class="stats">
-            <div class="stat">
-              <span>Club</span>
-              <strong>Bin Men FC</strong>
-            </div>
-            <div class="stat">
-              <span>Gallery</span>
-              <strong>4 Photos</strong>
-            </div>
-            <div class="stat">
-              <span>Reviews</span>
-              <strong id="reviewCount">0</strong>
-            </div>
+          <div id="reviewsMeta" class="meta" aria-live="polite">Loading reviews…</div>
+          <div class="kbd-note">Press <span class="mono">/</span> to focus search.</div>
+
+          <div id="reviewsList" class="reviews-list" aria-live="polite" aria-busy="true"></div>
+
+          <div id="emptyState" class="empty">No reviews match that search.</div>
+
+          <div id="reviewSentinel" class="sentinel" aria-hidden="true"></div>
+
+          <div class="load-more-wrap">
+            <button id="loadMoreButton" class="load-more-btn" type="button">Show more</button>
           </div>
-        </div>
+        </section>
       </div>
     </section>
 
-    <section class="section" id="gallery">
-      <div class="container">
-        <h2 class="section-title">Team Photos</h2>
-        <p class="section-subtitle">
-          A few of the best moments from the club so far. Click any photo to open it larger.
-        </p>
-
-        <div class="gallery">
-          <button class="tile" type="button" onclick="openImage('photo1.jpg', 'Matchday Focus')">
-            <img src="photo1.jpg" alt="Bin Men FC matchday photo 1" />
-            <span class="tile-caption">
-              <strong>Matchday Focus</strong>
-              <span>Ready from the first whistle</span>
-            </span>
-          </button>
-
-          <button class="tile" type="button" onclick="openImage('photo2.jpg', 'The Lads')">
-            <img src="photo2.jpg" alt="Bin Men FC team photo 2" />
-            <span class="tile-caption">
-              <strong>The Lads</strong>
-              <span>Team spirit on show</span>
-            </span>
-          </button>
-
-          <button class="tile" type="button" onclick="openImage('photo3.jpg', 'Touchline Energy')">
-            <img src="photo3.jpg" alt="Bin Men FC team photo 3" />
-            <span class="tile-caption">
-              <strong>Touchline Energy</strong>
-              <span>Football, noise, and memories</span>
-            </span>
-          </button>
-
-          <button class="tile" type="button" onclick="openImage('photo4.jpg', 'Full-Time Scenes')">
-            <img src="photo4.jpg" alt="Bin Men FC team photo 4" />
-            <span class="tile-caption">
-              <strong>Full-Time Scenes</strong>
-              <span>One for the club history</span>
-            </span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="reviews">
-      <div class="container">
-        <h2 class="section-title">Club Reviews</h2>
-        <p class="section-subtitle">
-          Leave a message for the team, share a memory, or post a photo from the day.
-        </p>
-
-        <div class="reviews-grid">
-          <div class="form-card">
-            <h3>Post a Review</h3>
-            <p>
-              Add your name, write your message, and attach a photo if you have one.
-            </p>
-
-            <form id="reviewForm">
-              <div class="field">
-                <label for="nameInput">Your name</label>
-                <input id="nameInput" type="text" maxlength="60" placeholder="Your name" />
-              </div>
-
-              <div class="field">
-                <label for="reviewInput">Your message</label>
-                <textarea id="reviewInput" maxlength="1200" placeholder="Write your message for Bin Men FC..."></textarea>
-              </div>
-
-              <div class="field">
-                <label for="imageInput">Photo optional</label>
-                <input id="imageInput" type="file" accept="image/*" />
-              </div>
-
-              <div class="preview" id="previewBox">
-                <img id="previewImage" alt="Selected image preview" />
-                <div class="preview-row">
-                  <span id="previewText">Selected image</span>
-                  <button class="small-btn" type="button" onclick="clearImage()">Remove</button>
-                </div>
-              </div>
-
-              <div class="progress-wrap" id="progressWrap">
-                <div class="progress">
-                  <span id="progressBar"></span>
-                </div>
-              </div>
-
-              <div class="status" id="statusText"></div>
-
-              <button class="btn post-btn" id="postButton" type="submit">Post Review</button>
-            </form>
-          </div>
-
-          <div class="reviews-card">
-            <h3>Latest Messages</h3>
-            <p>
-              Messages from the club, supporters, teammates, and anyone who has been part of the journey.
-            </p>
-
-            <div class="toolbar">
-              <input class="search" id="searchInput" type="search" placeholder="Search reviews..." />
-
-              <div class="filters">
-                <button class="chip active" type="button" data-filter="all">All</button>
-                <button class="chip" type="button" data-filter="photos">With Photos</button>
-                <button class="chip" type="button" data-filter="text">Text Only</button>
-              </div>
-            </div>
-
-            <div class="reviews-meta" id="reviewsMeta">Loading reviews...</div>
-
-            <div class="reviews-list" id="reviewsList"></div>
-
-            <div class="empty" id="emptyState">
-              No reviews match that search yet.
-            </div>
-
-            <button class="load-more" id="loadMoreButton" type="button">Show More</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    <footer class="footer">
+      © 2026 Bin Men Football Club
+    </footer>
   </main>
 
-  <footer>
-    <div class="container">
-      © 2026 Bin Men Football Club
-    </div>
-  </footer>
-
-  <div class="modal-backdrop" id="imageModal">
-    <div class="modal">
+  <div id="lightboxModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" aria-describedby="lightboxDesc">
       <div class="modal-top">
-        <h3 id="modalTitle">Photo</h3>
-        <button class="close" type="button" onclick="closeImage()">×</button>
+        <div>
+          <h3 id="lightboxTitle">Image</h3>
+          <div id="lightboxDesc" class="meta" style="margin-top:4px;">Preview</div>
+        </div>
+        <button class="close-btn" type="button" data-close-modal="lightboxModal" aria-label="Close image preview">
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
-      <img id="modalImage" alt="Expanded photo" />
+      <img id="lightboxImage" class="modal-img" alt="" />
     </div>
   </div>
 
-  <div class="toast-wrap" id="toastWrap"></div>
+  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
   <script>
+    // Exact user-provided Firebase config.
     const firebaseConfig = {
       apiKey: "AIzaSyBx1W3gp9LdFyN3dDtRUoZm52o6P2DLJso",
       authDomain: "bin-men-fc.firebaseapp.com",
@@ -1058,151 +957,419 @@
       appId: "1:960901793838:web:eeee2926789e3e846d77bf"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
 
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const reviewForm = document.getElementById("reviewForm");
-    const nameInput = document.getElementById("nameInput");
-    const reviewInput = document.getElementById("reviewInput");
-    const imageInput = document.getElementById("imageInput");
-    const previewBox = document.getElementById("previewBox");
-    const previewImage = document.getElementById("previewImage");
-    const previewText = document.getElementById("previewText");
-    const progressWrap = document.getElementById("progressWrap");
-    const progressBar = document.getElementById("progressBar");
-    const statusText = document.getElementById("statusText");
-    const postButton = document.getElementById("postButton");
-    const reviewsList = document.getElementById("reviewsList");
-    const reviewsMeta = document.getElementById("reviewsMeta");
-    const emptyState = document.getElementById("emptyState");
-    const searchInput = document.getElementById("searchInput");
-    const loadMoreButton = document.getElementById("loadMoreButton");
-    const reviewCount = document.getElementById("reviewCount");
+    const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+    const INITIAL_VISIBLE = 6;
+    const STEP_VISIBLE = 6;
 
-    let allReviews = [];
-    let filteredReviews = [];
-    let visibleReviews = 6;
-    let activeFilter = "all";
-    let isPosting = false;
-    let cooldownUntil = 0;
-    let cooldownTimer = null;
-    let previewUrl = "";
+    const state = {
+      allReviews: [],
+      filteredReviews: [],
+      visibleCount: INITIAL_VISIBLE,
+      activeFilter: "all",
+      searchTerm: "",
+      posting: false,
+      cooldownUntil: 0,
+      cooldownTimer: null,
+      previewUrl: "",
+      unsubscribeReviews: null,
+      activeModalId: null,
+      restoreFocusEl: null,
+      observer: null
+    };
 
-    imageInput.addEventListener("change", function () {
-      const file = imageInput.files[0];
+    const el = {
+      reviewForm: document.getElementById("reviewForm"),
+      nameInput: document.getElementById("nameInput"),
+      reviewInput: document.getElementById("reviewInput"),
+      imageInput: document.getElementById("imageInput"),
+      previewBox: document.getElementById("previewBox"),
+      previewImage: document.getElementById("previewImage"),
+      previewText: document.getElementById("previewText"),
+      clearImageButton: document.getElementById("clearImageButton"),
+      progressWrap: document.getElementById("progressWrap"),
+      progressBar: document.getElementById("progressBar"),
+      statusText: document.getElementById("statusText"),
+      postButton: document.getElementById("postButton"),
+      postButtonLabel: document.getElementById("postButtonLabel"),
+      searchInput: document.getElementById("searchInput"),
+      filterButtons: Array.from(document.querySelectorAll("[data-filter]")),
+      reviewsMeta: document.getElementById("reviewsMeta"),
+      reviewsList: document.getElementById("reviewsList"),
+      emptyState: document.getElementById("emptyState"),
+      loadMoreButton: document.getElementById("loadMoreButton"),
+      reviewSentinel: document.getElementById("reviewSentinel"),
+      lightboxModal: document.getElementById("lightboxModal"),
+      lightboxTitle: document.getElementById("lightboxTitle"),
+      lightboxDesc: document.getElementById("lightboxDesc"),
+      lightboxImage: document.getElementById("lightboxImage"),
+      toastWrap: document.getElementById("toastWrap")
+    };
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    function init() {
+      bindEvents();
+      setupInfiniteScroll();
+      loadReviews();
+    }
+
+    function bindEvents() {
+      // Gallery lightbox triggers.
+      document.querySelectorAll("[data-lightbox-src]").forEach((button) => {
+        button.addEventListener("click", () => {
+          openLightbox(
+            button.getAttribute("data-lightbox-src") || "",
+            button.getAttribute("data-lightbox-title") || "Image",
+            button.getAttribute("data-lightbox-desc") || "Preview"
+          );
+        });
+      });
+
+      // Form actions.
+      el.reviewForm.addEventListener("submit", handleReviewSubmit);
+      el.imageInput.addEventListener("change", handleImageSelection);
+      el.clearImageButton.addEventListener("click", clearImage);
+
+      // Search and filters.
+      el.searchInput.addEventListener("input", debounce(() => {
+        state.searchTerm = el.searchInput.value.trim().toLowerCase();
+        applyFilters(true);
+      }, 120));
+
+      el.filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setFilter(button.dataset.filter || "all");
+          applyFilters(true);
+        });
+      });
+
+      // Pagination.
+      el.loadMoreButton.addEventListener("click", renderMore);
+
+      // Modal close triggers.
+      document.querySelectorAll("[data-close-modal]").forEach((button) => {
+        button.addEventListener("click", () => closeModal(button.getAttribute("data-close-modal")));
+      });
+
+      el.lightboxModal.addEventListener("mousedown", (event) => {
+        if (event.target === el.lightboxModal) {
+          closeModal("lightboxModal");
+        }
+      });
+
+      // Keyboard shortcuts.
+      document.addEventListener("keydown", handleGlobalKeys);
+    }
+
+    function handleGlobalKeys(event) {
+      const modal = getOpenModal();
+
+      if (event.key === "Escape" && modal) {
+        event.preventDefault();
+        closeModal(modal.id);
+        return;
+      }
+
+      if (event.key === "/" && !modal && !isTextInput(event.target)) {
+        event.preventDefault();
+        el.searchInput.focus();
+        el.searchInput.select();
+        return;
+      }
+
+      if (event.key === "Tab" && modal) {
+        trapFocus(event, modal);
+      }
+    }
+
+    function setupInfiniteScroll() {
+      if (!("IntersectionObserver" in window)) return;
+
+      state.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && state.visibleCount < state.filteredReviews.length) {
+            renderMore();
+          }
+        });
+      }, {
+        rootMargin: "280px 0px"
+      });
+
+      state.observer.observe(el.reviewSentinel);
+    }
+
+    function loadReviews() {
+      el.reviewsList.setAttribute("aria-busy", "true");
+      el.reviewsMeta.textContent = "Loading reviews…";
+
+      if (typeof state.unsubscribeReviews === "function") {
+        state.unsubscribeReviews();
+      }
+
+      // Realtime listener for the public review wall.
+      state.unsubscribeReviews = db.collection("reviews")
+        .orderBy("time", "desc")
+        .onSnapshot(
+          (snapshot) => {
+            state.allReviews = snapshot.docs.map((doc) => {
+              const data = doc.data() || {};
+              return {
+                id: doc.id,
+                name: typeof data.name === "string" ? data.name : "Unknown",
+                text: typeof data.text === "string" ? data.text : "",
+                image: typeof data.image === "string" ? data.image : "",
+                time: normaliseTime(data.time)
+              };
+            });
+
+            applyFilters(false);
+            el.reviewsList.setAttribute("aria-busy", "false");
+          },
+          (error) => {
+            console.error("Could not load reviews:", error);
+            el.reviewsList.setAttribute("aria-busy", "false");
+            el.reviewsMeta.textContent = "Could not load reviews.";
+            toast("Could not load reviews.", "error");
+          }
+        );
+    }
+
+    function setFilter(filter) {
+      state.activeFilter = filter;
+
+      el.filterButtons.forEach((button) => {
+        const active = button.dataset.filter === filter;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    }
+
+    function applyFilters(resetVisible) {
+      const q = state.searchTerm;
+      const f = state.activeFilter;
+
+      state.filteredReviews = state.allReviews.filter((review) => {
+        const matchesFilter =
+          f === "all" ||
+          (f === "photos" && !!review.image) ||
+          (f === "text" && !review.image);
+
+        if (!matchesFilter) return false;
+
+        if (!q) return true;
+
+        const haystack = [
+          review.name,
+          review.text,
+          formatDate(review.time)
+        ].join(" ").toLowerCase();
+
+        return haystack.includes(q);
+      });
+
+      if (resetVisible) {
+        state.visibleCount = INITIAL_VISIBLE;
+      }
+
+      renderReviews();
+    }
+
+    function renderReviews() {
+      el.reviewsList.innerHTML = "";
+
+      const visible = state.filteredReviews.slice(0, state.visibleCount);
+      const fragment = document.createDocumentFragment();
+
+      visible.forEach((review) => {
+        fragment.appendChild(buildReview(review));
+      });
+
+      el.reviewsList.appendChild(fragment);
+
+      const total = state.filteredReviews.length;
+      const shown = visible.length;
+
+      el.reviewsMeta.textContent = `${total} review${total === 1 ? "" : "s"} • ${shown} shown`;
+      el.emptyState.style.display = total === 0 ? "block" : "none";
+      el.loadMoreButton.style.display = shown < total ? "inline-flex" : "none";
+    }
+
+    function renderMore() {
+      state.visibleCount += STEP_VISIBLE;
+      renderReviews();
+    }
+
+    function buildReview(review) {
+      const card = document.createElement("article");
+      card.className = "review";
+
+      const initials = initialsOf(review.name);
+      const safeImageUrl = sanitiseHttpUrl(review.image);
+
+      card.innerHTML = `
+        <div class="review-head">
+          <div class="avatar" aria-hidden="true">${escapeHTML(initials)}</div>
+          <div>
+            <div class="review-name">${escapeHTML(review.name)}</div>
+            <div class="review-date">${formatDate(review.time)}</div>
+          </div>
+        </div>
+        <div class="review-text">${escapeHTML(review.text)}</div>
+      `;
+
+      if (safeImageUrl) {
+        const imageButton = document.createElement("button");
+        imageButton.type = "button";
+        imageButton.className = "review-image-btn";
+        imageButton.setAttribute("aria-label", `Open review image from ${review.name}`);
+        imageButton.innerHTML = `
+          <img src="${safeImageUrl}" alt="Review photo from ${escapeHTML(review.name)}" loading="lazy" decoding="async">
+          <span class="review-image-badge">Photo</span>
+        `;
+        imageButton.addEventListener("click", () => {
+          openLightbox(
+            safeImageUrl,
+            `Photo from ${review.name}`,
+            formatDate(review.time)
+          );
+        });
+        card.appendChild(imageButton);
+      }
+
+      return card;
+    }
+
+    function handleImageSelection() {
+      const file = el.imageInput.files && el.imageInput.files[0];
 
       if (!file) {
         clearImage();
         return;
       }
 
-      if (!file.type.startsWith("image/")) {
-        toast("Please choose an image file.");
+      const validation = validateImageFile(file);
+      if (!validation.ok) {
+        toast(validation.message, "error");
         clearImage();
         return;
       }
 
-      if (file.size > 2 * 1024 * 1024) {
-        toast("Image must be under 2MB.");
-        clearImage();
-        return;
+      if (state.previewUrl) {
+        URL.revokeObjectURL(state.previewUrl);
       }
 
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      previewUrl = URL.createObjectURL(file);
-      previewImage.src = previewUrl;
-      previewText.textContent = file.name;
-      previewBox.style.display = "block";
-    });
-
-    function clearImage() {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        previewUrl = "";
-      }
-
-      imageInput.value = "";
-      previewImage.src = "";
-      previewBox.style.display = "none";
+      state.previewUrl = URL.createObjectURL(file);
+      el.previewImage.src = state.previewUrl;
+      el.previewImage.alt = `Preview of selected image ${file.name}`;
+      el.previewText.textContent = `${file.name} • ${formatBytes(file.size)}`;
+      el.previewBox.style.display = "block";
+      setStatus("Image ready.");
     }
 
-    reviewForm.addEventListener("submit", async function (event) {
+    function clearImage() {
+      if (state.previewUrl) {
+        URL.revokeObjectURL(state.previewUrl);
+        state.previewUrl = "";
+      }
+
+      el.imageInput.value = "";
+      el.previewImage.src = "";
+      el.previewImage.alt = "";
+      el.previewText.textContent = "Selected image";
+      el.previewBox.style.display = "none";
+    }
+
+    function validateImageFile(file) {
+      if (!file) return { ok: true };
+
+      if (!file.type || !file.type.startsWith("image/")) {
+        return { ok: false, message: "Please choose an image file." };
+      }
+
+      if (file.size > MAX_IMAGE_SIZE) {
+        return { ok: false, message: "Image must be under 2MB." };
+      }
+
+      return { ok: true };
+    }
+
+    async function handleReviewSubmit(event) {
       event.preventDefault();
 
-      if (isPosting) return;
+      if (state.posting) return;
 
       const cooldownLeft = getCooldownLeft();
-
       if (cooldownLeft > 0) {
-        toast("Please wait " + cooldownLeft + " seconds before posting again.");
+        toast(`Please wait ${cooldownLeft}s before posting again.`, "warning");
+        setStatus(`Ready again in ${cooldownLeft}s.`);
         return;
       }
 
-      const name = nameInput.value.trim();
-      const text = reviewInput.value.trim();
-      const file = imageInput.files[0];
+      const name = el.nameInput.value.trim();
+      const text = el.reviewInput.value.trim();
+      const file = el.imageInput.files && el.imageInput.files[0];
 
       if (!name || !text) {
-        toast("Please enter your name and message.");
+        toast("Please enter your name and message.", "warning");
+        setStatus("Name and message are required.");
         return;
       }
 
-      if (file) {
-        if (!file.type.startsWith("image/")) {
-          toast("Please choose an image file.");
-          return;
-        }
-
-        if (file.size > 2 * 1024 * 1024) {
-          toast("Image must be under 2MB.");
-          return;
-        }
+      const validation = validateImageFile(file);
+      if (!validation.ok) {
+        toast(validation.message, "error");
+        setStatus(validation.message);
+        return;
       }
 
-      isPosting = true;
-      postButton.disabled = true;
-      postButton.textContent = "Posting...";
-      progressWrap.style.display = "block";
-      progressBar.style.width = "8%";
-      statusText.textContent = "Preparing your review...";
+      state.posting = true;
+      setSubmitState(true, "Posting…");
+      showProgress(true);
+      updateProgress(8, "Preparing review…");
+
+      let imageUrl = "";
+      let uploadRef = null;
+      let reviewSaved = false;
 
       try {
-        let imageUrl = "";
-
         if (file) {
           const safeName = file.name.replace(/\s+/g, "-").replace(/[^\w.-]/g, "");
-          const imageRef = storage.ref("reviews/" + Date.now() + "-" + safeName);
-          const uploadTask = imageRef.put(file);
+          const path = `reviews/${Date.now()}-${safeName}`;
+          uploadRef = storage.ref(path);
+          const uploadTask = uploadRef.put(file);
 
-          await new Promise(function (resolve, reject) {
+          updateProgress(12, "Uploading image… 0%");
+
+          // Firebase compat upload task progress.
+          await new Promise((resolve, reject) => {
             uploadTask.on(
               "state_changed",
-              function (snapshot) {
-                const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                progressBar.style.width = percent + "%";
-                statusText.textContent = "Uploading photo... " + percent + "%";
+              (snapshot) => {
+                const percent = snapshot.totalBytes
+                  ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                  : 0;
+                const uiPercent = Math.max(12, Math.min(92, percent));
+                updateProgress(uiPercent, `Uploading image… ${percent}%`);
               },
-              function (error) {
-                reject(error);
-              },
-              function () {
-                resolve();
-              }
+              (error) => reject(error),
+              () => resolve()
             );
           });
 
-          imageUrl = await imageRef.getDownloadURL();
+          imageUrl = await uploadRef.getDownloadURL();
+          updateProgress(95, "Saving review…");
         } else {
-          progressBar.style.width = "70%";
+          updateProgress(62, "Saving review…");
         }
 
-        statusText.textContent = "Saving your review...";
-
+        // Public review document: exactly {name, text, image, time}.
         await db.collection("reviews").add({
           name: name,
           text: text,
@@ -1210,207 +1377,262 @@
           time: Date.now()
         });
 
-        progressBar.style.width = "100%";
-        statusText.textContent = "Posted successfully.";
-        toast("Review posted successfully.");
-
-        nameInput.value = "";
-        reviewInput.value = "";
-        clearImage();
-
+        reviewSaved = true;
+        updateProgress(100, "Posted.");
+        toast("Review posted.", "success");
+        resetForm();
         startCooldown(5);
-
       } catch (error) {
-        console.error(error);
-        toast("Something went wrong. Please try again.");
-        resetPostButton();
+        console.error("Post review failed:", error);
+
+        // Best-effort cleanup if upload succeeded but Firestore save failed.
+        if (uploadRef && !reviewSaved) {
+          try { await uploadRef.delete(); } catch (cleanupError) {}
+        }
+
+        toast(friendlyFirebaseError(error), "error", 5200);
+        setSubmitState(false, "Post review");
       } finally {
-        isPosting = false;
+        state.posting = false;
       }
-    });
+    }
+
+    function resetForm() {
+      el.nameInput.value = "";
+      el.reviewInput.value = "";
+      clearImage();
+    }
+
+    function showProgress(visible) {
+      el.progressWrap.style.display = visible ? "block" : "none";
+    }
+
+    function updateProgress(percent, message) {
+      showProgress(true);
+      el.progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+      setStatus(message);
+    }
+
+    function setStatus(message) {
+      el.statusText.textContent = message || "";
+    }
+
+    function setSubmitState(disabled, label) {
+      el.postButton.disabled = !!disabled;
+      el.postButtonLabel.textContent = label;
+    }
 
     function startCooldown(seconds) {
-      cooldownUntil = Date.now() + seconds * 1000;
+      state.cooldownUntil = Date.now() + (seconds * 1000);
 
-      if (cooldownTimer) {
-        clearInterval(cooldownTimer);
+      if (state.cooldownTimer) {
+        clearInterval(state.cooldownTimer);
       }
 
-      cooldownTimer = setInterval(function () {
+      updateCooldownUI();
+
+      state.cooldownTimer = window.setInterval(() => {
         const left = getCooldownLeft();
 
         if (left <= 0) {
-          clearInterval(cooldownTimer);
-          cooldownTimer = null;
-          cooldownUntil = 0;
-          resetPostButton();
-          statusText.textContent = "";
-          progressWrap.style.display = "none";
-          progressBar.style.width = "0%";
+          clearInterval(state.cooldownTimer);
+          state.cooldownTimer = null;
+          state.cooldownUntil = 0;
+          setSubmitState(false, "Post review");
+          setStatus("");
+          window.setTimeout(() => {
+            if (!state.posting) {
+              el.progressBar.style.width = "0%";
+              showProgress(false);
+            }
+          }, 350);
           return;
         }
 
-        postButton.disabled = true;
-        postButton.textContent = "Post Review (" + left + "s)";
-        statusText.textContent = "Ready to post again in " + left + " seconds.";
+        updateCooldownUI();
       }, 250);
     }
 
     function getCooldownLeft() {
-      if (!cooldownUntil) return 0;
-      return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+      if (!state.cooldownUntil) return 0;
+      return Math.max(0, Math.ceil((state.cooldownUntil - Date.now()) / 1000));
     }
 
-    function resetPostButton() {
-      postButton.disabled = false;
-      postButton.textContent = "Post Review";
+    function updateCooldownUI() {
+      const left = getCooldownLeft();
+      setSubmitState(true, `Post review (${left}s)`);
+      updateProgress(100, `Ready again in ${left}s.`);
     }
 
-    db.collection("reviews")
-      .orderBy("time", "desc")
-      .onSnapshot(function (snapshot) {
-        allReviews = snapshot.docs.map(function (doc) {
-          const data = doc.data();
+    function openLightbox(src, title, desc) {
+      const safe = sanitiseHttpUrl(src);
+      if (!safe) return;
 
-          return {
-            id: doc.id,
-            name: data.name || "Unknown",
-            text: data.text || "",
-            image: data.image || "",
-            time: data.time || 0
-          };
-        });
-
-        reviewCount.textContent = allReviews.length;
-        applyFilters();
-      }, function (error) {
-        console.error(error);
-        reviewsMeta.textContent = "Could not load reviews.";
-      });
-
-    searchInput.addEventListener("input", function () {
-      visibleReviews = 6;
-      applyFilters();
-    });
-
-    document.querySelectorAll(".chip").forEach(function (button) {
-      button.addEventListener("click", function () {
-        document.querySelectorAll(".chip").forEach(function (chip) {
-          chip.classList.remove("active");
-        });
-
-        button.classList.add("active");
-        activeFilter = button.dataset.filter;
-        visibleReviews = 6;
-        applyFilters();
-      });
-    });
-
-    loadMoreButton.addEventListener("click", function () {
-      visibleReviews += 6;
-      renderReviews();
-    });
-
-    function applyFilters() {
-      const search = searchInput.value.trim().toLowerCase();
-
-      filteredReviews = allReviews.filter(function (review) {
-        const matchesSearch =
-          review.name.toLowerCase().includes(search) ||
-          review.text.toLowerCase().includes(search);
-
-        const matchesFilter =
-          activeFilter === "all" ||
-          (activeFilter === "photos" && review.image) ||
-          (activeFilter === "text" && !review.image);
-
-        return matchesSearch && matchesFilter;
-      });
-
-      renderReviews();
+      el.lightboxTitle.textContent = title || "Image";
+      el.lightboxDesc.textContent = desc || "Preview";
+      el.lightboxImage.src = safe;
+      el.lightboxImage.alt = title || "Image";
+      openModal("lightboxModal");
     }
 
-    function renderReviews() {
-      reviewsList.innerHTML = "";
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
 
-      const visible = filteredReviews.slice(0, visibleReviews);
-
-      reviewsMeta.textContent =
-        filteredReviews.length + " review" + (filteredReviews.length === 1 ? "" : "s") + " found";
-
-      emptyState.style.display = filteredReviews.length === 0 ? "block" : "none";
-      loadMoreButton.style.display = visibleReviews < filteredReviews.length ? "inline-block" : "none";
-
-      visible.forEach(function (review) {
-        const div = document.createElement("article");
-        div.className = "review";
-
-        const initials = review.name
-          .split(" ")
-          .map(function (word) { return word[0]; })
-          .join("")
-          .slice(0, 2)
-          .toUpperCase();
-
-        div.innerHTML = `
-          <div class="review-head">
-            <div class="avatar">${escapeHTML(initials)}</div>
-            <div>
-              <div class="review-name">${escapeHTML(review.name)}</div>
-              <div class="review-date">${formatDate(review.time)}</div>
-            </div>
-          </div>
-
-          <div class="review-text">${escapeHTML(review.text)}</div>
-
-          ${
-            review.image
-              ? `<button class="review-photo" type="button" onclick="openImage('${review.image}', 'Review Photo')">
-                   <img src="${review.image}" alt="Review photo from ${escapeHTML(review.name)}">
-                 </button>`
-              : ""
-          }
-        `;
-
-        reviewsList.appendChild(div);
-      });
-    }
-
-    function openImage(src, title) {
-      document.getElementById("modalImage").src = src;
-      document.getElementById("modalTitle").textContent = title;
-      document.getElementById("imageModal").classList.add("open");
+      state.activeModalId = id;
+      state.restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
       document.body.classList.add("modal-open");
+
+      const focusTarget = modal.querySelector("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])");
+      if (focusTarget && focusTarget.focus) {
+        window.setTimeout(() => focusTarget.focus(), 20);
+      }
     }
 
-    function closeImage() {
-      document.getElementById("imageModal").classList.remove("open");
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
       document.body.classList.remove("modal-open");
-      document.getElementById("modalImage").src = "";
+      state.activeModalId = null;
+
+      if (id === "lightboxModal") {
+        el.lightboxImage.src = "";
+        el.lightboxImage.alt = "";
+        el.lightboxTitle.textContent = "Image";
+        el.lightboxDesc.textContent = "Preview";
+      }
+
+      if (state.restoreFocusEl && state.restoreFocusEl.focus) {
+        state.restoreFocusEl.focus();
+      }
     }
 
-    document.getElementById("imageModal").addEventListener("click", function (event) {
-      if (event.target.id === "imageModal") {
-        closeImage();
-      }
-    });
+    function getOpenModal() {
+      return document.querySelector(".modal-backdrop.open");
+    }
 
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        closeImage();
+    function trapFocus(event, modal) {
+      const focusable = Array.from(
+        modal.querySelectorAll("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])")
+      ).filter((node) => !node.hasAttribute("disabled"));
+
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
-    });
+    }
+
+    function friendlyFirebaseError(error) {
+      const code = String(error && error.code || "");
+
+      if (code.includes("permission-denied")) {
+        return "Permission denied.";
+      }
+      if (code.includes("storage/unauthorized")) {
+        return "Upload not allowed.";
+      }
+      if (code.includes("storage/bucket-not-found")) {
+        return "Storage bucket not found.";
+      }
+      if (code.includes("storage/project-not-found")) {
+        return "Storage project not found.";
+      }
+      if (code.includes("storage/unknown")) {
+        return "Storage error.";
+      }
+      if (code.includes("unavailable")) {
+        return "Service temporarily unavailable.";
+      }
+
+      return "Something went wrong.";
+    }
+
+    function toast(message, type = "success", duration = 3200) {
+      const node = document.createElement("div");
+      node.className = `toast ${type}`;
+      node.textContent = message;
+      el.toastWrap.appendChild(node);
+
+      window.setTimeout(() => {
+        node.style.opacity = "0";
+        node.style.transform = "translateY(8px)";
+        window.setTimeout(() => node.remove(), 160);
+      }, duration);
+    }
+
+    function normaliseTime(value) {
+      if (!value) return 0;
+
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+
+      if (typeof value === "string") {
+        const numeric = Number(value);
+        if (Number.isFinite(numeric) && numeric > 0) return numeric;
+        const parsed = Date.parse(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+
+      if (typeof value.toMillis === "function") {
+        try { return value.toMillis(); } catch (error) {}
+      }
+
+      if (typeof value.seconds === "number") {
+        return value.seconds * 1000;
+      }
+
+      return 0;
+    }
 
     function formatDate(time) {
       if (!time) return "Recently";
-
       try {
         return new Intl.DateTimeFormat("en-IE", {
           dateStyle: "medium",
           timeStyle: "short"
         }).format(new Date(time));
-      } catch {
+      } catch (error) {
         return "Recently";
+      }
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes && bytes !== 0) return "";
+      const units = ["B", "KB", "MB", "GB"];
+      let size = bytes;
+      let unit = 0;
+      while (size >= 1024 && unit < units.length - 1) {
+        size /= 1024;
+        unit += 1;
+      }
+      return `${size < 10 && unit > 0 ? size.toFixed(1) : Math.round(size)} ${units[unit]}`;
+    }
+
+    function initialsOf(name) {
+      const parts = String(name || "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
+      if (!parts.length) return "??";
+      return parts.map((part) => part[0]).join("").toUpperCase();
+    }
+
+    function sanitiseHttpUrl(url) {
+      if (!url) return "";
+      try {
+        const parsed = new URL(url, window.location.href);
+        return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+      } catch (error) {
+        return "";
       }
     }
 
@@ -1420,25 +1642,21 @@
       return div.innerHTML;
     }
 
-    function toast(message) {
-      const toastWrap = document.getElementById("toastWrap");
-      const div = document.createElement("div");
+    function isTextInput(target) {
+      return target instanceof HTMLElement && (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      );
+    }
 
-      div.className = "toast";
-      div.textContent = message;
-
-      toastWrap.appendChild(div);
-
-      setTimeout(function () {
-        div.style.opacity = "0";
-        div.style.transform = "translateY(8px)";
-
-        setTimeout(function () {
-          div.remove();
-        }, 180);
-      }, 3000);
+    function debounce(fn, wait) {
+      let timer = null;
+      return function debounced(...args) {
+        clearTimeout(timer);
+        timer = window.setTimeout(() => fn.apply(this, args), wait);
+      };
     }
   </script>
-
 </body>
 </html>

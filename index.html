@@ -1,170 +1,84 @@
-<!--
-Executive summary
-- Single-file homepage for liam.ink, ready to paste into /index.html in the repo root.
-- Uses hero.jpg only for the hero banner and photo1.jpg..photo4.jpg only for the gallery.
-- Uses the exact Firebase config supplied by the user, with Firebase compat CDN scripts and no build step.
-- Preserves the reviews flow:
-  1) optional image upload to Firebase Storage
-  2) getDownloadURL()
-  3) save Firestore review document with { name, text, image, time }
-  4) show live reviews with onSnapshot()
-- UX included:
-  - accessible labelled form controls
-  - image preview before upload
-  - client-side validation (image/*, under 2MB)
-  - animated upload progress bar with upload percentage
-  - toast notifications
-  - 5-second cooldown after posting
-  - disabled button during upload/cooldown
-  - live status messages
-  - search/filter by text and image presence
-  - client-side pagination with load-more and infinite-scroll assist
-  - image lightbox for gallery and review images
-  - keyboard shortcuts: "/" focuses search, Esc closes modals, Tab is trapped inside open modals
-- Moderation remains separate at /admin/:
-  - this homepage does NOT embed admin password UI
-  - this homepage does NOT show delete controls
-  - moderators should use /admin/ to delete or tidy reviews
-  - persistent client-side admin sessions belong on /admin/, not here
-- Deployment notes:
-  - keep hero.jpg and photo1.jpg..photo4.jpg beside this file
-  - add an empty /.nojekyll file if you publish a plain static GitHub Pages site from a source branch
-  - ensure /admin/index.html exists separately for moderation
-- Unspecified assumptions:
-  - friendly gallery captions are generated because none were provided
-  - review time is stored as milliseconds since epoch (Date.now())
-- Changelog:
-  - 2026-05-06: refined homepage design, upload UX, live reviews, troubleshooting and rules panel
--->
 <!DOCTYPE html>
 <html lang="en-IE">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="dark" />
   <title>Bin Men Football Club</title>
 
   <style>
     :root {
-      --bg: #07100d;
-      --bg-2: #0b1611;
-      --panel: rgba(10, 18, 14, 0.88);
-      --panel-2: rgba(8, 14, 11, 0.96);
-      --line: rgba(129, 165, 142, 0.16);
-      --line-strong: rgba(129, 165, 142, 0.32);
-      --text: #eef7f1;
-      --text-2: #cad8cf;
-      --muted: #90a298;
-      --accent: #53e08b;
-      --accent-2: #8cf8c0;
-      --accent-dark: #0b2e1a;
-      --danger: #ff758b;
-      --warning: #ffd672;
-      --success: #7df3ad;
-      --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
-      --radius-xl: 30px;
-      --radius-lg: 24px;
-      --radius-md: 18px;
-      --radius-sm: 14px;
-      --content: 1220px;
-      --fast: 160ms ease;
-      --med: 240ms ease;
-      --ring: rgba(83, 224, 139, 0.55);
+      --bg: #06100c;
+      --panel: rgba(10, 18, 14, 0.9);
+      --panel2: rgba(13, 25, 17, 0.95);
+      --line: rgba(126, 172, 142, 0.18);
+      --line2: rgba(126, 172, 142, 0.35);
+      --text: #f2fff6;
+      --muted: #bdd0c4;
+      --soft: #8da397;
+      --green: #54e88d;
+      --green2: #a3ffc9;
+      --darkgreen: #07140c;
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+      --radius: 28px;
     }
 
-    * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      letter-spacing: 0.01em;
-      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
       background:
-        radial-gradient(circle at 0% 0%, rgba(83, 224, 139, 0.08), transparent 26%),
-        radial-gradient(circle at 100% 0%, rgba(140, 248, 192, 0.06), transparent 24%),
-        radial-gradient(circle at 50% 100%, rgba(83, 224, 139, 0.05), transparent 28%),
-        linear-gradient(180deg, #06100c 0%, #09130f 100%);
-      background-attachment: fixed;
+        radial-gradient(circle at top left, rgba(84, 232, 141, 0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(163, 255, 201, 0.08), transparent 28%),
+        linear-gradient(180deg, #06100c 0%, #091610 100%);
+      color: var(--text);
     }
 
-    body.modal-open { overflow: hidden; }
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
     img {
       display: block;
       max-width: 100%;
     }
 
-    button, input, textarea {
+    button,
+    input,
+    textarea {
       font: inherit;
-      color: inherit;
     }
 
     button {
-      border: 0;
       cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: none;
-    }
-
-    .hidden { display: none !important; }
-
-    .sr-only {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      margin: -1px !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      clip: rect(0 0 0 0) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
-    }
-
-    :focus-visible {
-      outline: 3px solid var(--ring);
-      outline-offset: 3px;
-      border-radius: 12px;
+      border: none;
     }
 
     .container {
-      width: min(var(--content), calc(100% - 32px));
+      width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
     }
 
-    .top-progress {
+    .topbar {
       position: fixed;
-      inset: 0 0 auto 0;
-      height: 3px;
-      z-index: 100;
-      pointer-events: none;
-    }
-
-    .top-progress-bar {
-      width: 0%;
-      height: 100%;
-      opacity: 0;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2), #dffff0);
-      box-shadow: 0 0 18px rgba(83, 224, 139, 0.55);
-      transition: width 220ms ease, opacity 220ms ease;
-    }
-
-    .site-header {
-      position: sticky;
       top: 0;
-      z-index: 30;
-      backdrop-filter: blur(14px);
-      background: rgba(6, 12, 9, 0.72);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(5, 12, 8, 0.72);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .nav {
@@ -172,36 +86,31 @@ Executive summary
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
+      gap: 18px;
     }
 
     .brand {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 12px;
-      color: var(--text);
       font-weight: 900;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
-    .brand:hover {
-      color: var(--text);
-      text-decoration: none;
-    }
-
     .crest {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(83, 224, 139, 0.16), rgba(140, 248, 192, 0.08));
-      border: 1px solid rgba(83, 224, 139, 0.28);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      color: var(--green);
+      background: rgba(84, 232, 141, 0.1);
+      border: 1px solid rgba(84, 232, 141, 0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
     }
 
-    .nav-actions {
+    .nav-links {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -209,66 +118,57 @@ Executive summary
       justify-content: flex-end;
     }
 
-    .btn,
-    .btn-ghost,
-    .btn-link {
-      min-height: 46px;
+    .nav-link,
+    .btn {
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 0 16px;
-      border-radius: 14px;
       font-weight: 800;
-      transition: transform var(--fast), background var(--fast), border-color var(--fast), opacity var(--fast);
-      white-space: nowrap;
+      transition: 0.2s ease;
     }
 
-    .btn:hover,
-    .btn-ghost:hover,
-    .btn-link:hover {
+    .nav-link {
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      border-color: var(--line2);
       transform: translateY(-1px);
-      text-decoration: none;
     }
 
     .btn {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #06110b;
-      box-shadow: 0 16px 36px rgba(83, 224, 139, 0.18);
+      background: linear-gradient(135deg, var(--green), var(--green2));
+      color: #06100c;
+      box-shadow: 0 18px 40px rgba(84, 232, 141, 0.22);
     }
 
-    .btn-ghost {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
-      color: var(--text);
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 48px rgba(84, 232, 141, 0.28);
     }
 
-    .btn-link {
-      background: rgba(83, 224, 139, 0.08);
-      border: 1px solid rgba(83, 224, 139, 0.22);
-      color: var(--accent-2);
-    }
-
-    .btn[disabled],
-    .btn-ghost[disabled],
-    .btn-link[disabled] {
-      opacity: 0.65;
+    .btn:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
 
     .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 110px 0 44px;
+      background:
+        linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.82)),
+        url("hero.jpg") center / cover no-repeat;
       position: relative;
       overflow: hidden;
-      min-height: 86vh;
-      display: grid;
-      place-items: end center;
-      padding: 24px 0 34px;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.56)),
-        linear-gradient(180deg, rgba(7, 16, 12, 0.08), rgba(7, 16, 12, 0.9)),
-        url("hero.jpg") center / cover no-repeat;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
     .hero::before {
@@ -276,509 +176,427 @@ Executive summary
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 12% 10%, rgba(83, 224, 139, 0.18), transparent 28%),
-        radial-gradient(circle at 88% 6%, rgba(140, 248, 192, 0.14), transparent 22%);
+        radial-gradient(circle at 18% 20%, rgba(84, 232, 141, 0.22), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(163, 255, 201, 0.15), transparent 26%);
       pointer-events: none;
     }
 
     .hero-card {
       position: relative;
-      z-index: 1;
-      width: min(100%, 1120px);
-      padding: 28px;
-      border-radius: var(--radius-xl);
-      background: linear-gradient(180deg, rgba(10, 18, 14, 0.72), rgba(8, 14, 11, 0.88));
-      border: 1px solid rgba(255,255,255,0.10);
+      z-index: 2;
+      padding: 34px;
+      border-radius: 34px;
+      background: linear-gradient(180deg, rgba(9, 18, 13, 0.76), rgba(6, 13, 9, 0.94));
+      border: 1px solid rgba(255,255,255,0.12);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 14px;
-      border-radius: 999px;
-      background: rgba(83, 224, 139, 0.12);
-      border: 1px solid rgba(83, 224, 139, 0.28);
-      color: var(--accent-2);
-      font-size: 0.88rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
+      backdrop-filter: blur(14px);
     }
 
     .hero-grid {
-      margin-top: 16px;
       display: grid;
-      grid-template-columns: 1.18fr 0.82fr;
-      gap: 24px;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 28px;
       align-items: end;
     }
 
-    .hero-copy h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2.4rem, 6vw, 5.3rem);
-      line-height: 0.95;
-      letter-spacing: -0.05em;
-      text-transform: uppercase;
-    }
-
-    .hero-copy p {
-      margin: 0;
-      max-width: 62ch;
-      color: var(--text-2);
-      line-height: 1.72;
-      font-size: 1.02rem;
-    }
-
-    .hero-actions {
-      margin-top: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .hero-side {
-      display: grid;
-      gap: 12px;
-    }
-
-    .mini-card {
-      padding: 18px;
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-    }
-
-    .mini-card h2,
-    .mini-card h3 {
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-      letter-spacing: -0.02em;
-    }
-
-    .mini-card p {
-      margin: 0;
-      color: var(--text-2);
-      line-height: 1.62;
-      font-size: 0.96rem;
-    }
-
-    .mini-card .note {
-      display: inline-block;
-      margin-top: 10px;
-      color: var(--accent-2);
-      font-weight: 700;
-    }
-
-    .section {
-      padding: 78px 0;
-    }
-
-    .section-title {
-      margin: 0 0 10px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1.02;
-      letter-spacing: -0.04em;
-      text-align: center;
-    }
-
-    .section-intro {
-      margin: 0 auto 30px;
-      max-width: 68ch;
-      text-align: center;
-      line-height: 1.72;
-      color: var(--text-2);
-      font-size: 1rem;
-    }
-
-    .about-card {
-      padding: 28px;
-      border-radius: var(--radius-xl);
-      background: linear-gradient(180deg, rgba(12, 22, 16, 0.92), rgba(8, 14, 11, 0.96));
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 22px;
-    }
-
-    .about-card h2 {
-      margin: 0 0 12px;
-      font-size: clamp(1.7rem, 3vw, 2.5rem);
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-    }
-
-    .about-card p {
-      margin: 0;
-      color: var(--text-2);
-      line-height: 1.76;
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .stat {
-      padding: 18px;
-      border-radius: 20px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .stat .k {
-      color: var(--muted);
-      font-size: 0.88rem;
-      font-weight: 700;
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      color: var(--green2);
+      background: rgba(84, 232, 141, 0.12);
+      border: 1px solid rgba(84, 232, 141, 0.28);
+      font-size: 0.86rem;
+      font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
-    .stat .v {
-      margin-top: 8px;
-      font-size: clamp(1.5rem, 2vw, 2rem);
-      font-weight: 900;
-      letter-spacing: -0.04em;
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 8vw, 6.7rem);
+      line-height: 0.9;
+      letter-spacing: -0.07em;
+      text-transform: uppercase;
     }
 
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
+    .hero p {
+      margin: 20px 0 0;
+      max-width: 660px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.75;
     }
 
-    .gallery-tile {
-      position: relative;
-      overflow: hidden;
-      padding: 0;
-      min-height: 320px;
+    .hero-actions {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .side-card {
+      padding: 22px;
       border-radius: 24px;
+      background: rgba(255,255,255,0.045);
       border: 1px solid var(--line);
-      background: #050b08;
+    }
+
+    .side-card h2,
+    .side-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      letter-spacing: -0.03em;
+    }
+
+    .side-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+
+    .section {
+      padding: 82px 0;
+    }
+
+    .section-title {
+      margin: 0;
+      text-align: center;
+      font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+      line-height: 1;
+      letter-spacing: -0.055em;
+    }
+
+    .section-subtitle {
+      max-width: 720px;
+      margin: 14px auto 36px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 1.02rem;
+    }
+
+    .about {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .glass {
+      padding: 28px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel2), rgba(7, 14, 10, 0.96));
+      border: 1px solid var(--line);
       box-shadow: var(--shadow);
     }
 
-    .gallery-tile img {
+    .glass h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.8rem, 3.5vw, 2.7rem);
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+    }
+
+    .glass p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.78;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      height: 100%;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 150px;
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+    }
+
+    .stat span {
+      color: var(--soft);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      font-weight: 900;
+    }
+
+    .stat strong {
+      margin-top: 10px;
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .tile {
+      position: relative;
+      overflow: hidden;
+      border-radius: 26px;
+      border: 1px solid var(--line);
+      background: #030805;
+      box-shadow: var(--shadow);
+      min-height: 330px;
+      padding: 0;
+    }
+
+    .tile img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 320ms ease;
+      transition: 0.35s ease;
     }
 
-    .gallery-tile:hover img,
-    .gallery-tile:focus-visible img {
-      transform: scale(1.03);
+    .tile:hover img {
+      transform: scale(1.045);
     }
 
-    .gallery-label {
+    .tile-caption {
       position: absolute;
       left: 12px;
       right: 12px;
       bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(0,0,0,0.44);
-      backdrop-filter: blur(10px);
-      color: #f6fff8;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.52);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
     }
 
-    .gallery-label strong {
+    .tile-caption strong {
       display: block;
-      font-size: 0.98rem;
-      letter-spacing: -0.02em;
+      font-size: 1rem;
     }
 
-    .gallery-label span {
-      color: rgba(246,255,248,0.82);
-      font-size: 0.88rem;
+    .tile-caption span {
+      display: block;
+      margin-top: 3px;
+      color: rgba(255,255,255,0.76);
+      font-size: 0.9rem;
     }
 
-    .reviews-shell {
+    .reviews-grid {
       display: grid;
-      grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
-      gap: 18px;
+      grid-template-columns: 430px 1fr;
+      gap: 20px;
       align-items: start;
     }
 
-    .card {
-      padding: 22px;
-      border-radius: var(--radius-xl);
+    .form-card,
+    .reviews-card {
+      padding: 26px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel2), rgba(7, 14, 10, 0.98));
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(12, 22, 16, 0.92), rgba(8, 14, 11, 0.97));
       box-shadow: var(--shadow);
     }
 
-    .card h3 {
+    .form-card h3,
+    .reviews-card h3 {
       margin: 0 0 8px;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
+      font-size: 1.45rem;
+      letter-spacing: -0.04em;
     }
 
-    .card p.lead {
-      margin: 0 0 14px;
-      color: var(--text-2);
-      line-height: 1.68;
-      font-size: 0.97rem;
+    .form-card p,
+    .reviews-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
     }
 
     .field {
-      display: grid;
-      gap: 8px;
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
-    .field label {
-      color: var(--text-2);
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    .field small {
+    label {
+      display: block;
+      margin-bottom: 8px;
       color: var(--muted);
-      line-height: 1.5;
+      font-weight: 800;
+      font-size: 0.94rem;
     }
 
-    .input,
-    .textarea,
-    .file-input,
-    .search-input {
+    input,
+    textarea {
       width: 100%;
-      border: 1px solid var(--line);
-      background: rgba(5, 10, 8, 0.92);
-      color: var(--text);
       border-radius: 16px;
-      transition: border-color var(--fast), background var(--fast), box-shadow var(--fast);
-    }
-
-    .input,
-    .file-input,
-    .search-input {
-      min-height: 48px;
-      padding: 0 14px;
-    }
-
-    .textarea {
-      min-height: 146px;
+      border: 1px solid var(--line);
+      background: rgba(3, 8, 5, 0.78);
+      color: var(--text);
       padding: 14px;
+      outline: none;
+      transition: 0.18s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(84, 232, 141, 0.12);
+    }
+
+    textarea {
+      min-height: 140px;
       resize: vertical;
       line-height: 1.6;
     }
 
-    .input:hover,
-    .textarea:hover,
-    .file-input:hover,
-    .search-input:hover {
-      border-color: var(--line-strong);
-    }
-
-    .search-wrap {
-      position: relative;
-    }
-
-    .search-wrap svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
+    input[type="file"] {
+      border-style: dashed;
       color: var(--muted);
-      pointer-events: none;
     }
 
-    .search-input {
-      padding-left: 42px;
-      padding-right: 14px;
-    }
-
-    .posting-note {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(83, 224, 139, 0.06);
-      border: 1px solid rgba(83, 224, 139, 0.22);
-      color: var(--text-2);
-      line-height: 1.6;
-      font-size: 0.94rem;
-    }
-
-    .preview-wrap {
+    .preview {
+      display: none;
       margin-top: 14px;
-      padding: 14px;
-      border: 1px dashed rgba(83, 224, 139, 0.32);
+      padding: 12px;
       border-radius: 20px;
-      background: rgba(83, 224, 139, 0.05);
+      border: 1px dashed rgba(84, 232, 141, 0.35);
+      background: rgba(84, 232, 141, 0.055);
     }
 
-    .preview-frame {
-      overflow: hidden;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: #04100a;
-    }
-
-    .preview-frame img {
+    .preview img {
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
+      border-radius: 16px;
     }
 
-    .preview-meta {
+    .preview-row {
+      margin-top: 10px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      color: var(--text-2);
-      font-size: 0.92rem;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .small-btn {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-weight: 800;
     }
 
     .progress-wrap {
-      margin-top: 14px;
       display: none;
-      gap: 10px;
+      margin-top: 16px;
     }
 
     .progress {
       width: 100%;
-      height: 12px;
+      height: 11px;
       overflow: hidden;
       border-radius: 999px;
+      background: rgba(255,255,255,0.08);
       border: 1px solid var(--line);
-      background: rgba(255,255,255,0.05);
     }
 
-    .progress > span {
+    .progress span {
       display: block;
       width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2), #dffff0);
-      box-shadow: 0 0 16px rgba(83, 224, 139, 0.45);
-      transition: width 220ms ease;
+      background: linear-gradient(90deg, var(--green), var(--green2));
+      transition: width 0.2s ease;
     }
 
-    .status-line {
-      margin-top: 12px;
-      color: var(--text-2);
-      line-height: 1.55;
+    .status {
       min-height: 24px;
-      font-size: 0.95rem;
+      margin-top: 10px;
+      color: var(--green2);
+      font-weight: 800;
+      font-size: 0.94rem;
+    }
+
+    .post-btn {
+      width: 100%;
+      margin-top: 10px;
+      min-height: 52px;
     }
 
     .toolbar {
       display: grid;
-      gap: 14px;
-    }
-
-    .toolbar-top {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
-      align-items: end;
+      margin-top: 18px;
     }
 
-    .filter-group {
+    .search {
+      min-height: 48px;
+    }
+
+    .filters {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .chip {
-      min-height: 40px;
-      padding: 0 14px;
+      padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      background: rgba(255,255,255,0.05);
       border: 1px solid var(--line);
-      color: var(--text);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      transition: transform var(--fast), background var(--fast), border-color var(--fast);
+      font-weight: 900;
+      transition: 0.18s ease;
     }
 
+    .chip.active,
     .chip:hover {
-      transform: translateY(-1px);
-    }
-
-    .chip.active {
-      background: rgba(83, 224, 139, 0.12);
-      border-color: rgba(83, 224, 139, 0.28);
-      color: var(--accent-2);
-    }
-
-    .chip-badge {
-      min-width: 24px;
-      min-height: 24px;
-      padding: 0 8px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid var(--line);
-      color: var(--text-2);
-      font-size: 0.78rem;
+      color: var(--green2);
+      border-color: rgba(84, 232, 141, 0.34);
+      background: rgba(84, 232, 141, 0.09);
     }
 
     .reviews-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      color: var(--muted);
+      margin-top: 12px;
+      color: var(--soft);
       font-size: 0.92rem;
-      margin-top: 6px;
-    }
-
-    .moderator-note {
-      margin-top: 14px;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--line);
-      color: var(--text-2);
-      line-height: 1.62;
     }
 
     .reviews-list {
-      margin-top: 16px;
+      margin-top: 18px;
       display: grid;
       gap: 14px;
     }
 
-    .review-card {
-      display: grid;
-      gap: 14px;
+    .review {
       padding: 18px;
       border-radius: 22px;
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(8, 14, 11, 0.96), rgba(6, 11, 9, 0.98));
-      transition: transform var(--med), border-color var(--med), box-shadow var(--med);
+      background: rgba(3, 8, 5, 0.72);
+      transition: 0.22s ease;
     }
 
-    .review-card:hover {
+    .review:hover {
+      border-color: var(--line2);
       transform: translateY(-2px);
-      border-color: var(--line-strong);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.28);
     }
 
     .review-head {
-      display: grid;
-      grid-template-columns: auto 1fr;
+      display: flex;
       gap: 12px;
-      align-items: start;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     .avatar {
@@ -787,872 +605,450 @@ Executive summary
       display: grid;
       place-items: center;
       border-radius: 50%;
+      background: rgba(84, 232, 141, 0.14);
+      color: var(--green2);
+      border: 1px solid rgba(84, 232, 141, 0.25);
       font-weight: 900;
-      background: linear-gradient(135deg, rgba(83, 224, 139, 0.22), rgba(140, 248, 192, 0.16));
-      border: 1px solid rgba(255,255,255,0.06);
     }
 
     .review-name {
       font-weight: 900;
-      line-height: 1.2;
-      font-size: 1rem;
     }
 
     .review-date {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.9rem;
+      margin-top: 3px;
+      color: var(--soft);
+      font-size: 0.88rem;
     }
 
     .review-text {
-      margin: 0;
-      color: var(--text-2);
+      color: var(--muted);
       line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .review-media {
-      position: relative;
-      width: min(280px, 100%);
-      padding: 0;
-      overflow: hidden;
+    .review-photo {
+      margin-top: 14px;
+      width: min(320px, 100%);
       border-radius: 18px;
+      overflow: hidden;
       border: 1px solid var(--line);
-      background: #04110a;
+      background: #030805;
+      padding: 0;
     }
 
-    .review-media img {
+    .review-photo img {
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
-      transition: transform 300ms ease;
+      transition: 0.25s ease;
     }
 
-    .review-media:hover img,
-    .review-media:focus-visible img {
-      transform: scale(1.03);
-    }
-
-    .review-media-badge {
-      position: absolute;
-      left: 10px;
-      bottom: 10px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #f4fff7;
-      font-size: 0.8rem;
-      font-weight: 800;
-    }
-
-    .review-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .tiny-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 0.84rem;
-    }
-
-    .tiny-pill {
-      min-height: 32px;
-      padding: 0 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .review-photo:hover img {
+      transform: scale(1.035);
     }
 
     .empty {
-      padding: 34px 18px;
-      text-align: center;
-      border: 1px dashed var(--line-strong);
-      border-radius: 22px;
-      color: var(--muted);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .sentinel {
-      height: 10px;
-    }
-
-    .load-more-wrap {
-      margin-top: 16px;
-      text-align: center;
-    }
-
-    details.docs {
-      margin-top: 26px;
-      padding: 22px;
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(12, 22, 16, 0.92), rgba(8, 14, 11, 0.97));
-      box-shadow: var(--shadow);
-    }
-
-    details.docs summary {
-      list-style: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 900;
-      letter-spacing: -0.01em;
-      user-select: none;
-    }
-
-    details.docs summary::-webkit-details-marker {
       display: none;
-    }
-
-    details.docs[open] summary {
-      margin-bottom: 16px;
-    }
-
-    .docs-body {
-      display: grid;
-      gap: 16px;
-      color: var(--text-2);
-      line-height: 1.72;
-    }
-
-    .docs-body pre {
-      margin: 0;
-      padding: 16px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow: auto;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(3, 7, 5, 0.92);
-      color: #d9eee0;
-      font-size: 0.9rem;
-      line-height: 1.55;
-    }
-
-    .docs-body ul {
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .docs-body li + li {
-      margin-top: 8px;
-    }
-
-    .security-note {
-      padding: 16px 18px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255, 214, 114, 0.10), rgba(255, 214, 114, 0.03));
-      border: 1px solid rgba(255, 214, 114, 0.22);
-      color: #ffefc3;
-      line-height: 1.62;
-    }
-
-    .site-footer {
-      padding: 34px 0 60px;
-      color: var(--muted);
+      margin-top: 18px;
+      padding: 26px;
       text-align: center;
-      line-height: 1.7;
-      font-size: 0.95rem;
+      border-radius: 22px;
+      border: 1px dashed var(--line2);
+      color: var(--soft);
+      background: rgba(255,255,255,0.035);
+    }
+
+    .load-more {
+      display: none;
+      margin: 18px auto 0;
+      padding: 13px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    footer {
+      padding: 36px 0 52px;
+      text-align: center;
+      color: var(--soft);
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
 
     .modal-backdrop {
+      display: none;
       position: fixed;
       inset: 0;
-      z-index: 110;
-      display: none;
+      z-index: 100;
+      padding: 20px;
       align-items: center;
       justify-content: center;
-      padding: 18px;
-      background: rgba(0, 0, 0, 0.62);
+      background: rgba(0,0,0,0.72);
       backdrop-filter: blur(12px);
     }
 
     .modal-backdrop.open {
       display: flex;
-      animation: fadeIn 160ms ease both;
     }
 
     .modal {
-      width: min(860px, 100%);
-      max-height: calc(100vh - 36px);
+      width: min(920px, 100%);
+      max-height: 90vh;
       overflow: auto;
       border-radius: 28px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(12, 22, 16, 0.98), rgba(7, 13, 10, 0.99));
-      box-shadow: 0 36px 90px rgba(0,0,0,0.48);
+      background: var(--panel2);
+      border: 1px solid var(--line2);
+      box-shadow: var(--shadow);
+      padding: 18px;
     }
 
-    .modal-head {
+    .modal-top {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 14px;
-      padding: 20px 20px 0;
+      align-items: center;
+      margin-bottom: 14px;
     }
 
-    .modal-title {
+    .modal-top h3 {
       margin: 0;
-      font-size: 1.35rem;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
 
-    .modal-desc {
-      margin: 8px 0 0;
-      color: var(--text-2);
-      line-height: 1.6;
-    }
-
-    .modal-body {
-      padding: 18px 20px 20px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .close-x {
+    .close {
       width: 42px;
       height: 42px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
       color: var(--text);
-      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      font-size: 1.2rem;
     }
 
-    .lightbox-img {
+    .modal img {
       width: 100%;
-      max-height: min(78vh, 900px);
+      max-height: 75vh;
       object-fit: contain;
       border-radius: 20px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,0.32);
+      background: #030805;
     }
 
     .toast-wrap {
       position: fixed;
       right: 16px;
       bottom: 16px;
-      z-index: 120;
-      width: min(420px, calc(100vw - 32px));
+      z-index: 150;
+      width: min(390px, calc(100vw - 32px));
       display: grid;
       gap: 10px;
-      pointer-events: none;
     }
 
     .toast {
-      pointer-events: auto;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 12px;
-      align-items: start;
-      padding: 14px 14px 14px 12px;
+      padding: 14px 16px;
       border-radius: 18px;
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(14, 24, 18, 0.97), rgba(8, 13, 10, 0.99));
-      box-shadow: 0 26px 70px rgba(0,0,0,0.44);
-      opacity: 0;
-      transform: translateY(10px);
-      animation: toastIn 180ms ease forwards;
-    }
-
-    .toast.success { border-color: rgba(125, 243, 173, 0.30); }
-    .toast.warning { border-color: rgba(255, 214, 114, 0.30); }
-    .toast.error { border-color: rgba(255, 117, 139, 0.30); }
-
-    .toast-title {
-      margin: 0 0 2px;
-      font-weight: 900;
-    }
-
-    .toast-msg {
-      color: var(--text-2);
-      line-height: 1.55;
-      font-size: 0.94rem;
-    }
-
-    .toast-close {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
+      background: rgba(10, 18, 14, 0.98);
+      border: 1px solid var(--line2);
       color: var(--text);
+      box-shadow: var(--shadow);
+      animation: pop 0.18s ease;
     }
 
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    svg.icon {
-      width: 18px;
-      height: 18px;
-      flex: 0 0 auto;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 1080px) {
+    @media (max-width: 980px) {
       .hero-grid,
-      .about-card,
-      .reviews-shell {
+      .about,
+      .reviews-grid {
         grid-template-columns: 1fr;
       }
 
-      .gallery-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .stat-grid {
+      .stats {
         grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 650px) {
       .container {
-        width: min(var(--content), calc(100% - 20px));
+        width: min(100% - 20px, 1180px);
       }
 
       .nav {
-        min-height: 64px;
+        align-items: flex-start;
+        padding: 12px 0;
+        flex-direction: column;
       }
 
-      .hero {
-        min-height: 78vh;
-        padding-bottom: 20px;
-      }
-
-      .hero-card,
-      .card,
-      .about-card,
-      details.docs {
-        padding: 18px;
-      }
-
-      .hero-actions,
-      .nav-actions {
+      .nav-links {
         width: 100%;
       }
 
-      .hero-actions > *,
-      .nav-actions > * {
-        flex: 1 1 100%;
+      .nav-link {
+        flex: 1;
       }
 
-      .gallery-grid {
+      .hero {
+        padding-top: 150px;
+      }
+
+      .hero-card {
+        padding: 22px;
+      }
+
+      .gallery {
         grid-template-columns: 1fr;
       }
 
-      .toolbar-top {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: 1ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 1ms !important;
+      .tile {
+        min-height: 310px;
       }
     }
   </style>
 </head>
-<body>
-  <div class="top-progress" aria-hidden="true">
-    <div id="topProgressBar" class="top-progress-bar"></div>
-  </div>
 
-  <header class="site-header">
+<body>
+
+  <header class="topbar">
     <div class="container nav">
-      <a class="brand" href="#top" aria-label="Bin Men Football Club home">
-        <span class="crest" aria-hidden="true">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M12 3 4.5 6.8v5.5c0 4.7 2.8 7.7 7.5 9.2 4.7-1.5 7.5-4.5 7.5-9.2V6.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="m8.8 12.2 2 2 4.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
+      <a href="#home" class="brand">
+        <span class="crest">BM</span>
         <span>Bin Men FC</span>
       </a>
 
-      <nav class="nav-actions" aria-label="Primary">
-        <a class="btn-ghost" href="#gallery">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/>
-            <path d="m7 14 2.8-2.8a1 1 0 0 1 1.4 0L14 14l1.8-1.8a1 1 0 0 1 1.4 0L20 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
-          </svg>
-          Gallery
-        </a>
-
-        <a class="btn-ghost" href="#reviews">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 18.5c-1.1 0-2-.9-2-2v-9c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H9l-5 3v-3H6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-          </svg>
-          Reviews
-        </a>
-
-        <a class="btn-link" href="/admin/" aria-label="Open moderator page at /admin/">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 3 4.5 6.8v5.5c0 4.7 2.8 7.7 7.5 9.2 4.7-1.5 7.5-4.5 7.5-9.2V6.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="m8.8 12.2 2 2 4.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Moderator /admin/
-        </a>
+      <nav class="nav-links">
+        <a class="nav-link" href="#club">Club</a>
+        <a class="nav-link" href="#gallery">Photos</a>
+        <a class="nav-link" href="#reviews">Reviews</a>
       </nav>
     </div>
   </header>
 
-  <main id="top">
-    <section class="hero" aria-labelledby="heroHeading">
+  <main id="home">
+
+    <section class="hero">
       <div class="container">
         <div class="hero-card">
-          <span class="hero-badge">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 2.8 4.8 6.4v5.4c0 4.8 2.7 8 7.2 9.4 4.5-1.4 7.2-4.6 7.2-9.4V6.4L12 2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-              <path d="M9.5 11.9 11.3 13.7 14.9 9.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Official club page
-          </span>
+          <span class="tag">Official Team Page</span>
 
           <div class="hero-grid">
-            <div class="hero-copy">
-              <h1 id="heroHeading">Bin Men Football Club</h1>
-              <p>From the first whistle to the full-time stories, this is the home of Bin Men FC online. The hero uses <span class="mono">hero.jpg</span> only, the gallery below uses <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> only, and the live review wall lets supporters leave a message or an optional photo for the club.</p>
+            <div>
+              <h1>Bin Men<br>Football Club</h1>
+              <p>
+                The home of Bin Men FC — team photos, matchday memories, supporter messages,
+                and the moments that make the club what it is.
+              </p>
 
               <div class="hero-actions">
-                <a class="btn" href="#reviews">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M5 12h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                    <path d="m13 7 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  Leave a review
-                </a>
-
-                <a class="btn-ghost" href="#gallery">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/>
-                    <path d="m7 14 2.8-2.8a1 1 0 0 1 1.4 0L14 14l1.8-1.8a1 1 0 0 1 1.4 0L20 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
-                  </svg>
-                  View photos
-                </a>
+                <a class="btn" href="#reviews">Leave a Review</a>
+                <a class="nav-link" href="#gallery">View Photos</a>
               </div>
             </div>
 
-            <div class="hero-side">
-              <div class="mini-card">
-                <h2>Supporter messages, kept simple</h2>
-                <p>Posting is secure and quick — your photo uploads are optional and limited to 2MB. Reviews appear live for everyone and are moderated separately at <a href="/admin/">/admin/</a>.</p>
-              </div>
-
-              <div class="mini-card">
-                <h3>For moderators</h3>
-                <p>This homepage never shows delete controls. Review tidy-up and deletion stay on the separate moderator page.</p>
-                <a class="note" href="/admin/">Open /admin/ →</a>
-              </div>
+            <div class="side-card">
+              <h2>Built on team spirit</h2>
+              <p>
+                From kick-off to full time, Bin Men FC is about effort, laughs, loyalty,
+                and turning every match into a story worth remembering.
+              </p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="aboutHeading">
+    <section class="section" id="club">
       <div class="container">
-        <div class="about-card">
-          <div>
-            <h2 id="aboutHeading">A proper home for the club</h2>
-            <p>Clean, fast and built to suit a small team site: one standout hero image at the top, a proper four-photo gallery below, and a live review board where players, supporters and mates can leave a memory from the touchline, the changing room or the pub after full-time.</p>
+        <div class="about">
+          <div class="glass">
+            <h2>More than just a team.</h2>
+            <p>
+              Bin Men FC is where the lads come together, put in a shift, and make memories
+              on and off the pitch. This page keeps the best moments in one place — photos,
+              messages, and everything worth saving from matchday.
+            </p>
           </div>
 
-          <div class="stat-grid" aria-label="Quick site highlights">
+          <div class="stats">
             <div class="stat">
-              <div class="k">Hero image</div>
-              <div class="v">hero.jpg</div>
+              <span>Club</span>
+              <strong>Bin Men FC</strong>
             </div>
             <div class="stat">
-              <div class="k">Gallery</div>
-              <div class="v">4 photos</div>
+              <span>Gallery</span>
+              <strong>4 Photos</strong>
             </div>
             <div class="stat">
-              <div class="k">Live reviews</div>
-              <div id="reviewStatTotal" class="v">0</div>
+              <span>Reviews</span>
+              <strong id="reviewCount">0</strong>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="gallery" aria-labelledby="galleryHeading">
+    <section class="section" id="gallery">
       <div class="container">
-        <h2 id="galleryHeading" class="section-title">Gallery</h2>
-        <p class="section-intro">The hero image above is kept separate from the main gallery. These four tiles use your existing team photos only, with short matchday captions to keep the page feeling like a proper club site rather than a placeholder.</p>
+        <h2 class="section-title">Team Photos</h2>
+        <p class="section-subtitle">
+          A few of the best moments from the club so far. Click any photo to open it larger.
+        </p>
 
-        <div class="gallery-grid" aria-label="Team gallery">
-          <button class="gallery-tile" type="button" data-lightbox-src="photo1.jpg" data-lightbox-title="Matchday focus" data-lightbox-desc="A sharp moment before the whistle — boots on, heads right, ready to go.">
-            <img src="photo1.jpg" alt="Bin Men FC gallery photo showing matchday focus" loading="lazy" decoding="async" />
-            <span class="gallery-label">
-              <span>
-                <strong>Matchday focus</strong>
-                <span>Boots on, ready to go</span>
-              </span>
-              <span>Open</span>
+        <div class="gallery">
+          <button class="tile" type="button" onclick="openImage('photo1.jpg', 'Matchday Focus')">
+            <img src="photo1.jpg" alt="Bin Men FC matchday photo 1" />
+            <span class="tile-caption">
+              <strong>Matchday Focus</strong>
+              <span>Ready from the first whistle</span>
             </span>
           </button>
 
-          <button class="gallery-tile" type="button" data-lightbox-src="photo2.jpg" data-lightbox-title="The lads together" data-lightbox-desc="Another good one for the club album — the group together and enjoying the day.">
-            <img src="photo2.jpg" alt="Bin Men FC gallery photo showing the team together" loading="lazy" decoding="async" />
-            <span class="gallery-label">
-              <span>
-                <strong>The lads together</strong>
-                <span>A proper team photo</span>
-              </span>
-              <span>Open</span>
+          <button class="tile" type="button" onclick="openImage('photo2.jpg', 'The Lads')">
+            <img src="photo2.jpg" alt="Bin Men FC team photo 2" />
+            <span class="tile-caption">
+              <strong>The Lads</strong>
+              <span>Team spirit on show</span>
             </span>
           </button>
 
-          <button class="gallery-tile" type="button" data-lightbox-src="photo3.jpg" data-lightbox-title="Touchline energy" data-lightbox-desc="The kind of snapshot that feels like football — noise from the side and a bit of chaos.">
-            <img src="photo3.jpg" alt="Bin Men FC gallery photo showing touchline energy" loading="lazy" decoding="async" />
-            <span class="gallery-label">
-              <span>
-                <strong>Touchline energy</strong>
-                <span>Noise, laughs and football</span>
-              </span>
-              <span>Open</span>
+          <button class="tile" type="button" onclick="openImage('photo3.jpg', 'Touchline Energy')">
+            <img src="photo3.jpg" alt="Bin Men FC team photo 3" />
+            <span class="tile-caption">
+              <strong>Touchline Energy</strong>
+              <span>Football, noise, and memories</span>
             </span>
           </button>
 
-          <button class="gallery-tile" type="button" data-lightbox-src="photo4.jpg" data-lightbox-title="Full-time scenes" data-lightbox-desc="One for the memory bank after the game — the sort of photo every team ends up keeping.">
-            <img src="photo4.jpg" alt="Bin Men FC gallery photo showing full-time scenes" loading="lazy" decoding="async" />
-            <span class="gallery-label">
-              <span>
-                <strong>Full-time scenes</strong>
-                <span>One for the memory bank</span>
-              </span>
-              <span>Open</span>
+          <button class="tile" type="button" onclick="openImage('photo4.jpg', 'Full-Time Scenes')">
+            <img src="photo4.jpg" alt="Bin Men FC team photo 4" />
+            <span class="tile-caption">
+              <strong>Full-Time Scenes</strong>
+              <span>One for the club history</span>
             </span>
           </button>
         </div>
       </div>
     </section>
 
-    <section class="section" id="reviews" aria-labelledby="reviewsHeading">
+    <section class="section" id="reviews">
       <div class="container">
-        <h2 id="reviewsHeading" class="section-title">Reviews</h2>
-        <p class="section-intro">Leave a message, memory or optional photo for the club. Review photos are shown as smaller supporter thumbnails so they stay visually separate from the main gallery above.</p>
+        <h2 class="section-title">Club Reviews</h2>
+        <p class="section-subtitle">
+          Leave a message for the team, share a memory, or post a photo from the day.
+        </p>
 
-        <div class="reviews-shell">
-          <aside class="card" aria-labelledby="postReviewHeading">
-            <h3 id="postReviewHeading">Post a review</h3>
-            <p class="lead">Posting is secure and quick — your photo uploads are optional and limited to 2MB. Reviews update live and are moderated separately at <a href="/admin/">/admin/</a>.</p>
+        <div class="reviews-grid">
+          <div class="form-card">
+            <h3>Post a Review</h3>
+            <p>
+              Add your name, write your message, and attach a photo if you have one.
+            </p>
 
-            <div class="posting-note">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 3 2.6 19.2A1.3 1.3 0 0 0 3.7 21h16.6a1.3 1.3 0 0 0 1.1-1.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <path d="M12 9v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                <circle cx="12" cy="16.5" r="1" fill="currentColor"/>
-              </svg>
-              <div>
-                Images must be genuine image files and under 2MB. To help avoid accidental repeat posts, there is a short 5-second cooldown after each submission.
-              </div>
-            </div>
-
-            <form id="reviewForm" novalidate>
+            <form id="reviewForm">
               <div class="field">
                 <label for="nameInput">Your name</label>
-                <input
-                  id="nameInput"
-                  class="input"
-                  type="text"
-                  maxlength="60"
-                  autocomplete="name"
-                  placeholder="Your name"
-                  aria-describedby="nameHelp"
-                />
-                <small id="nameHelp">Use the name you want shown publicly with your review.</small>
+                <input id="nameInput" type="text" maxlength="60" placeholder="Your name" />
               </div>
 
               <div class="field">
-                <label for="reviewInput">Your review</label>
-                <textarea
-                  id="reviewInput"
-                  class="textarea"
-                  maxlength="1200"
-                  placeholder="Write your message for the club…"
-                  aria-describedby="reviewHelp"
-                ></textarea>
-                <small id="reviewHelp">A short memory, shout-out, matchday story or message for the lads.</small>
+                <label for="reviewInput">Your message</label>
+                <textarea id="reviewInput" maxlength="1200" placeholder="Write your message for Bin Men FC..."></textarea>
               </div>
 
               <div class="field">
-                <label for="imageInput">Optional image</label>
-                <input
-                  id="imageInput"
-                  class="file-input"
-                  type="file"
-                  accept="image/*"
-                  aria-describedby="imageHelp"
-                />
-                <small id="imageHelp">Image files only. Maximum size 2MB.</small>
+                <label for="imageInput">Photo optional</label>
+                <input id="imageInput" type="file" accept="image/*" />
               </div>
 
-              <div id="imagePreviewWrap" class="preview-wrap hidden" aria-live="polite">
-                <div class="preview-frame">
-                  <img id="imagePreview" alt="" />
-                </div>
-                <div class="preview-meta">
-                  <span id="imagePreviewMeta">Selected image preview</span>
-                  <button id="clearImageButton" class="btn-ghost" type="button">Remove image</button>
+              <div class="preview" id="previewBox">
+                <img id="previewImage" alt="Selected image preview" />
+                <div class="preview-row">
+                  <span id="previewText">Selected image</span>
+                  <button class="small-btn" type="button" onclick="clearImage()">Remove</button>
                 </div>
               </div>
 
-              <div id="formProgressWrap" class="progress-wrap">
-                <div class="progress"><span id="formProgressBar"></span></div>
+              <div class="progress-wrap" id="progressWrap">
+                <div class="progress">
+                  <span id="progressBar"></span>
+                </div>
               </div>
 
-              <div id="formStatus" class="status-line" role="status" aria-live="polite"></div>
+              <div class="status" id="statusText"></div>
 
-              <button id="postButton" class="btn" type="submit">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M4 11.5 20 4l-4 16-4.5-5L4 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                  <path d="M11.5 15 20 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                </svg>
-                <span id="postButtonLabel">Post review</span>
-              </button>
+              <button class="btn post-btn" id="postButton" type="submit">Post Review</button>
             </form>
-          </aside>
+          </div>
 
-          <section class="card" aria-labelledby="latestReviewsHeading">
-            <h3 id="latestReviewsHeading">Latest reviews</h3>
-            <p class="lead">Reviews load live from Firestore. Search and filter work on the reviews currently loaded into the page. Press <span class="mono">/</span> anywhere outside a form field to jump straight to search.</p>
+          <div class="reviews-card">
+            <h3>Latest Messages</h3>
+            <p>
+              Messages from the club, supporters, teammates, and anyone who has been part of the journey.
+            </p>
 
             <div class="toolbar">
-              <div class="toolbar-top">
-                <div class="search-wrap">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/>
-                    <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                  </svg>
-                  <input
-                    id="reviewSearchInput"
-                    class="search-input"
-                    type="search"
-                    autocomplete="off"
-                    spellcheck="false"
-                    placeholder="Search names or review text…"
-                    aria-label="Search reviews"
-                  />
-                </div>
+              <input class="search" id="searchInput" type="search" placeholder="Search reviews..." />
 
-                <div class="filter-group" role="tablist" aria-label="Review filters">
-                  <button class="chip active" type="button" data-filter="all" aria-pressed="true">
-                    All
-                    <span id="filterCountAll" class="chip-badge">0</span>
-                  </button>
-
-                  <button class="chip" type="button" data-filter="with-image" aria-pressed="false">
-                    With photo
-                    <span id="filterCountWithImage" class="chip-badge">0</span>
-                  </button>
-
-                  <button class="chip" type="button" data-filter="without-image" aria-pressed="false">
-                    Text only
-                    <span id="filterCountWithoutImage" class="chip-badge">0</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="reviews-meta" aria-live="polite">
-                <span id="reviewsMetaLine">Loading reviews…</span>
-                <span id="reviewsRenderedLine">0 shown</span>
+              <div class="filters">
+                <button class="chip active" type="button" data-filter="all">All</button>
+                <button class="chip" type="button" data-filter="photos">With Photos</button>
+                <button class="chip" type="button" data-filter="text">Text Only</button>
               </div>
             </div>
 
-            <div class="moderator-note">
-              Moderators use <a href="/admin/">/admin/</a> to delete or tidy reviews. This public homepage intentionally does not expose delete controls or admin sign-in.
+            <div class="reviews-meta" id="reviewsMeta">Loading reviews...</div>
+
+            <div class="reviews-list" id="reviewsList"></div>
+
+            <div class="empty" id="emptyState">
+              No reviews match that search yet.
             </div>
 
-            <div id="reviewsList" class="reviews-list" aria-live="polite" aria-busy="true"></div>
-
-            <div id="reviewsEmpty" class="empty hidden">
-              No reviews match the current search or filter.
-            </div>
-
-            <div id="reviewSentinel" class="sentinel" aria-hidden="true"></div>
-
-            <div class="load-more-wrap">
-              <button id="loadMoreReviewsButton" class="btn-ghost hidden" type="button">Show more reviews</button>
-            </div>
-          </section>
-        </div>
-
-        <details class="docs">
-          <summary>
-            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/>
-              <path d="M8 9h8M8 12h8M8 15h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            </svg>
-            Deployment, rules and troubleshooting
-          </summary>
-
-          <div class="docs-body">
-            <p><strong>Deployment note:</strong> place this file at <span class="mono">/index.html</span> in the repo root (or the top of the selected GitHub Pages publishing source). Keep <span class="mono">hero.jpg</span> plus <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> beside it. For a plain static Pages site published from a branch, add an empty <span class="mono">/.nojekyll</span> file. Moderation remains separate at <span class="mono">/admin/</span>.</p>
-
-            <p><strong>Firebase config used here:</strong> this file keeps the exact user-provided values, including the Storage bucket <span class="mono">bin-men-fc.firebasestorage.app</span>. Public review posting uses Firestore and Storage compat flows only.</p>
-
-            <div class="security-note">
-              <strong>Security note:</strong> a client-side password prompt is not real security. For production moderation, use Firebase Authentication and Security Rules backed by trusted auth data such as custom claims. Keep delete controls on <span class="mono">/admin/</span>, not on this public page.
-            </div>
-
-            <p><strong>Secure production rules</strong> — use these once <span class="mono">/admin/</span> is backed by Firebase Authentication and an admin custom claim.</p>
-
-<pre>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
-    }
-
-    match /reviews/{docId} {
-      allow read: if true;
-      allow create: if true;
-      allow update, delete: if isAdmin();
-    }
-  }
-}</pre>
-
-<pre>rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
-    }
-
-    match /reviews/{allPaths=**} {
-      allow read: if true;
-      allow create: if request.resource != null
-        && request.resource.size < 2 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
-      allow delete: if isAdmin();
-    }
-  }
-}</pre>
-
-            <p><strong>Temporary passcode-only rules</strong> — not secure, but useful while you are still using a browser-only moderator gate on <span class="mono">/admin/</span>.</p>
-
-<pre>rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /reviews/{docId} {
-      allow read, create, update, delete: if true;
-    }
-  }
-}</pre>
-
-<pre>rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /reviews/{allPaths=**} {
-      allow read: if true;
-      allow create: if request.resource != null
-        && request.resource.size < 2 * 1024 * 1024
-        && request.resource.contentType.matches('image/.*');
-      allow delete: if true;
-    }
-  }
-}</pre>
-
-            <p><strong>Troubleshooting checklist</strong></p>
-            <ul>
-              <li><strong>CORS or bucket URL errors:</strong> if uploads fail with a URL containing an obvious typo such as <span class="mono">firebasestorage.appE</span>, fix the exact <span class="mono">storageBucket</span> value. Standard Firebase Web SDK upload flows normally work without custom bucket CORS config; custom raw Google Cloud Storage requests may need bucket CORS rules.</li>
-              <li><strong>Permission denied:</strong> publish the correct Firestore and Storage rules and wait a short time for them to take effect. Review creation needs Firestore create access and Storage create access. Review reading needs Firestore read access.</li>
-              <li><strong>GitHub Pages 404:</strong> confirm that this file is in the selected publishing source, confirm the custom domain if used, and hard refresh after deployment. If <span class="mono">/admin/</span> 404s, that separate file must exist at <span class="mono">/admin/index.html</span>.</li>
-              <li><strong>Moderator remember-me:</strong> persistent client-side admin sessions are intentionally not implemented here. They belong on the separate <span class="mono">/admin/</span> page only.</li>
-            </ul>
-
-            <p><strong>Official references used for guidance</strong></p>
-            <ul>
-              <li><a href="https://firebase.google.com/docs/firestore/query-data/listen" target="_blank" rel="noopener">Firebase — Cloud Firestore real-time listeners (onSnapshot)</a></li>
-              <li><a href="https://firebase.google.com/docs/storage/web/upload-files" target="_blank" rel="noopener">Firebase — Cloud Storage uploads on the web</a></li>
-              <li><a href="https://firebase.google.com/docs/firestore/manage-data/delete-data" target="_blank" rel="noopener">Firebase — Firestore delete data</a></li>
-              <li><a href="https://firebase.google.com/docs/auth/admin/custom-claims" target="_blank" rel="noopener">Firebase — Admin custom claims</a></li>
-              <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site" target="_blank" rel="noopener">GitHub Pages — creating and publishing a site</a></li>
-              <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/troubleshooting-404-errors-for-github-pages-sites" target="_blank" rel="noopener">GitHub Pages — troubleshooting 404 errors</a></li>
-              <li><a href="https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/about-github-pages-and-jekyll" target="_blank" rel="noopener">GitHub Pages — Jekyll and static site notes</a></li>
-            </ul>
+            <button class="load-more" id="loadMoreButton" type="button">Show More</button>
           </div>
-        </details>
+        </div>
       </div>
     </section>
+
   </main>
 
-  <footer class="site-footer">
+  <footer>
     <div class="container">
-      © 2026 Bin Men Football Club. Reviews are live for the community; moderation stays on <a href="/admin/">/admin/</a>.
+      © 2026 Bin Men Football Club
     </div>
   </footer>
 
-  <div id="lightboxModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" aria-describedby="lightboxDesc">
-      <div class="modal-head">
-        <div>
-          <h3 id="lightboxTitle" class="modal-title">Image preview</h3>
-          <p id="lightboxDesc" class="modal-desc">Preview</p>
-        </div>
-        <button class="close-x" type="button" data-close-modal="lightboxModal" aria-label="Close image preview">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-        </button>
+  <div class="modal-backdrop" id="imageModal">
+    <div class="modal">
+      <div class="modal-top">
+        <h3 id="modalTitle">Photo</h3>
+        <button class="close" type="button" onclick="closeImage()">×</button>
       </div>
-
-      <div class="modal-body">
-        <img id="lightboxImage" class="lightbox-img" alt="" />
-      </div>
+      <img id="modalImage" alt="Expanded photo" />
     </div>
   </div>
 
-  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
+  <div class="toast-wrap" id="toastWrap"></div>
 
-  <!-- Firebase compat CDN scripts only; no build step -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
   <script>
-    "use strict";
-
-    /*
-      Developer notes
-      - This homepage intentionally does NOT implement admin password or delete UI.
-      - Moderation belongs at /admin/.
-      - Persistent client-side moderator sessions, if desired, should also stay on /admin/.
-    */
-
-    const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB limit
-    const INITIAL_VISIBLE_REVIEWS = 6;
-    const REVIEW_STEP = 6;
-
-    // Exact user-provided Firebase config; keep unchanged.
     const firebaseConfig = {
       apiKey: "AIzaSyBx1W3gp9LdFyN3dDtRUoZm52o6P2DLJso",
       authDomain: "bin-men-fc.firebaseapp.com",
@@ -1662,487 +1058,151 @@ service firebase.storage {
       appId: "1:960901793838:web:eeee2926789e3e846d77bf"
     };
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
 
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const state = {
-      reviews: [],
-      filteredReviews: [],
-      quickFilter: "all",
-      searchTerm: "",
-      visibleCount: INITIAL_VISIBLE_REVIEWS,
-      posting: false,
-      cooldownUntil: 0,
-      cooldownTimer: null,
-      previewObjectUrl: "",
-      unsubReviews: null,
-      activeModalId: null,
-      modalRestoreFocus: null,
-      observer: null
-    };
+    const reviewForm = document.getElementById("reviewForm");
+    const nameInput = document.getElementById("nameInput");
+    const reviewInput = document.getElementById("reviewInput");
+    const imageInput = document.getElementById("imageInput");
+    const previewBox = document.getElementById("previewBox");
+    const previewImage = document.getElementById("previewImage");
+    const previewText = document.getElementById("previewText");
+    const progressWrap = document.getElementById("progressWrap");
+    const progressBar = document.getElementById("progressBar");
+    const statusText = document.getElementById("statusText");
+    const postButton = document.getElementById("postButton");
+    const reviewsList = document.getElementById("reviewsList");
+    const reviewsMeta = document.getElementById("reviewsMeta");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const loadMoreButton = document.getElementById("loadMoreButton");
+    const reviewCount = document.getElementById("reviewCount");
+
+    let allReviews = [];
+    let filteredReviews = [];
+    let visibleReviews = 6;
+    let activeFilter = "all";
+    let isPosting = false;
+    let cooldownUntil = 0;
+    let cooldownTimer = null;
+    let previewUrl = "";
+
+    imageInput.addEventListener("change", function () {
+      const file = imageInput.files[0];
 
-    const el = {
-      body: document.body,
-      topProgressBar: document.getElementById("topProgressBar"),
-
-      reviewStatTotal: document.getElementById("reviewStatTotal"),
-
-      reviewForm: document.getElementById("reviewForm"),
-      nameInput: document.getElementById("nameInput"),
-      reviewInput: document.getElementById("reviewInput"),
-      imageInput: document.getElementById("imageInput"),
-      imagePreviewWrap: document.getElementById("imagePreviewWrap"),
-      imagePreview: document.getElementById("imagePreview"),
-      imagePreviewMeta: document.getElementById("imagePreviewMeta"),
-      clearImageButton: document.getElementById("clearImageButton"),
-      formProgressWrap: document.getElementById("formProgressWrap"),
-      formProgressBar: document.getElementById("formProgressBar"),
-      formStatus: document.getElementById("formStatus"),
-      postButton: document.getElementById("postButton"),
-      postButtonLabel: document.getElementById("postButtonLabel"),
-
-      reviewSearchInput: document.getElementById("reviewSearchInput"),
-      reviewFilterButtons: Array.from(document.querySelectorAll("[data-filter]")),
-      filterCountAll: document.getElementById("filterCountAll"),
-      filterCountWithImage: document.getElementById("filterCountWithImage"),
-      filterCountWithoutImage: document.getElementById("filterCountWithoutImage"),
-
-      reviewsMetaLine: document.getElementById("reviewsMetaLine"),
-      reviewsRenderedLine: document.getElementById("reviewsRenderedLine"),
-      reviewsList: document.getElementById("reviewsList"),
-      reviewsEmpty: document.getElementById("reviewsEmpty"),
-      reviewSentinel: document.getElementById("reviewSentinel"),
-      loadMoreReviewsButton: document.getElementById("loadMoreReviewsButton"),
-
-      lightboxModal: document.getElementById("lightboxModal"),
-      lightboxTitle: document.getElementById("lightboxTitle"),
-      lightboxDesc: document.getElementById("lightboxDesc"),
-      lightboxImage: document.getElementById("lightboxImage"),
-
-      toastWrap: document.getElementById("toastWrap")
-    };
-
-    document.addEventListener("DOMContentLoaded", init);
-
-    function init() {
-      bindEvents();
-      setupInfiniteScroll();
-      loadReviews();
-    }
-
-    function bindEvents() {
-      el.reviewForm.addEventListener("submit", handleReviewSubmit);
-      el.imageInput.addEventListener("change", handleImageSelection);
-      el.clearImageButton.addEventListener("click", clearSelectedImage);
-
-      el.reviewSearchInput.addEventListener("input", debounce(() => {
-        state.searchTerm = el.reviewSearchInput.value.trim().toLowerCase();
-        applyReviewFilters(true);
-      }, 120));
-
-      el.reviewFilterButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          setQuickFilter(button.dataset.filter || "all");
-          applyReviewFilters(true);
-        });
-      });
-
-      el.loadMoreReviewsButton.addEventListener("click", renderMoreReviews);
-
-      document.querySelectorAll("[data-lightbox-src]").forEach((button) => {
-        button.addEventListener("click", () => {
-          openLightbox(
-            button.getAttribute("data-lightbox-src") || "",
-            button.getAttribute("data-lightbox-title") || "Image preview",
-            button.getAttribute("data-lightbox-desc") || "Preview"
-          );
-        });
-      });
-
-      document.querySelectorAll("[data-close-modal]").forEach((button) => {
-        button.addEventListener("click", () => closeModal(button.getAttribute("data-close-modal")));
-      });
-
-      el.lightboxModal.addEventListener("mousedown", (event) => {
-        if (event.target === el.lightboxModal) {
-          closeModal("lightboxModal");
-        }
-      });
-
-      document.addEventListener("keydown", handleGlobalKeys);
-    }
-
-    function handleGlobalKeys(event) {
-      const activeModal = getOpenModal();
-
-      if (event.key === "Escape" && activeModal) {
-        event.preventDefault();
-        closeModal(activeModal.id);
-        return;
-      }
-
-      if (event.key === "/" && !activeModal && !isTextInput(event.target)) {
-        event.preventDefault();
-        el.reviewSearchInput.focus();
-        el.reviewSearchInput.select();
-        return;
-      }
-
-      if (event.key === "Tab" && activeModal) {
-        trapFocus(event, activeModal);
-      }
-    }
-
-    function setupInfiniteScroll() {
-      if (!("IntersectionObserver" in window)) return;
-
-      state.observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && state.visibleCount < state.filteredReviews.length) {
-            renderMoreReviews();
-          }
-        });
-      }, {
-        rootMargin: "280px 0px"
-      });
-
-      state.observer.observe(el.reviewSentinel);
-    }
-
-    function loadReviews() {
-      loadingBarStart();
-      el.reviewsList.setAttribute("aria-busy", "true");
-      el.reviewsMetaLine.textContent = "Connecting to Firestore…";
-
-      if (typeof state.unsubReviews === "function") {
-        state.unsubReviews();
-      }
-
-      // Real-time listener as requested.
-      state.unsubReviews = db.collection("reviews")
-        .orderBy("time", "desc")
-        .onSnapshot(
-          (snapshot) => {
-            state.reviews = snapshot.docs.map((doc) => {
-              const data = doc.data() || {};
-              return {
-                id: doc.id,
-                name: typeof data.name === "string" ? data.name : "Unknown reviewer",
-                text: typeof data.text === "string" ? data.text : "",
-                image: typeof data.image === "string" ? data.image : "",
-                time: normaliseTime(data.time)
-              };
-            });
-
-            el.reviewStatTotal.textContent = String(state.reviews.length);
-            updateFilterCounts();
-            applyReviewFilters(false);
-            el.reviewsList.setAttribute("aria-busy", "false");
-            loadingBarDone();
-          },
-          (error) => {
-            console.error("Firestore listener error:", error);
-            el.reviewsList.setAttribute("aria-busy", "false");
-            loadingBarDone();
-            handleFirebaseError(error, "Could not load reviews.");
-          }
-        );
-    }
-
-    function updateFilterCounts() {
-      const withImage = state.reviews.filter((review) => !!review.image).length;
-      const withoutImage = state.reviews.length - withImage;
-
-      el.filterCountAll.textContent = String(state.reviews.length);
-      el.filterCountWithImage.textContent = String(withImage);
-      el.filterCountWithoutImage.textContent = String(withoutImage);
-    }
-
-    function setQuickFilter(filter) {
-      state.quickFilter = filter;
-
-      el.reviewFilterButtons.forEach((button) => {
-        const active = button.dataset.filter === filter;
-        button.classList.toggle("active", active);
-        button.setAttribute("aria-pressed", active ? "true" : "false");
-      });
-    }
-
-    function applyReviewFilters(resetVisible) {
-      const q = state.searchTerm;
-      const f = state.quickFilter;
-
-      state.filteredReviews = state.reviews.filter((review) => {
-        const matchesImageFilter =
-          f === "all" ||
-          (f === "with-image" && !!review.image) ||
-          (f === "without-image" && !review.image);
-
-        if (!matchesImageFilter) return false;
-        if (!q) return true;
-
-        const haystack = [
-          review.name,
-          review.text,
-          review.id,
-          formatDate(review.time)
-        ].join(" ").toLowerCase();
-
-        return haystack.includes(q);
-      });
-
-      if (resetVisible) {
-        state.visibleCount = INITIAL_VISIBLE_REVIEWS;
-      }
-
-      renderReviews();
-    }
-
-    function renderReviews() {
-      el.reviewsList.innerHTML = "";
-
-      const visible = state.filteredReviews.slice(0, state.visibleCount);
-      const fragment = document.createDocumentFragment();
-
-      visible.forEach((review) => {
-        fragment.appendChild(buildReviewCard(review));
-      });
-
-      el.reviewsList.appendChild(fragment);
-
-      const total = state.filteredReviews.length;
-      const shown = visible.length;
-      const photoCount = state.filteredReviews.filter((review) => !!review.image).length;
-
-      el.reviewsMetaLine.textContent = `${total} visible review${total === 1 ? "" : "s"} • ${photoCount} with photo${photoCount === 1 ? "" : "s"}`;
-      el.reviewsRenderedLine.textContent = `${shown} shown`;
-
-      const hasAny = total > 0;
-      const hasMore = shown < total;
-
-      el.reviewsEmpty.classList.toggle("hidden", hasAny);
-      el.loadMoreReviewsButton.classList.toggle("hidden", !hasMore);
-    }
-
-    function renderMoreReviews() {
-      state.visibleCount += REVIEW_STEP;
-      renderReviews();
-    }
-
-    function buildReviewCard(review) {
-      const card = document.createElement("article");
-      card.className = "review-card";
-
-      const head = document.createElement("div");
-      head.className = "review-head";
-
-      const avatar = document.createElement("div");
-      avatar.className = "avatar";
-      avatar.setAttribute("aria-hidden", "true");
-      avatar.textContent = initialsOf(review.name);
-
-      const meta = document.createElement("div");
-
-      const name = document.createElement("div");
-      name.className = "review-name";
-      name.textContent = review.name;
-
-      const date = document.createElement("div");
-      date.className = "review-date";
-      date.textContent = formatDate(review.time);
-
-      meta.appendChild(name);
-      meta.appendChild(date);
-
-      head.appendChild(avatar);
-      head.appendChild(meta);
-      card.appendChild(head);
-
-      const text = document.createElement("p");
-      text.className = "review-text";
-      text.textContent = review.text || "No review text supplied.";
-      card.appendChild(text);
-
-      const safeImageUrl = sanitiseHttpUrl(review.image);
-      if (safeImageUrl) {
-        const media = document.createElement("button");
-        media.type = "button";
-        media.className = "review-media";
-        media.setAttribute("aria-label", `Open supporter photo from ${review.name}`);
-        media.addEventListener("click", () => {
-          openLightbox(
-            safeImageUrl,
-            `Supporter photo from ${review.name}`,
-            `Review image posted by ${review.name}`
-          );
-        });
-
-        const img = document.createElement("img");
-        img.src = safeImageUrl;
-        img.alt = `Supporter photo shared in a review by ${review.name}`;
-        img.loading = "lazy";
-        img.decoding = "async";
-
-        const badge = document.createElement("div");
-        badge.className = "review-media-badge";
-        badge.textContent = "Supporter photo";
-
-        media.appendChild(img);
-        media.appendChild(badge);
-        card.appendChild(media);
-      }
-
-      const foot = document.createElement("div");
-      foot.className = "review-foot";
-
-      const tinyMeta = document.createElement("div");
-      tinyMeta.className = "tiny-meta";
-
-      const typePill = document.createElement("span");
-      typePill.className = "tiny-pill";
-      typePill.textContent = safeImageUrl ? "Has photo" : "Text only";
-
-      const timePill = document.createElement("span");
-      timePill.className = "tiny-pill";
-      timePill.textContent = formatTimeOnly(review.time);
-
-      tinyMeta.appendChild(typePill);
-      tinyMeta.appendChild(timePill);
-      foot.appendChild(tinyMeta);
-
-      card.appendChild(foot);
-      return card;
-    }
-
-    function handleImageSelection() {
-      const file = el.imageInput.files && el.imageInput.files[0];
       if (!file) {
-        clearSelectedImage();
+        clearImage();
         return;
       }
 
-      const validation = validateImageFile(file);
-      if (!validation.ok) {
-        toast(validation.message, "error");
-        clearSelectedImage();
+      if (!file.type.startsWith("image/")) {
+        toast("Please choose an image file.");
+        clearImage();
         return;
       }
 
-      if (state.previewObjectUrl) {
-        URL.revokeObjectURL(state.previewObjectUrl);
+      if (file.size > 2 * 1024 * 1024) {
+        toast("Image must be under 2MB.");
+        clearImage();
+        return;
       }
 
-      state.previewObjectUrl = URL.createObjectURL(file);
-      el.imagePreview.src = state.previewObjectUrl;
-      el.imagePreview.alt = `Preview of selected image ${file.name}`;
-      el.imagePreviewMeta.textContent = `${file.name} • ${formatBytes(file.size)}`;
-      el.imagePreviewWrap.classList.remove("hidden");
-      setFormStatus("Image looks good. Ready to upload.");
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      previewUrl = URL.createObjectURL(file);
+      previewImage.src = previewUrl;
+      previewText.textContent = file.name;
+      previewBox.style.display = "block";
+    });
+
+    function clearImage() {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = "";
+      }
+
+      imageInput.value = "";
+      previewImage.src = "";
+      previewBox.style.display = "none";
     }
 
-    function clearSelectedImage() {
-      if (state.previewObjectUrl) {
-        URL.revokeObjectURL(state.previewObjectUrl);
-        state.previewObjectUrl = "";
-      }
-
-      el.imageInput.value = "";
-      el.imagePreview.src = "";
-      el.imagePreview.alt = "";
-      el.imagePreviewMeta.textContent = "Selected image preview";
-      el.imagePreviewWrap.classList.add("hidden");
-    }
-
-    function validateImageFile(file) {
-      if (!file) return { ok: true };
-
-      if (!file.type || !file.type.startsWith("image/")) {
-        return { ok: false, message: "Please choose an image file." };
-      }
-
-      if (file.size > MAX_IMAGE_SIZE) {
-        return { ok: false, message: "Image must be under 2MB." };
-      }
-
-      return { ok: true };
-    }
-
-    async function handleReviewSubmit(event) {
+    reviewForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
-      if (state.posting) return;
+      if (isPosting) return;
 
-      const cooldownLeft = getCooldownSecondsLeft();
+      const cooldownLeft = getCooldownLeft();
+
       if (cooldownLeft > 0) {
-        toast(`Please wait ${cooldownLeft}s before posting again.`, "warning");
-        setFormStatus(`Cooldown active. You can post again in ${cooldownLeft}s.`);
+        toast("Please wait " + cooldownLeft + " seconds before posting again.");
         return;
       }
 
-      const name = el.nameInput.value.trim();
-      const text = el.reviewInput.value.trim();
-      const file = el.imageInput.files && el.imageInput.files[0];
+      const name = nameInput.value.trim();
+      const text = reviewInput.value.trim();
+      const file = imageInput.files[0];
 
       if (!name || !text) {
-        toast("Please enter your name and review text.", "warning");
-        setFormStatus("Name and review text are required.");
+        toast("Please enter your name and message.");
         return;
       }
 
-      const validation = validateImageFile(file);
-      if (!validation.ok) {
-        toast(validation.message, "error");
-        setFormStatus(validation.message);
-        return;
+      if (file) {
+        if (!file.type.startsWith("image/")) {
+          toast("Please choose an image file.");
+          return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+          toast("Image must be under 2MB.");
+          return;
+        }
       }
 
-      state.posting = true;
-      setPostButtonBusy(true, "Posting…");
-      showFormProgress(true);
-      updateFormProgress(8, "Preparing review…");
-      loadingBarStart();
-
-      let imageUrl = "";
-      let uploadRef = null;
-      let reviewSaved = false;
+      isPosting = true;
+      postButton.disabled = true;
+      postButton.textContent = "Posting...";
+      progressWrap.style.display = "block";
+      progressBar.style.width = "8%";
+      statusText.textContent = "Preparing your review...";
 
       try {
+        let imageUrl = "";
+
         if (file) {
           const safeName = file.name.replace(/\s+/g, "-").replace(/[^\w.-]/g, "");
-          const storagePath = `reviews/${Date.now()}-${safeName}`;
-          uploadRef = storage.ref(storagePath);
-          const uploadTask = uploadRef.put(file);
+          const imageRef = storage.ref("reviews/" + Date.now() + "-" + safeName);
+          const uploadTask = imageRef.put(file);
 
-          updateFormProgress(12, "Uploading image… 0%");
-
-          await new Promise((resolve, reject) => {
+          await new Promise(function (resolve, reject) {
             uploadTask.on(
               "state_changed",
-              (snapshot) => {
-                const percent = snapshot.totalBytes
-                  ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                  : 0;
-
-                // Keep the UI moving smoothly even before Firestore save begins.
-                const uiPercent = Math.max(12, Math.min(92, percent));
-                updateFormProgress(uiPercent, `Uploading image… ${percent}%`);
+              function (snapshot) {
+                const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                progressBar.style.width = percent + "%";
+                statusText.textContent = "Uploading photo... " + percent + "%";
               },
-              (error) => reject(error),
-              () => resolve()
+              function (error) {
+                reject(error);
+              },
+              function () {
+                resolve();
+              }
             );
           });
 
-          imageUrl = await uploadRef.getDownloadURL();
-          updateFormProgress(95, "Saving review…");
+          imageUrl = await imageRef.getDownloadURL();
         } else {
-          updateFormProgress(62, "Saving review…");
+          progressBar.style.width = "70%";
         }
 
-        // Preserve the requested Firestore document shape exactly.
+        statusText.textContent = "Saving your review...";
+
         await db.collection("reviews").add({
           name: name,
           text: text,
@@ -2150,377 +1210,235 @@ service firebase.storage {
           time: Date.now()
         });
 
-        reviewSaved = true;
-        updateFormProgress(100, "Posted successfully.");
-        toast("Review posted successfully.", "success");
-        clearReviewForm();
+        progressBar.style.width = "100%";
+        statusText.textContent = "Posted successfully.";
+        toast("Review posted successfully.");
+
+        nameInput.value = "";
+        reviewInput.value = "";
+        clearImage();
+
         startCooldown(5);
+
       } catch (error) {
-        console.error("Post review failed:", error);
-
-        // If upload succeeded but Firestore save failed, attempt cleanup.
-        if (uploadRef && !reviewSaved) {
-          try {
-            await uploadRef.delete();
-          } catch (cleanupError) {
-            console.warn("Uploaded image cleanup failed:", cleanupError);
-          }
-        }
-
-        handleFirebaseError(error, "Could not post review.");
-        setPostButtonBusy(false, "Post review");
+        console.error(error);
+        toast("Something went wrong. Please try again.");
+        resetPostButton();
       } finally {
-        state.posting = false;
-        loadingBarDone();
+        isPosting = false;
       }
-    }
-
-    function clearReviewForm() {
-      el.nameInput.value = "";
-      el.reviewInput.value = "";
-      clearSelectedImage();
-    }
-
-    function showFormProgress(show) {
-      el.formProgressWrap.style.display = show ? "grid" : "none";
-    }
-
-    function updateFormProgress(percent, message) {
-      showFormProgress(true);
-      el.formProgressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-      setFormStatus(message);
-    }
-
-    function setFormStatus(message) {
-      el.formStatus.textContent = message || "";
-    }
-
-    function setPostButtonBusy(disabled, label) {
-      el.postButton.disabled = !!disabled;
-      el.postButtonLabel.textContent = label;
-    }
+    });
 
     function startCooldown(seconds) {
-      state.cooldownUntil = Date.now() + (seconds * 1000);
-      updateCooldownUI();
+      cooldownUntil = Date.now() + seconds * 1000;
 
-      if (state.cooldownTimer) {
-        clearInterval(state.cooldownTimer);
+      if (cooldownTimer) {
+        clearInterval(cooldownTimer);
       }
 
-      state.cooldownTimer = window.setInterval(() => {
-        const left = getCooldownSecondsLeft();
+      cooldownTimer = setInterval(function () {
+        const left = getCooldownLeft();
 
         if (left <= 0) {
-          clearInterval(state.cooldownTimer);
-          state.cooldownTimer = null;
-          state.cooldownUntil = 0;
-          setPostButtonBusy(false, "Post review");
-          setFormStatus("Ready to post another review.");
-          window.setTimeout(() => {
-            if (!state.posting) {
-              el.formProgressBar.style.width = "0%";
-              showFormProgress(false);
-            }
-          }, 500);
+          clearInterval(cooldownTimer);
+          cooldownTimer = null;
+          cooldownUntil = 0;
+          resetPostButton();
+          statusText.textContent = "";
+          progressWrap.style.display = "none";
+          progressBar.style.width = "0%";
           return;
         }
 
-        updateCooldownUI();
+        postButton.disabled = true;
+        postButton.textContent = "Post Review (" + left + "s)";
+        statusText.textContent = "Ready to post again in " + left + " seconds.";
       }, 250);
     }
 
-    function getCooldownSecondsLeft() {
-      if (!state.cooldownUntil) return 0;
-      return Math.max(0, Math.ceil((state.cooldownUntil - Date.now()) / 1000));
+    function getCooldownLeft() {
+      if (!cooldownUntil) return 0;
+      return Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
     }
 
-    function updateCooldownUI() {
-      const left = getCooldownSecondsLeft();
-      setPostButtonBusy(true, left > 0 ? `Post review (${left}s)` : "Post review");
-      updateFormProgress(100, left > 0 ? `Cooldown active. You can post again in ${left}s.` : "Ready.");
+    function resetPostButton() {
+      postButton.disabled = false;
+      postButton.textContent = "Post Review";
     }
 
-    function openLightbox(src, title, desc) {
-      const safe = sanitiseHttpUrl(src);
-      if (!safe) return;
+    db.collection("reviews")
+      .orderBy("time", "desc")
+      .onSnapshot(function (snapshot) {
+        allReviews = snapshot.docs.map(function (doc) {
+          const data = doc.data();
 
-      el.lightboxTitle.textContent = title || "Image preview";
-      el.lightboxDesc.textContent = desc || "Preview";
-      el.lightboxImage.src = safe;
-      el.lightboxImage.alt = title || "Image preview";
-      openModal("lightboxModal");
+          return {
+            id: doc.id,
+            name: data.name || "Unknown",
+            text: data.text || "",
+            image: data.image || "",
+            time: data.time || 0
+          };
+        });
+
+        reviewCount.textContent = allReviews.length;
+        applyFilters();
+      }, function (error) {
+        console.error(error);
+        reviewsMeta.textContent = "Could not load reviews.";
+      });
+
+    searchInput.addEventListener("input", function () {
+      visibleReviews = 6;
+      applyFilters();
+    });
+
+    document.querySelectorAll(".chip").forEach(function (button) {
+      button.addEventListener("click", function () {
+        document.querySelectorAll(".chip").forEach(function (chip) {
+          chip.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        activeFilter = button.dataset.filter;
+        visibleReviews = 6;
+        applyFilters();
+      });
+    });
+
+    loadMoreButton.addEventListener("click", function () {
+      visibleReviews += 6;
+      renderReviews();
+    });
+
+    function applyFilters() {
+      const search = searchInput.value.trim().toLowerCase();
+
+      filteredReviews = allReviews.filter(function (review) {
+        const matchesSearch =
+          review.name.toLowerCase().includes(search) ||
+          review.text.toLowerCase().includes(search);
+
+        const matchesFilter =
+          activeFilter === "all" ||
+          (activeFilter === "photos" && review.image) ||
+          (activeFilter === "text" && !review.image);
+
+        return matchesSearch && matchesFilter;
+      });
+
+      renderReviews();
     }
 
-    function openModal(id) {
-      const modal = document.getElementById(id);
-      if (!modal) return;
+    function renderReviews() {
+      reviewsList.innerHTML = "";
 
-      state.activeModalId = id;
-      state.modalRestoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const visible = filteredReviews.slice(0, visibleReviews);
 
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-      el.body.classList.add("modal-open");
+      reviewsMeta.textContent =
+        filteredReviews.length + " review" + (filteredReviews.length === 1 ? "" : "s") + " found";
 
-      const focusTarget = modal.querySelector("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])");
-      if (focusTarget && focusTarget.focus) {
-        window.setTimeout(() => focusTarget.focus(), 20);
-      }
-    }
+      emptyState.style.display = filteredReviews.length === 0 ? "block" : "none";
+      loadMoreButton.style.display = visibleReviews < filteredReviews.length ? "inline-block" : "none";
 
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if (!modal) return;
+      visible.forEach(function (review) {
+        const div = document.createElement("article");
+        div.className = "review";
 
-      modal.classList.remove("open");
-      modal.setAttribute("aria-hidden", "true");
-      state.activeModalId = null;
-      el.body.classList.remove("modal-open");
+        const initials = review.name
+          .split(" ")
+          .map(function (word) { return word[0]; })
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
 
-      if (id === "lightboxModal") {
-        el.lightboxImage.src = "";
-        el.lightboxImage.alt = "";
-        el.lightboxTitle.textContent = "Image preview";
-        el.lightboxDesc.textContent = "Preview";
-      }
+        div.innerHTML = `
+          <div class="review-head">
+            <div class="avatar">${escapeHTML(initials)}</div>
+            <div>
+              <div class="review-name">${escapeHTML(review.name)}</div>
+              <div class="review-date">${formatDate(review.time)}</div>
+            </div>
+          </div>
 
-      if (state.modalRestoreFocus && state.modalRestoreFocus.focus) {
-        state.modalRestoreFocus.focus();
-      }
-    }
+          <div class="review-text">${escapeHTML(review.text)}</div>
 
-    function getOpenModal() {
-      return document.querySelector(".modal-backdrop.open");
-    }
+          ${
+            review.image
+              ? `<button class="review-photo" type="button" onclick="openImage('${review.image}', 'Review Photo')">
+                   <img src="${review.image}" alt="Review photo from ${escapeHTML(review.name)}">
+                 </button>`
+              : ""
+          }
+        `;
 
-    function trapFocus(event, modal) {
-      const focusable = Array.from(
-        modal.querySelectorAll("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])")
-      ).filter((node) => !node.hasAttribute("disabled"));
-
-      if (!focusable.length) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    function loadingBarStart() {
-      el.topProgressBar.style.opacity = "1";
-      el.topProgressBar.style.width = "18%";
-      requestAnimationFrame(() => {
-        el.topProgressBar.style.width = "72%";
+        reviewsList.appendChild(div);
       });
     }
 
-    function loadingBarDone() {
-      el.topProgressBar.style.width = "100%";
-      window.setTimeout(() => {
-        el.topProgressBar.style.opacity = "0";
-        el.topProgressBar.style.width = "0%";
-      }, 220);
+    function openImage(src, title) {
+      document.getElementById("modalImage").src = src;
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("imageModal").classList.add("open");
+      document.body.classList.add("modal-open");
     }
 
-    function handleFirebaseError(error, fallback) {
-      const code = String(error && error.code || "");
-      let message = fallback || "Something went wrong.";
-
-      if (code.includes("permission-denied")) {
-        message = "Permission denied. Check your Firestore or Storage rules.";
-      } else if (code.includes("storage/unauthorized")) {
-        message = "Storage denied the request. Check your Storage Security Rules.";
-      } else if (code.includes("storage/bucket-not-found")) {
-        message = "Storage bucket not found. Check the exact storageBucket value in firebaseConfig.";
-      } else if (code.includes("storage/project-not-found")) {
-        message = "Storage project not found. Make sure Cloud Storage is enabled for this Firebase project.";
-      } else if (code.includes("storage/unknown")) {
-        message = "Cloud Storage returned an unknown error. Check the bucket name, rules and any raw GCS CORS setup.";
-      } else if (code.includes("failed-precondition")) {
-        message = "Operation failed a precondition. If Firebase suggests an index or setup action in the console, complete it and try again.";
-      } else if (code.includes("unavailable")) {
-        message = "Firebase is temporarily unavailable. Please try again in a moment.";
-      }
-
-      toast(message, code.includes("permission") ? "error" : "warning", 5200);
+    function closeImage() {
+      document.getElementById("imageModal").classList.remove("open");
+      document.body.classList.remove("modal-open");
+      document.getElementById("modalImage").src = "";
     }
 
-    function toast(message, type = "info", duration = 3400) {
-      const node = document.createElement("div");
-      node.className = `toast ${type}`;
-
-      const iconWrap = document.createElement("div");
-      iconWrap.innerHTML =
-        type === "success" ? iconCheck() :
-        type === "warning" ? iconWarning() :
-        type === "error" ? iconAlert() :
-        iconInfo();
-
-      const textWrap = document.createElement("div");
-
-      const title = document.createElement("div");
-      title.className = "toast-title";
-      title.textContent =
-        type === "success" ? "Success" :
-        type === "warning" ? "Warning" :
-        type === "error" ? "Error" :
-        "Notice";
-
-      const msg = document.createElement("div");
-      msg.className = "toast-msg";
-      msg.textContent = message;
-
-      textWrap.appendChild(title);
-      textWrap.appendChild(msg);
-
-      const closeBtn = document.createElement("button");
-      closeBtn.className = "toast-close";
-      closeBtn.type = "button";
-      closeBtn.setAttribute("aria-label", "Dismiss notification");
-      closeBtn.innerHTML = iconClose();
-      closeBtn.addEventListener("click", () => removeToast(node));
-
-      node.appendChild(iconWrap);
-      node.appendChild(textWrap);
-      node.appendChild(closeBtn);
-
-      el.toastWrap.appendChild(node);
-      window.setTimeout(() => removeToast(node), duration);
-    }
-
-    function removeToast(node) {
-      if (!node || !node.parentNode) return;
-      node.style.opacity = "0";
-      node.style.transform = "translateY(8px)";
-      window.setTimeout(() => {
-        if (node.parentNode) node.parentNode.removeChild(node);
-      }, 150);
-    }
-
-    function normaliseTime(value) {
-      if (!value) return 0;
-
-      if (typeof value === "number" && Number.isFinite(value)) {
-        return value;
+    document.getElementById("imageModal").addEventListener("click", function (event) {
+      if (event.target.id === "imageModal") {
+        closeImage();
       }
+    });
 
-      if (typeof value === "string") {
-        const numeric = Number(value);
-        if (Number.isFinite(numeric) && numeric > 0) {
-          return numeric;
-        }
-        const parsed = Date.parse(value);
-        return Number.isFinite(parsed) ? parsed : 0;
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeImage();
       }
+    });
 
-      if (typeof value.toMillis === "function") {
-        try { return value.toMillis(); } catch (error) {}
-      }
+    function formatDate(time) {
+      if (!time) return "Recently";
 
-      if (typeof value.seconds === "number") {
-        return value.seconds * 1000;
-      }
-
-      return 0;
-    }
-
-    function formatDate(timestamp) {
-      if (!timestamp) return "Unknown date";
       try {
         return new Intl.DateTimeFormat("en-IE", {
           dateStyle: "medium",
           timeStyle: "short"
-        }).format(new Date(timestamp));
-      } catch (error) {
-        return new Date(timestamp).toLocaleString("en-IE");
+        }).format(new Date(time));
+      } catch {
+        return "Recently";
       }
     }
 
-    function formatTimeOnly(timestamp) {
-      if (!timestamp) return "—";
-      try {
-        return new Intl.DateTimeFormat("en-IE", {
-          hour: "2-digit",
-          minute: "2-digit"
-        }).format(new Date(timestamp));
-      } catch (error) {
-        return "—";
-      }
+    function escapeHTML(text) {
+      const div = document.createElement("div");
+      div.textContent = text || "";
+      return div.innerHTML;
     }
 
-    function formatBytes(bytes) {
-      if (!bytes && bytes !== 0) return "";
-      const units = ["B", "KB", "MB", "GB"];
-      let size = bytes;
-      let unitIndex = 0;
+    function toast(message) {
+      const toastWrap = document.getElementById("toastWrap");
+      const div = document.createElement("div");
 
-      while (size >= 1024 && unitIndex < units.length - 1) {
-        size /= 1024;
-        unitIndex += 1;
-      }
+      div.className = "toast";
+      div.textContent = message;
 
-      const formatted = size < 10 && unitIndex > 0 ? size.toFixed(1) : Math.round(size);
-      return `${formatted} ${units[unitIndex]}`;
-    }
+      toastWrap.appendChild(div);
 
-    function initialsOf(name) {
-      const parts = String(name || "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
-      if (!parts.length) return "??";
-      return parts.map((part) => part[0]).join("").toUpperCase();
-    }
+      setTimeout(function () {
+        div.style.opacity = "0";
+        div.style.transform = "translateY(8px)";
 
-    function sanitiseHttpUrl(url) {
-      if (!url) return "";
-      try {
-        const parsed = new URL(url, window.location.href);
-        return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
-      } catch (error) {
-        return "";
-      }
-    }
-
-    function isTextInput(target) {
-      return target instanceof HTMLElement && (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      );
-    }
-
-    function debounce(fn, wait) {
-      let timer = null;
-      return function debounced(...args) {
-        clearTimeout(timer);
-        timer = window.setTimeout(() => fn.apply(this, args), wait);
-      };
-    }
-
-    function iconCheck() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="m8.6 12.2 2.2 2.2 4.6-5.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    }
-
-    function iconWarning() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 2.6 19.2A1.3 1.3 0 0 0 3.7 21h16.6a1.3 1.3 0 0 0 1.1-1.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 9v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>`;
-    }
-
-    function iconAlert() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 8.5v4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>`;
-    }
-
-    function iconInfo() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 10.5V16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></svg>`;
-    }
-
-    function iconClose() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`;
+        setTimeout(function () {
+          div.remove();
+        }, 180);
+      }, 3000);
     }
   </script>
+
 </body>
 </html>

@@ -1,3 +1,41 @@
+<!--
+Executive summary
+- Single-file homepage for liam.ink, ready to paste into /index.html in the repo root.
+- Uses hero.jpg only for the hero banner and photo1.jpg..photo4.jpg only for the gallery.
+- Uses the exact Firebase config supplied by the user, with Firebase compat CDN scripts and no build step.
+- Preserves the reviews flow:
+  1) optional image upload to Firebase Storage
+  2) getDownloadURL()
+  3) save Firestore review document with { name, text, image, time }
+  4) show live reviews with onSnapshot()
+- UX included:
+  - accessible labelled form controls
+  - image preview before upload
+  - client-side validation (image/*, under 2MB)
+  - animated upload progress bar with upload percentage
+  - toast notifications
+  - 5-second cooldown after posting
+  - disabled button during upload/cooldown
+  - live status messages
+  - search/filter by text and image presence
+  - client-side pagination with load-more and infinite-scroll assist
+  - image lightbox for gallery and review images
+  - keyboard shortcuts: "/" focuses search, Esc closes modals, Tab is trapped inside open modals
+- Moderation remains separate at /admin/:
+  - this homepage does NOT embed admin password UI
+  - this homepage does NOT show delete controls
+  - moderators should use /admin/ to delete or tidy reviews
+  - persistent client-side admin sessions belong on /admin/, not here
+- Deployment notes:
+  - keep hero.jpg and photo1.jpg..photo4.jpg beside this file
+  - add an empty /.nojekyll file if you publish a plain static GitHub Pages site from a source branch
+  - ensure /admin/index.html exists separately for moderation
+- Unspecified assumptions:
+  - friendly gallery captions are generated because none were provided
+  - review time is stored as milliseconds since epoch (Date.now())
+- Changelog:
+  - 2026-05-06: refined homepage design, upload UX, live reviews, troubleshooting and rules panel
+-->
 <!DOCTYPE html>
 <html lang="en-IE">
 <head>
@@ -6,52 +44,23 @@
   <meta name="color-scheme" content="dark" />
   <title>Bin Men Football Club</title>
 
-  <!--
-    Executive summary
-    - Single-file homepage for a GitHub Pages site. No build step.
-    - Uses hero.jpg for the hero only, and photo1.jpg..photo4.jpg in the gallery only.
-    - Keeps the existing Firebase config exactly as provided.
-    - Reviews remain backed by Firestore + Storage compat libraries.
-    - Public visitors can post reviews with optional photo upload.
-    - Includes image preview, progress bar, validation (<2MB, image/*), toast notifications, and a 5-second cooldown.
-    - Includes embedded admin mode for review deletion from the homepage itself.
-      Because this brief only asked for repo-root index.html, admin mode is embedded here
-      rather than creating a dedicated /admin/ route.
-    - Admin session can be remembered for 7 days in localStorage or kept only for the current session.
-    - Security note: the admin passcode is client-side only. Real production security requires Firebase Auth + rules.
-
-    Deployment notes
-    - Save this file as /index.html in the repo root (or the top level of your chosen Pages publishing source).
-    - Keep hero.jpg and photo1.jpg..photo4.jpg in the same folder as this file.
-    - Add an empty /.nojekyll file if you publish from a source branch and want plain static output.
-    - Hard refresh after deployment if GitHub Pages, DNS, or caching delays make changes look stale.
-
-    Changelog
-    - v2.0.0 (2026-05-01): homepage redesign, upload UX, embedded admin mode, improved accessibility, review preview and deletion flow.
-
-    Inherited / unspecified details
-    - The current prompt did not re-state the admin passcode, so this file preserves "liam" from your earlier setup.
-    - Gallery captions were not specified, so generic alt/caption text is used.
-  -->
-
   <style>
     :root {
-      --bg: #07110d;
-      --bg-2: #0b1511;
+      --bg: #07100d;
+      --bg-2: #0b1611;
       --panel: rgba(10, 18, 14, 0.88);
       --panel-2: rgba(8, 14, 11, 0.96);
-      --line: rgba(130, 167, 143, 0.16);
-      --line-strong: rgba(130, 167, 143, 0.32);
-      --text: #f1f8f4;
+      --line: rgba(129, 165, 142, 0.16);
+      --line-strong: rgba(129, 165, 142, 0.32);
+      --text: #eef7f1;
       --text-2: #cad8cf;
-      --muted: #92a49a;
+      --muted: #90a298;
       --accent: #53e08b;
-      --accent-2: #86ffc6;
-      --accent-dark: #0b2f1a;
-      --danger: #ff6e8b;
-      --warning: #ffd26d;
+      --accent-2: #8cf8c0;
+      --accent-dark: #0b2e1a;
+      --danger: #ff758b;
+      --warning: #ffd672;
       --success: #7df3ad;
-      --ring: rgba(83, 224, 139, 0.55);
       --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
       --radius-xl: 30px;
       --radius-lg: 24px;
@@ -60,22 +69,24 @@
       --content: 1220px;
       --fast: 160ms ease;
       --med: 240ms ease;
+      --ring: rgba(83, 224, 139, 0.55);
     }
 
     * { box-sizing: border-box; }
     html, body { min-height: 100%; }
-    html { scroll-behaviour: smooth; }
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0.01em;
       color: var(--text);
       background:
-        radial-gradient(circle at 0% 0%, rgba(83, 224, 139, 0.08), transparent 25%),
-        radial-gradient(circle at 100% 0%, rgba(134, 255, 198, 0.06), transparent 20%),
+        radial-gradient(circle at 0% 0%, rgba(83, 224, 139, 0.08), transparent 26%),
+        radial-gradient(circle at 100% 0%, rgba(140, 248, 192, 0.06), transparent 24%),
         radial-gradient(circle at 50% 100%, rgba(83, 224, 139, 0.05), transparent 28%),
         linear-gradient(180deg, #06100c 0%, #09130f 100%);
       background-attachment: fixed;
-      letter-spacing: 0.01em;
     }
 
     body.modal-open { overflow: hidden; }
@@ -101,7 +112,12 @@
       text-decoration: none;
     }
 
+    a:hover {
+      text-decoration: none;
+    }
+
     .hidden { display: none !important; }
+
     .sr-only {
       position: absolute !important;
       width: 1px !important;
@@ -127,11 +143,9 @@
 
     .top-progress {
       position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
+      inset: 0 0 auto 0;
       height: 3px;
-      z-index: 90;
+      z-index: 100;
       pointer-events: none;
     }
 
@@ -139,7 +153,7 @@
       width: 0%;
       height: 100%;
       opacity: 0;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2), #caffea);
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), #dffff0);
       box-shadow: 0 0 18px rgba(83, 224, 139, 0.55);
       transition: width 220ms ease, opacity 220ms ease;
     }
@@ -150,7 +164,7 @@
       z-index: 30;
       backdrop-filter: blur(14px);
       background: rgba(6, 12, 9, 0.72);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .nav {
@@ -163,22 +177,27 @@
 
     .brand {
       display: inline-flex;
-      align-items: centre;
+      align-items: center;
       gap: 12px;
-      font-weight: 900;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
       color: var(--text);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .brand:hover {
+      color: var(--text);
+      text-decoration: none;
     }
 
     .crest {
       width: 42px;
       height: 42px;
-      border-radius: 50%;
       display: grid;
       place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(83, 224, 139, 0.16), rgba(140, 248, 192, 0.08));
       border: 1px solid rgba(83, 224, 139, 0.28);
-      background: linear-gradient(135deg, rgba(83, 224, 139, 0.16), rgba(134, 255, 198, 0.08));
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     }
 
@@ -190,30 +209,16 @@
       justify-content: flex-end;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 38px;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
-      color: var(--text-2);
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
-
     .btn,
     .btn-ghost,
-    .btn-danger {
+    .btn-link {
       min-height: 46px;
-      border-radius: 14px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       padding: 0 16px;
+      border-radius: 14px;
       font-weight: 800;
       transition: transform var(--fast), background var(--fast), border-color var(--fast), opacity var(--fast);
       white-space: nowrap;
@@ -221,13 +226,14 @@
 
     .btn:hover,
     .btn-ghost:hover,
-    .btn-danger:hover {
+    .btn-link:hover {
       transform: translateY(-1px);
+      text-decoration: none;
     }
 
     .btn {
-      color: #05100a;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #06110b;
       box-shadow: 0 16px 36px rgba(83, 224, 139, 0.18);
     }
 
@@ -237,15 +243,15 @@
       color: var(--text);
     }
 
-    .btn-danger {
-      background: linear-gradient(135deg, rgba(255, 110, 139, 0.18), rgba(255, 110, 139, 0.08));
-      border: 1px solid rgba(255, 110, 139, 0.34);
-      color: #fff4f7;
+    .btn-link {
+      background: rgba(83, 224, 139, 0.08);
+      border: 1px solid rgba(83, 224, 139, 0.22);
+      color: var(--accent-2);
     }
 
     .btn[disabled],
     .btn-ghost[disabled],
-    .btn-danger[disabled] {
+    .btn-link[disabled] {
       opacity: 0.65;
       cursor: not-allowed;
       transform: none;
@@ -259,9 +265,9 @@
       place-items: end center;
       padding: 24px 0 34px;
       background:
-        linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.55)),
-        linear-gradient(180deg, rgba(7, 16, 12, 0.12), rgba(7, 16, 12, 0.9)),
-        url("hero.jpg") centre / cover no-repeat;
+        linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.56)),
+        linear-gradient(180deg, rgba(7, 16, 12, 0.08), rgba(7, 16, 12, 0.9)),
+        url("hero.jpg") center / cover no-repeat;
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
@@ -270,19 +276,19 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 10% 10%, rgba(83, 224, 139, 0.18), transparent 28%),
-        radial-gradient(circle at 80% 5%, rgba(134, 255, 198, 0.14), transparent 20%);
+        radial-gradient(circle at 12% 10%, rgba(83, 224, 139, 0.18), transparent 28%),
+        radial-gradient(circle at 88% 6%, rgba(140, 248, 192, 0.14), transparent 22%);
       pointer-events: none;
     }
 
     .hero-card {
       position: relative;
-      width: min(100%, 1120px);
       z-index: 1;
+      width: min(100%, 1120px);
       padding: 28px;
       border-radius: var(--radius-xl);
-      border: 1px solid rgba(255,255,255,0.10);
       background: linear-gradient(180deg, rgba(10, 18, 14, 0.72), rgba(8, 14, 11, 0.88));
+      border: 1px solid rgba(255,255,255,0.10);
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
     }
@@ -305,14 +311,14 @@
     .hero-grid {
       margin-top: 16px;
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
+      grid-template-columns: 1.18fr 0.82fr;
       gap: 24px;
       align-items: end;
     }
 
     .hero-copy h1 {
       margin: 0 0 12px;
-      font-size: clamp(2.3rem, 6vw, 5.2rem);
+      font-size: clamp(2.4rem, 6vw, 5.3rem);
       line-height: 0.95;
       letter-spacing: -0.05em;
       text-transform: uppercase;
@@ -322,21 +328,20 @@
       margin: 0;
       max-width: 62ch;
       color: var(--text-2);
-      line-height: 1.7;
+      line-height: 1.72;
       font-size: 1.02rem;
     }
 
     .hero-actions {
       margin-top: 18px;
       display: flex;
-      gap: 12px;
       flex-wrap: wrap;
+      gap: 12px;
     }
 
     .hero-side {
       display: grid;
       gap: 12px;
-      align-self: stretch;
     }
 
     .mini-card {
@@ -356,8 +361,15 @@
     .mini-card p {
       margin: 0;
       color: var(--text-2);
-      line-height: 1.6;
+      line-height: 1.62;
       font-size: 0.96rem;
+    }
+
+    .mini-card .note {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--accent-2);
+      font-weight: 700;
     }
 
     .section {
@@ -369,14 +381,14 @@
       font-size: clamp(2rem, 4vw, 3rem);
       line-height: 1.02;
       letter-spacing: -0.04em;
-      text-align: centre;
+      text-align: center;
     }
 
     .section-intro {
       margin: 0 auto 30px;
       max-width: 68ch;
-      text-align: centre;
-      line-height: 1.7;
+      text-align: center;
+      line-height: 1.72;
       color: var(--text-2);
       font-size: 1rem;
     }
@@ -388,7 +400,7 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
+      grid-template-columns: 1.15fr 0.85fr;
       gap: 22px;
     }
 
@@ -402,10 +414,10 @@
     .about-card p {
       margin: 0;
       color: var(--text-2);
-      line-height: 1.75;
+      line-height: 1.76;
     }
 
-    .stats {
+    .stat-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
@@ -443,11 +455,11 @@
       position: relative;
       overflow: hidden;
       padding: 0;
+      min-height: 320px;
       border-radius: 24px;
       border: 1px solid var(--line);
       background: #050b08;
       box-shadow: var(--shadow);
-      min-height: 320px;
     }
 
     .gallery-tile img {
@@ -468,7 +480,7 @@
       right: 12px;
       bottom: 12px;
       display: flex;
-      align-items: centre;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
       padding: 12px 14px;
@@ -477,12 +489,22 @@
       background: rgba(0,0,0,0.44);
       backdrop-filter: blur(10px);
       color: #f6fff8;
-      font-weight: 800;
+    }
+
+    .gallery-label strong {
+      display: block;
+      font-size: 0.98rem;
+      letter-spacing: -0.02em;
+    }
+
+    .gallery-label span {
+      color: rgba(246,255,248,0.82);
+      font-size: 0.88rem;
     }
 
     .reviews-shell {
       display: grid;
-      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
       gap: 18px;
       align-items: start;
     }
@@ -504,7 +526,7 @@
     .card p.lead {
       margin: 0 0 14px;
       color: var(--text-2);
-      line-height: 1.65;
+      line-height: 1.68;
       font-size: 0.97rem;
     }
 
@@ -525,7 +547,10 @@
       line-height: 1.5;
     }
 
-    .input, .textarea, .file-input, .search-input {
+    .input,
+    .textarea,
+    .file-input,
+    .search-input {
       width: 100%;
       border: 1px solid var(--line);
       background: rgba(5, 10, 8, 0.92);
@@ -534,19 +559,24 @@
       transition: border-color var(--fast), background var(--fast), box-shadow var(--fast);
     }
 
-    .input, .search-input, .file-input {
+    .input,
+    .file-input,
+    .search-input {
       min-height: 48px;
       padding: 0 14px;
     }
 
     .textarea {
       min-height: 146px;
-      resize: vertical;
       padding: 14px;
+      resize: vertical;
       line-height: 1.6;
     }
 
-    .input:hover, .textarea:hover, .file-input:hover, .search-input:hover {
+    .input:hover,
+    .textarea:hover,
+    .file-input:hover,
+    .search-input:hover {
       border-color: var(--line-strong);
     }
 
@@ -566,6 +596,19 @@
     .search-input {
       padding-left: 42px;
       padding-right: 14px;
+    }
+
+    .posting-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(83, 224, 139, 0.06);
+      border: 1px solid rgba(83, 224, 139, 0.22);
+      color: var(--text-2);
+      line-height: 1.6;
+      font-size: 0.94rem;
     }
 
     .preview-wrap {
@@ -591,7 +634,7 @@
 
     .preview-meta {
       display: flex;
-      align-items: centre;
+      align-items: center;
       justify-content: space-between;
       gap: 10px;
       flex-wrap: wrap;
@@ -617,9 +660,9 @@
 
     .progress > span {
       display: block;
-      height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2), #dafaec);
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), #dffff0);
       box-shadow: 0 0 16px rgba(83, 224, 139, 0.45);
       transition: width 220ms ease;
     }
@@ -664,7 +707,10 @@
       transition: transform var(--fast), background var(--fast), border-color var(--fast);
     }
 
-    .chip:hover { transform: translateY(-1px); }
+    .chip:hover {
+      transform: translateY(-1px);
+    }
+
     .chip.active {
       background: rgba(83, 224, 139, 0.12);
       border-color: rgba(83, 224, 139, 0.28);
@@ -696,14 +742,14 @@
       margin-top: 6px;
     }
 
-    .admin-summary {
+    .moderator-note {
       margin-top: 14px;
       padding: 14px;
       border-radius: 18px;
-      background: rgba(83, 224, 139, 0.06);
-      border: 1px solid rgba(83, 224, 139, 0.22);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
       color: var(--text-2);
-      line-height: 1.6;
+      line-height: 1.62;
     }
 
     .reviews-list {
@@ -730,7 +776,7 @@
 
     .review-head {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr;
       gap: 12px;
       align-items: start;
     }
@@ -738,11 +784,11 @@
     .avatar {
       width: 46px;
       height: 46px;
-      border-radius: 50%;
       display: grid;
       place-items: center;
+      border-radius: 50%;
       font-weight: 900;
-      background: linear-gradient(135deg, rgba(83, 224, 139, 0.22), rgba(134, 255, 198, 0.16));
+      background: linear-gradient(135deg, rgba(83, 224, 139, 0.22), rgba(140, 248, 192, 0.16));
       border: 1px solid rgba(255,255,255,0.06);
     }
 
@@ -758,15 +804,6 @@
       font-size: 0.9rem;
     }
 
-    .review-id {
-      color: var(--muted);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 0.75rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      text-align: right;
-    }
-
     .review-text {
       margin: 0;
       color: var(--text-2);
@@ -776,13 +813,13 @@
     }
 
     .review-media {
+      position: relative;
       width: min(280px, 100%);
       padding: 0;
-      border-radius: 18px;
       overflow: hidden;
+      border-radius: 18px;
       border: 1px solid var(--line);
       background: #04110a;
-      position: relative;
     }
 
     .review-media img {
@@ -837,27 +874,25 @@
       gap: 8px;
     }
 
-    .review-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
     .empty {
       padding: 34px 18px;
-      text-align: centre;
+      text-align: center;
       border: 1px dashed var(--line-strong);
       border-radius: 22px;
       color: var(--muted);
       background: rgba(255,255,255,0.03);
     }
 
-    .load-more-wrap {
-      margin-top: 16px;
-      text-align: centre;
+    .sentinel {
+      height: 10px;
     }
 
-    details.ops {
+    .load-more-wrap {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    details.docs {
       margin-top: 26px;
       padding: 22px;
       border-radius: var(--radius-xl);
@@ -866,7 +901,7 @@
       box-shadow: var(--shadow);
     }
 
-    details.ops summary {
+    details.docs summary {
       list-style: none;
       cursor: pointer;
       display: flex;
@@ -877,17 +912,22 @@
       user-select: none;
     }
 
-    details.ops summary::-webkit-details-marker { display: none; }
-    details.ops[open] summary { margin-bottom: 16px; }
+    details.docs summary::-webkit-details-marker {
+      display: none;
+    }
 
-    .ops-body {
+    details.docs[open] summary {
+      margin-bottom: 16px;
+    }
+
+    .docs-body {
       display: grid;
       gap: 16px;
       color: var(--text-2);
-      line-height: 1.7;
+      line-height: 1.72;
     }
 
-    .ops-body pre {
+    .docs-body pre {
       margin: 0;
       padding: 16px;
       white-space: pre-wrap;
@@ -901,20 +941,28 @@
       line-height: 1.55;
     }
 
-    .notice {
-      margin-top: 16px;
+    .docs-body ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .docs-body li + li {
+      margin-top: 8px;
+    }
+
+    .security-note {
       padding: 16px 18px;
       border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255, 210, 109, 0.10), rgba(255, 210, 109, 0.03));
-      border: 1px solid rgba(255, 210, 109, 0.22);
-      color: #ffefc2;
-      line-height: 1.6;
+      background: linear-gradient(180deg, rgba(255, 214, 114, 0.10), rgba(255, 214, 114, 0.03));
+      border: 1px solid rgba(255, 214, 114, 0.22);
+      color: #ffefc3;
+      line-height: 1.62;
     }
 
     .site-footer {
       padding: 34px 0 60px;
       color: var(--muted);
-      text-align: centre;
+      text-align: center;
       line-height: 1.7;
       font-size: 0.95rem;
     }
@@ -922,7 +970,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 100;
+      z-index: 110;
       display: none;
       align-items: center;
       justify-content: center;
@@ -937,7 +985,7 @@
     }
 
     .modal {
-      width: min(680px, 100%);
+      width: min(860px, 100%);
       max-height: calc(100vh - 36px);
       overflow: auto;
       border-radius: 28px;
@@ -972,13 +1020,6 @@
       gap: 14px;
     }
 
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
     .close-x {
       width: 42px;
       height: 42px;
@@ -989,45 +1030,13 @@
       flex: 0 0 auto;
     }
 
-    .modal-preview {
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      color: var(--text-2);
-      line-height: 1.6;
-    }
-
-    .login-error {
-      display: none;
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 110, 139, 0.28);
-      background: rgba(255, 110, 139, 0.10);
-      color: #ffd3dc;
-    }
-
-    .checkbox {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-2);
-      font-size: 0.95rem;
-    }
-
-    .checkbox input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent);
-    }
-
     .lightbox-img {
       width: 100%;
-      max-height: min(75vh, 900px);
+      max-height: min(78vh, 900px);
       object-fit: contain;
       border-radius: 20px;
       border: 1px solid var(--line);
-      background: rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.32);
     }
 
     .toast-wrap {
@@ -1058,8 +1067,8 @@
     }
 
     .toast.success { border-color: rgba(125, 243, 173, 0.30); }
-    .toast.warning { border-color: rgba(255, 210, 109, 0.30); }
-    .toast.error { border-color: rgba(255, 110, 139, 0.30); }
+    .toast.warning { border-color: rgba(255, 214, 114, 0.30); }
+    .toast.error { border-color: rgba(255, 117, 139, 0.30); }
 
     .toast-title {
       margin: 0 0 2px;
@@ -1112,7 +1121,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .stats {
+      .stat-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -1134,19 +1143,17 @@
       .hero-card,
       .card,
       .about-card,
-      details.ops {
+      details.docs {
         padding: 18px;
       }
 
       .hero-actions,
-      .modal-actions,
-      .review-actions {
+      .nav-actions {
         width: 100%;
       }
 
       .hero-actions > *,
-      .modal-actions > *,
-      .review-actions > * {
+      .nav-actions > * {
         flex: 1 1 100%;
       }
 
@@ -1156,15 +1163,6 @@
 
       .toolbar-top {
         grid-template-columns: 1fr;
-      }
-
-      .review-head {
-        grid-template-columns: auto 1fr;
-      }
-
-      .review-id {
-        grid-column: 1 / -1;
-        text-align: left;
       }
     }
 
@@ -1196,33 +1194,31 @@
         <span>Bin Men FC</span>
       </a>
 
-      <div class="nav-actions">
-        <span id="adminBadge" class="pill hidden">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
+      <nav class="nav-actions" aria-label="Primary">
+        <a class="btn-ghost" href="#gallery">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/>
+            <path d="m7 14 2.8-2.8a1 1 0 0 1 1.4 0L14 14l1.8-1.8a1 1 0 0 1 1.4 0L20 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+          </svg>
+          Gallery
+        </a>
+
+        <a class="btn-ghost" href="#reviews">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 18.5c-1.1 0-2-.9-2-2v-9c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H9l-5 3v-3H6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          </svg>
+          Reviews
+        </a>
+
+        <a class="btn-link" href="/admin/" aria-label="Open moderator page at /admin/">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M12 3 4.5 6.8v5.5c0 4.7 2.8 7.7 7.5 9.2 4.7-1.5 7.5-4.5 7.5-9.2V6.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
             <path d="m8.8 12.2 2 2 4.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Admin mode on
-        </span>
-
-        <button id="adminButton" class="btn-ghost" type="button">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M6 11V8a6 6 0 0 1 12 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            <rect x="4" y="11" width="16" height="10" rx="3" stroke="currentColor" stroke-width="1.7"/>
-            <circle cx="12" cy="16" r="1.2" fill="currentColor"/>
-          </svg>
-          Admin
-        </button>
-
-        <button id="adminLogoutButton" class="btn-ghost hidden" type="button">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M15 7V5.5A2.5 2.5 0 0 0 12.5 3h-5A2.5 2.5 0 0 0 5 5.5v13A2.5 2.5 0 0 0 7.5 21h5a2.5 2.5 0 0 0 2.5-2.5V17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            <path d="M10 12h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            <path d="m17 7 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Log out
-        </button>
-      </div>
+          Moderator /admin/
+        </a>
+      </nav>
     </div>
   </header>
 
@@ -1231,27 +1227,29 @@
       <div class="container">
         <div class="hero-card">
           <span class="hero-badge">
-            <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 2.8 4.8 6.4v5.4c0 4.8 2.7 8 7.2 9.4 4.5-1.4 7.2-4.6 7.2-9.4V6.4L12 2.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
               <path d="M9.5 11.9 11.3 13.7 14.9 9.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Official team page
+            Official club page
           </span>
 
           <div class="hero-grid">
             <div class="hero-copy">
               <h1 id="heroHeading">Bin Men Football Club</h1>
-              <p>The home of Bin Men FC. Matchday memories, team photos, and a live community review wall where supporters can leave a message or upload a photo. The hero uses <span class="mono">hero.jpg</span> only, while the photo gallery below uses <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> only.</p>
+              <p>From the first whistle to the full-time stories, this is the home of Bin Men FC online. The hero uses <span class="mono">hero.jpg</span> only, the gallery below uses <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> only, and the live review wall lets supporters leave a message or an optional photo for the club.</p>
+
               <div class="hero-actions">
                 <a class="btn" href="#reviews">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M5 12h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                     <path d="m13 7 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                   Leave a review
                 </a>
+
                 <a class="btn-ghost" href="#gallery">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/>
                     <path d="m7 14 2.8-2.8a1 1 0 0 1 1.4 0L14 14l1.8-1.8a1 1 0 0 1 1.4 0L20 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                     <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
@@ -1263,12 +1261,14 @@
 
             <div class="hero-side">
               <div class="mini-card">
-                <h2>Built for a small static site</h2>
-                <p>No build step, no framework, and no placeholder assets. It is designed to drop into GitHub Pages as a single file while still giving you real-time reviews and image uploads through Firebase.</p>
+                <h2>Supporter messages, kept simple</h2>
+                <p>Posting is secure and quick — your photo uploads are optional and limited to 2MB. Reviews appear live for everyone and are moderated separately at <a href="/admin/">/admin/</a>.</p>
               </div>
+
               <div class="mini-card">
-                <h3>Quick highlights</h3>
-                <p>Accessible review form, image preview before upload, animated progress, toast notifications, 5-second cooldown, and admin-only delete controls once the passcode is unlocked.</p>
+                <h3>For moderators</h3>
+                <p>This homepage never shows delete controls. Review tidy-up and deletion stay on the separate moderator page.</p>
+                <a class="note" href="/admin/">Open /admin/ →</a>
               </div>
             </div>
           </div>
@@ -1276,17 +1276,17 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" aria-labelledby="aboutHeading">
       <div class="container">
         <div class="about-card">
           <div>
-            <h2>About the club</h2>
-            <p>Welcome to the official Bin Men Football Club homepage. This layout keeps the tone sharp and simple: one standout hero image for the top section, a separate four-photo gallery for club moments, and a community review area below for supporters, players, mates, and matchday legends to leave memories.</p>
+            <h2 id="aboutHeading">A proper home for the club</h2>
+            <p>Clean, fast and built to suit a small team site: one standout hero image at the top, a proper four-photo gallery below, and a live review board where players, supporters and mates can leave a memory from the touchline, the changing room or the pub after full-time.</p>
           </div>
 
-          <div class="stats" aria-label="Quick stats">
+          <div class="stat-grid" aria-label="Quick site highlights">
             <div class="stat">
-              <div class="k">Hero</div>
+              <div class="k">Hero image</div>
               <div class="v">hero.jpg</div>
             </div>
             <div class="stat">
@@ -1294,48 +1294,60 @@
               <div class="v">4 photos</div>
             </div>
             <div class="stat">
-              <div class="k">Reviews</div>
-              <div class="v" id="reviewStatTotal">0</div>
+              <div class="k">Live reviews</div>
+              <div id="reviewStatTotal" class="v">0</div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="gallery">
+    <section class="section" id="gallery" aria-labelledby="galleryHeading">
       <div class="container">
-        <h2 class="section-title">Gallery</h2>
-        <p class="section-intro">The top hero image is intentionally separate from the gallery. These four shots use your existing <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> assets only.</p>
+        <h2 id="galleryHeading" class="section-title">Gallery</h2>
+        <p class="section-intro">The hero image above is kept separate from the main gallery. These four tiles use your existing team photos only, with short matchday captions to keep the page feeling like a proper club site rather than a placeholder.</p>
 
         <div class="gallery-grid" aria-label="Team gallery">
-          <button class="gallery-tile" type="button" data-lightbox-src="photo1.jpg" data-lightbox-title="Bin Men FC gallery photo 1">
-            <img src="photo1.jpg" alt="Bin Men FC gallery photo 1" loading="lazy" decoding="async" />
+          <button class="gallery-tile" type="button" data-lightbox-src="photo1.jpg" data-lightbox-title="Matchday focus" data-lightbox-desc="A sharp moment before the whistle — boots on, heads right, ready to go.">
+            <img src="photo1.jpg" alt="Bin Men FC gallery photo showing matchday focus" loading="lazy" decoding="async" />
             <span class="gallery-label">
-              <span>Photo 1</span>
+              <span>
+                <strong>Matchday focus</strong>
+                <span>Boots on, ready to go</span>
+              </span>
               <span>Open</span>
             </span>
           </button>
 
-          <button class="gallery-tile" type="button" data-lightbox-src="photo2.jpg" data-lightbox-title="Bin Men FC gallery photo 2">
-            <img src="photo2.jpg" alt="Bin Men FC gallery photo 2" loading="lazy" decoding="async" />
+          <button class="gallery-tile" type="button" data-lightbox-src="photo2.jpg" data-lightbox-title="The lads together" data-lightbox-desc="Another good one for the club album — the group together and enjoying the day.">
+            <img src="photo2.jpg" alt="Bin Men FC gallery photo showing the team together" loading="lazy" decoding="async" />
             <span class="gallery-label">
-              <span>Photo 2</span>
+              <span>
+                <strong>The lads together</strong>
+                <span>A proper team photo</span>
+              </span>
               <span>Open</span>
             </span>
           </button>
 
-          <button class="gallery-tile" type="button" data-lightbox-src="photo3.jpg" data-lightbox-title="Bin Men FC gallery photo 3">
-            <img src="photo3.jpg" alt="Bin Men FC gallery photo 3" loading="lazy" decoding="async" />
+          <button class="gallery-tile" type="button" data-lightbox-src="photo3.jpg" data-lightbox-title="Touchline energy" data-lightbox-desc="The kind of snapshot that feels like football — noise from the side and a bit of chaos.">
+            <img src="photo3.jpg" alt="Bin Men FC gallery photo showing touchline energy" loading="lazy" decoding="async" />
             <span class="gallery-label">
-              <span>Photo 3</span>
+              <span>
+                <strong>Touchline energy</strong>
+                <span>Noise, laughs and football</span>
+              </span>
               <span>Open</span>
             </span>
           </button>
 
-          <button class="gallery-tile" type="button" data-lightbox-src="photo4.jpg" data-lightbox-title="Bin Men FC gallery photo 4">
-            <img src="photo4.jpg" alt="Bin Men FC gallery photo 4" loading="lazy" decoding="async" />
+          <button class="gallery-tile" type="button" data-lightbox-src="photo4.jpg" data-lightbox-title="Full-time scenes" data-lightbox-desc="One for the memory bank after the game — the sort of photo every team ends up keeping.">
+            <img src="photo4.jpg" alt="Bin Men FC gallery photo showing full-time scenes" loading="lazy" decoding="async" />
             <span class="gallery-label">
-              <span>Photo 4</span>
+              <span>
+                <strong>Full-time scenes</strong>
+                <span>One for the memory bank</span>
+              </span>
               <span>Open</span>
             </span>
           </button>
@@ -1343,32 +1355,64 @@
       </div>
     </section>
 
-    <section class="section" id="reviews">
+    <section class="section" id="reviews" aria-labelledby="reviewsHeading">
       <div class="container">
-        <h2 class="section-title">Reviews</h2>
-        <p class="section-intro">Leave a message, a memory, or an optional photo. Review images use a smaller supporter-photo thumbnail style so they stay visually distinct from the main four-image gallery above.</p>
+        <h2 id="reviewsHeading" class="section-title">Reviews</h2>
+        <p class="section-intro">Leave a message, memory or optional photo for the club. Review photos are shown as smaller supporter thumbnails so they stay visually separate from the main gallery above.</p>
 
         <div class="reviews-shell">
-          <aside class="card">
-            <h3>Post a review</h3>
-            <p class="lead">Reviews go live in real time. Uploading a photo is optional. Supported client-side checks: image only, under 2MB, plus a five-second post cooldown to reduce accidental repeat submits.</p>
+          <aside class="card" aria-labelledby="postReviewHeading">
+            <h3 id="postReviewHeading">Post a review</h3>
+            <p class="lead">Posting is secure and quick — your photo uploads are optional and limited to 2MB. Reviews update live and are moderated separately at <a href="/admin/">/admin/</a>.</p>
+
+            <div class="posting-note">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3 2.6 19.2A1.3 1.3 0 0 0 3.7 21h16.6a1.3 1.3 0 0 0 1.1-1.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M12 9v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <circle cx="12" cy="16.5" r="1" fill="currentColor"/>
+              </svg>
+              <div>
+                Images must be genuine image files and under 2MB. To help avoid accidental repeat posts, there is a short 5-second cooldown after each submission.
+              </div>
+            </div>
 
             <form id="reviewForm" novalidate>
               <div class="field">
                 <label for="nameInput">Your name</label>
-                <input id="nameInput" class="input" type="text" maxlength="60" autocomplete="name" placeholder="Your name" />
+                <input
+                  id="nameInput"
+                  class="input"
+                  type="text"
+                  maxlength="60"
+                  autocomplete="name"
+                  placeholder="Your name"
+                  aria-describedby="nameHelp"
+                />
+                <small id="nameHelp">Use the name you want shown publicly with your review.</small>
               </div>
 
               <div class="field">
                 <label for="reviewInput">Your review</label>
-                <textarea id="reviewInput" class="textarea" maxlength="1200" placeholder="Write your message for the club…"></textarea>
-                <small id="reviewLengthHint">Max 1200 characters.</small>
+                <textarea
+                  id="reviewInput"
+                  class="textarea"
+                  maxlength="1200"
+                  placeholder="Write your message for the club…"
+                  aria-describedby="reviewHelp"
+                ></textarea>
+                <small id="reviewHelp">A short memory, shout-out, matchday story or message for the lads.</small>
               </div>
 
               <div class="field">
                 <label for="imageInput">Optional image</label>
-                <input id="imageInput" class="file-input" type="file" accept="image/*" aria-describedby="imageHint" />
-                <small id="imageHint">Image files only. Maximum size 2MB.</small>
+                <input
+                  id="imageInput"
+                  class="file-input"
+                  type="file"
+                  accept="image/*"
+                  aria-describedby="imageHelp"
+                />
+                <small id="imageHelp">Image files only. Maximum size 2MB.</small>
               </div>
 
               <div id="imagePreviewWrap" class="preview-wrap hidden" aria-live="polite">
@@ -1381,7 +1425,7 @@
                 </div>
               </div>
 
-              <div id="formProgressWrap" class="progress-wrap" aria-hidden="false">
+              <div id="formProgressWrap" class="progress-wrap">
                 <div class="progress"><span id="formProgressBar"></span></div>
               </div>
 
@@ -1395,15 +1439,11 @@
                 <span id="postButtonLabel">Post review</span>
               </button>
             </form>
-
-            <div class="notice" style="margin-top: 16px;">
-              Client-side note: the cooldown and admin passcode improve usability, but they are not a substitute for real server-enforced security rules.
-            </div>
           </aside>
 
-          <section class="card">
-            <h3>Latest reviews</h3>
-            <p class="lead">Live updates from Firestore. Search and filter below work on the reviews currently loaded in the page.</p>
+          <section class="card" aria-labelledby="latestReviewsHeading">
+            <h3 id="latestReviewsHeading">Latest reviews</h3>
+            <p class="lead">Reviews load live from Firestore. Search and filter work on the reviews currently loaded into the page. Press <span class="mono">/</span> anywhere outside a form field to jump straight to search.</p>
 
             <div class="toolbar">
               <div class="toolbar-top">
@@ -1412,7 +1452,15 @@
                     <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/>
                     <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                   </svg>
-                  <input id="reviewSearchInput" class="search-input" type="search" autocomplete="off" placeholder="Search names or reviews…" />
+                  <input
+                    id="reviewSearchInput"
+                    class="search-input"
+                    type="search"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="Search names or review text…"
+                    aria-label="Search reviews"
+                  />
                 </div>
 
                 <div class="filter-group" role="tablist" aria-label="Review filters">
@@ -1420,10 +1468,12 @@
                     All
                     <span id="filterCountAll" class="chip-badge">0</span>
                   </button>
+
                   <button class="chip" type="button" data-filter="with-image" aria-pressed="false">
                     With photo
                     <span id="filterCountWithImage" class="chip-badge">0</span>
                   </button>
+
                   <button class="chip" type="button" data-filter="without-image" aria-pressed="false">
                     Text only
                     <span id="filterCountWithoutImage" class="chip-badge">0</span>
@@ -1437,7 +1487,9 @@
               </div>
             </div>
 
-            <div id="adminSummary" class="admin-summary hidden"></div>
+            <div class="moderator-note">
+              Moderators use <a href="/admin/">/admin/</a> to delete or tidy reviews. This public homepage intentionally does not expose delete controls or admin sign-in.
+            </div>
 
             <div id="reviewsList" class="reviews-list" aria-live="polite" aria-busy="true"></div>
 
@@ -1445,29 +1497,33 @@
               No reviews match the current search or filter.
             </div>
 
+            <div id="reviewSentinel" class="sentinel" aria-hidden="true"></div>
+
             <div class="load-more-wrap">
               <button id="loadMoreReviewsButton" class="btn-ghost hidden" type="button">Show more reviews</button>
             </div>
           </section>
         </div>
 
-        <details class="ops">
+        <details class="docs">
           <summary>
             <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.7"/>
               <path d="M8 9h8M8 12h8M8 15h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
             </svg>
-            Deployment, rules, and troubleshooting
+            Deployment, rules and troubleshooting
           </summary>
 
-          <div class="ops-body">
-            <p><strong>GitHub Pages note:</strong> save this file as <span class="mono">/index.html</span> in the top level of the chosen publishing source. If you are publishing a plain static site from a source branch, add an empty <span class="mono">/.nojekyll</span> file as well. Keep <span class="mono">hero.jpg</span> and <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> beside this file.</p>
+          <div class="docs-body">
+            <p><strong>Deployment note:</strong> place this file at <span class="mono">/index.html</span> in the repo root (or the top of the selected GitHub Pages publishing source). Keep <span class="mono">hero.jpg</span> plus <span class="mono">photo1.jpg</span> to <span class="mono">photo4.jpg</span> beside it. For a plain static Pages site published from a branch, add an empty <span class="mono">/.nojekyll</span> file. Moderation remains separate at <span class="mono">/admin/</span>.</p>
 
-            <p><strong>Firebase config used here:</strong> this file keeps your existing project values exactly, including the Storage bucket:
-              <span class="mono">bin-men-fc.firebasestorage.app</span>.
-            </p>
+            <p><strong>Firebase config used here:</strong> this file keeps the exact user-provided values, including the Storage bucket <span class="mono">bin-men-fc.firebasestorage.app</span>. Public review posting uses Firestore and Storage compat flows only.</p>
 
-            <p><strong>Secure production rules</strong> — recommended once you add Firebase Authentication and an admin custom claim.</p>
+            <div class="security-note">
+              <strong>Security note:</strong> a client-side password prompt is not real security. For production moderation, use Firebase Authentication and Security Rules backed by trusted auth data such as custom claims. Keep delete controls on <span class="mono">/admin/</span>, not on this public page.
+            </div>
+
+            <p><strong>Secure production rules</strong> — use these once <span class="mono">/admin/</span> is backed by Firebase Authentication and an admin custom claim.</p>
 
 <pre>rules_version = '2';
 service cloud.firestore {
@@ -1501,14 +1557,13 @@ service firebase.storage {
   }
 }</pre>
 
-            <p><strong>Temporary passcode-only rules</strong> — these match the client-side admin gate in this file, but they are not secure because Firebase cannot trust the local password prompt.</p>
+            <p><strong>Temporary passcode-only rules</strong> — not secure, but useful while you are still using a browser-only moderator gate on <span class="mono">/admin/</span>.</p>
 
 <pre>rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /reviews/{docId} {
-      allow read, create, delete: if true;
-      allow update: if true;
+      allow read, create, update, delete: if true;
     }
   }
 }</pre>
@@ -1526,12 +1581,23 @@ service firebase.storage {
   }
 }</pre>
 
-            <p><strong>Troubleshooting:</strong></p>
+            <p><strong>Troubleshooting checklist</strong></p>
             <ul>
-              <li>If image upload fails with a Storage URL that looks wrong, check for a bucket typo. A common mistake is accidentally adding an extra character such as <span class="mono">firebasestorage.appE</span>.</li>
-              <li>If Firestore says permission denied, publish the correct rules and wait a short time for them to take effect.</li>
-              <li>If GitHub Pages shows a 404, confirm that this file is at the top level of the selected publishing source, and hard refresh after deployment.</li>
-              <li>If you use raw Google Cloud Storage URLs or custom browser requests instead of the Firebase SDK flow, configure bucket CORS accordingly.</li>
+              <li><strong>CORS or bucket URL errors:</strong> if uploads fail with a URL containing an obvious typo such as <span class="mono">firebasestorage.appE</span>, fix the exact <span class="mono">storageBucket</span> value. Standard Firebase Web SDK upload flows normally work without custom bucket CORS config; custom raw Google Cloud Storage requests may need bucket CORS rules.</li>
+              <li><strong>Permission denied:</strong> publish the correct Firestore and Storage rules and wait a short time for them to take effect. Review creation needs Firestore create access and Storage create access. Review reading needs Firestore read access.</li>
+              <li><strong>GitHub Pages 404:</strong> confirm that this file is in the selected publishing source, confirm the custom domain if used, and hard refresh after deployment. If <span class="mono">/admin/</span> 404s, that separate file must exist at <span class="mono">/admin/index.html</span>.</li>
+              <li><strong>Moderator remember-me:</strong> persistent client-side admin sessions are intentionally not implemented here. They belong on the separate <span class="mono">/admin/</span> page only.</li>
+            </ul>
+
+            <p><strong>Official references used for guidance</strong></p>
+            <ul>
+              <li><a href="https://firebase.google.com/docs/firestore/query-data/listen" target="_blank" rel="noopener">Firebase — Cloud Firestore real-time listeners (onSnapshot)</a></li>
+              <li><a href="https://firebase.google.com/docs/storage/web/upload-files" target="_blank" rel="noopener">Firebase — Cloud Storage uploads on the web</a></li>
+              <li><a href="https://firebase.google.com/docs/firestore/manage-data/delete-data" target="_blank" rel="noopener">Firebase — Firestore delete data</a></li>
+              <li><a href="https://firebase.google.com/docs/auth/admin/custom-claims" target="_blank" rel="noopener">Firebase — Admin custom claims</a></li>
+              <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site" target="_blank" rel="noopener">GitHub Pages — creating and publishing a site</a></li>
+              <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/troubleshooting-404-errors-for-github-pages-sites" target="_blank" rel="noopener">GitHub Pages — troubleshooting 404 errors</a></li>
+              <li><a href="https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll/about-github-pages-and-jekyll" target="_blank" rel="noopener">GitHub Pages — Jekyll and static site notes</a></li>
             </ul>
           </div>
         </details>
@@ -1541,89 +1607,12 @@ service firebase.storage {
 
   <footer class="site-footer">
     <div class="container">
-      © 2026 Bin Men Football Club. Built as a single static page with Firebase-backed reviews and a small client-side admin mode.
+      © 2026 Bin Men Football Club. Reviews are live for the community; moderation stays on <a href="/admin/">/admin/</a>.
     </div>
   </footer>
 
-  <!-- Admin login modal -->
-  <div id="adminModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle" aria-describedby="adminModalDesc">
-      <div class="modal-head">
-        <div>
-          <h3 id="adminModalTitle" class="modal-title">Admin mode</h3>
-          <p id="adminModalDesc" class="modal-desc">Enter the admin passcode to enable delete controls for reviews. This is a client-side convenience gate only. For real production security, use Firebase Authentication and secure Security Rules.</p>
-        </div>
-        <button class="close-x" type="button" data-close-modal="adminModal" aria-label="Close admin modal">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div id="adminLoginError" class="login-error" role="alert"></div>
-
-        <div class="field">
-          <label for="adminPasswordInput">Admin password</label>
-          <input id="adminPasswordInput" class="input" type="password" autocomplete="current-password" placeholder="Enter admin password" />
-        </div>
-
-        <label class="checkbox">
-          <input id="adminRememberInput" type="checkbox" />
-          <span>Remember this device for 7 days</span>
-        </label>
-
-        <div class="modal-actions">
-          <button id="adminLoginButton" class="btn" type="button">
-            <svg class="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="m13 7 5 5-5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Enter admin mode
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete confirmation modal -->
-  <div id="deleteModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" aria-describedby="deleteModalDesc">
-      <div class="modal-head">
-        <div>
-          <h3 id="deleteModalTitle" class="modal-title">Delete this review?</h3>
-          <p id="deleteModalDesc" class="modal-desc">This removes the Firestore document first, then tries to remove the associated image from Firebase Storage. If image deletion fails, the review can still be removed and the orphan file can be cleaned up later.</p>
-        </div>
-        <button class="close-x" type="button" data-close-modal="deleteModal" aria-label="Close delete confirmation">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div id="deletePreview" class="modal-preview"></div>
-        <div class="progress"><span id="deleteProgressBar"></span></div>
-        <div id="deleteStatus" class="status-line" role="status" aria-live="polite">Waiting for confirmation.</div>
-
-        <div class="modal-actions">
-          <button id="deleteCancelButton" class="btn-ghost" type="button" data-close-modal="deleteModal">Cancel</button>
-          <button id="deleteConfirmButton" class="btn-danger" type="button">
-            <svg class="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M4 7h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="M6 7l1 12.2A2 2 0 0 0 9 21h6a2 2 0 0 0 2-1.8L18 7M9 7V5.7A1.7 1.7 0 0 1 10.7 4h2.6A1.7 1.7 0 0 1 15 5.7V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Delete review
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Lightbox modal -->
   <div id="lightboxModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" aria-describedby="lightboxDesc">
       <div class="modal-head">
         <div>
           <h3 id="lightboxTitle" class="modal-title">Image preview</h3>
@@ -1644,7 +1633,7 @@ service firebase.storage {
 
   <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Firebase compat SDKs -->
+  <!-- Firebase compat CDN scripts only; no build step -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
@@ -1653,18 +1642,17 @@ service firebase.storage {
     "use strict";
 
     /*
-      This file uses Firebase compat CDN scripts so it can stay as a single static HTML file.
-      Long term, Firebase recommends the modular SDK, but compat is still documented for
-      namespaced code during migration.
+      Developer notes
+      - This homepage intentionally does NOT implement admin password or delete UI.
+      - Moderation belongs at /admin/.
+      - Persistent client-side moderator sessions, if desired, should also stay on /admin/.
     */
 
-    const ADMIN_PASSWORD = "liam";
-    const ADMIN_SESSION_KEY = "liam_ink_home_admin_v1";
-    const ADMIN_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-    const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+    const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB limit
     const INITIAL_VISIBLE_REVIEWS = 6;
     const REVIEW_STEP = 6;
 
+    // Exact user-provided Firebase config; keep unchanged.
     const firebaseConfig = {
       apiKey: "AIzaSyBx1W3gp9LdFyN3dDtRUoZm52o6P2DLJso",
       authDomain: "bin-men-fc.firebaseapp.com",
@@ -1682,7 +1670,6 @@ service firebase.storage {
     const storage = firebase.storage();
 
     const state = {
-      isAdmin: false,
       reviews: [],
       filteredReviews: [],
       quickFilter: "all",
@@ -1690,22 +1677,17 @@ service firebase.storage {
       visibleCount: INITIAL_VISIBLE_REVIEWS,
       posting: false,
       cooldownUntil: 0,
-      cooldownInterval: null,
-      reviewListenerUnsub: null,
+      cooldownTimer: null,
       previewObjectUrl: "",
+      unsubReviews: null,
       activeModalId: null,
-      restoreFocusEl: null,
-      deleteTarget: null,
-      deleteBusy: false
+      modalRestoreFocus: null,
+      observer: null
     };
 
     const el = {
       body: document.body,
       topProgressBar: document.getElementById("topProgressBar"),
-
-      adminBadge: document.getElementById("adminBadge"),
-      adminButton: document.getElementById("adminButton"),
-      adminLogoutButton: document.getElementById("adminLogoutButton"),
 
       reviewStatTotal: document.getElementById("reviewStatTotal"),
 
@@ -1728,25 +1710,13 @@ service firebase.storage {
       filterCountAll: document.getElementById("filterCountAll"),
       filterCountWithImage: document.getElementById("filterCountWithImage"),
       filterCountWithoutImage: document.getElementById("filterCountWithoutImage"),
+
       reviewsMetaLine: document.getElementById("reviewsMetaLine"),
       reviewsRenderedLine: document.getElementById("reviewsRenderedLine"),
-      adminSummary: document.getElementById("adminSummary"),
       reviewsList: document.getElementById("reviewsList"),
       reviewsEmpty: document.getElementById("reviewsEmpty"),
+      reviewSentinel: document.getElementById("reviewSentinel"),
       loadMoreReviewsButton: document.getElementById("loadMoreReviewsButton"),
-
-      adminModal: document.getElementById("adminModal"),
-      adminPasswordInput: document.getElementById("adminPasswordInput"),
-      adminRememberInput: document.getElementById("adminRememberInput"),
-      adminLoginError: document.getElementById("adminLoginError"),
-      adminLoginButton: document.getElementById("adminLoginButton"),
-
-      deleteModal: document.getElementById("deleteModal"),
-      deletePreview: document.getElementById("deletePreview"),
-      deleteProgressBar: document.getElementById("deleteProgressBar"),
-      deleteStatus: document.getElementById("deleteStatus"),
-      deleteCancelButton: document.getElementById("deleteCancelButton"),
-      deleteConfirmButton: document.getElementById("deleteConfirmButton"),
 
       lightboxModal: document.getElementById("lightboxModal"),
       lightboxTitle: document.getElementById("lightboxTitle"),
@@ -1760,57 +1730,36 @@ service firebase.storage {
 
     function init() {
       bindEvents();
-      restoreAdminSession();
-      updateAdminUI();
+      setupInfiniteScroll();
       loadReviews();
-      maybeOpenAdminFromQuery();
     }
 
     function bindEvents() {
-      el.adminButton.addEventListener("click", () => {
-        if (state.isAdmin) {
-          toast("Admin mode is already active on this device.", "info");
-          return;
-        }
-        openModal("adminModal", el.adminPasswordInput);
-      });
-
-      el.adminLogoutButton.addEventListener("click", logoutAdmin);
-
-      el.adminLoginButton.addEventListener("click", handleAdminLogin);
-      el.adminPasswordInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          handleAdminLogin();
-        }
-      });
-
       el.reviewForm.addEventListener("submit", handleReviewSubmit);
       el.imageInput.addEventListener("change", handleImageSelection);
       el.clearImageButton.addEventListener("click", clearSelectedImage);
 
       el.reviewSearchInput.addEventListener("input", debounce(() => {
         state.searchTerm = el.reviewSearchInput.value.trim().toLowerCase();
-        applyReviewFilters();
+        applyReviewFilters(true);
       }, 120));
 
       el.reviewFilterButtons.forEach((button) => {
         button.addEventListener("click", () => {
           setQuickFilter(button.dataset.filter || "all");
-          applyReviewFilters();
+          applyReviewFilters(true);
         });
       });
 
-      el.loadMoreReviewsButton.addEventListener("click", () => {
-        state.visibleCount += REVIEW_STEP;
-        renderReviews();
-      });
+      el.loadMoreReviewsButton.addEventListener("click", renderMoreReviews);
 
       document.querySelectorAll("[data-lightbox-src]").forEach((button) => {
         button.addEventListener("click", () => {
-          const src = button.getAttribute("data-lightbox-src") || "";
-          const title = button.getAttribute("data-lightbox-title") || "Image preview";
-          openLightbox(src, title, title);
+          openLightbox(
+            button.getAttribute("data-lightbox-src") || "",
+            button.getAttribute("data-lightbox-title") || "Image preview",
+            button.getAttribute("data-lightbox-desc") || "Preview"
+          );
         });
       });
 
@@ -1818,37 +1767,29 @@ service firebase.storage {
         button.addEventListener("click", () => closeModal(button.getAttribute("data-close-modal")));
       });
 
-      [el.adminModal, el.deleteModal, el.lightboxModal].forEach((backdrop) => {
-        backdrop.addEventListener("mousedown", (event) => {
-          if (event.target === backdrop) {
-            closeModal(backdrop.id);
-          }
-        });
+      el.lightboxModal.addEventListener("mousedown", (event) => {
+        if (event.target === el.lightboxModal) {
+          closeModal("lightboxModal");
+        }
       });
 
       document.addEventListener("keydown", handleGlobalKeys);
-      el.deleteConfirmButton.addEventListener("click", performDelete);
-    }
-
-    function maybeOpenAdminFromQuery() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("admin") === "1" && !state.isAdmin) {
-        openModal("adminModal", el.adminPasswordInput);
-      }
     }
 
     function handleGlobalKeys(event) {
       const activeModal = getOpenModal();
+
       if (event.key === "Escape" && activeModal) {
         event.preventDefault();
         closeModal(activeModal.id);
         return;
       }
 
-      if (event.key === "/" && !isTextInput(event.target) && !activeModal) {
+      if (event.key === "/" && !activeModal && !isTextInput(event.target)) {
         event.preventDefault();
         el.reviewSearchInput.focus();
         el.reviewSearchInput.select();
+        return;
       }
 
       if (event.key === "Tab" && activeModal) {
@@ -1856,104 +1797,20 @@ service firebase.storage {
       }
     }
 
-    function handleAdminLogin() {
-      const password = el.adminPasswordInput.value.trim();
-      const remember = el.adminRememberInput.checked;
+    function setupInfiniteScroll() {
+      if (!("IntersectionObserver" in window)) return;
 
-      if (password !== ADMIN_PASSWORD) {
-        el.adminLoginError.textContent = "Incorrect password.";
-        el.adminLoginError.style.display = "block";
-        toast("Incorrect admin password.", "error");
-        el.adminPasswordInput.focus();
-        el.adminPasswordInput.select();
-        return;
-      }
-
-      el.adminLoginError.textContent = "";
-      el.adminLoginError.style.display = "none";
-
-      saveAdminSession(remember);
-      state.isAdmin = true;
-      updateAdminUI();
-      closeModal("adminModal");
-      el.adminPasswordInput.value = "";
-      toast("Admin mode enabled.", "success");
-    }
-
-    function logoutAdmin() {
-      clearAdminSession();
-      state.isAdmin = false;
-      updateAdminUI();
-      renderReviews();
-      toast("Admin session cleared.", "info");
-    }
-
-    function saveAdminSession(remember) {
-      const payload = JSON.stringify({
-        version: 1,
-        expiresAt: Date.now() + ADMIN_SESSION_TTL_MS
+      state.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && state.visibleCount < state.filteredReviews.length) {
+            renderMoreReviews();
+          }
+        });
+      }, {
+        rootMargin: "280px 0px"
       });
 
-      sessionStorage.removeItem(ADMIN_SESSION_KEY);
-      localStorage.removeItem(ADMIN_SESSION_KEY);
-
-      if (remember) {
-        localStorage.setItem(ADMIN_SESSION_KEY, payload);
-      } else {
-        sessionStorage.setItem(ADMIN_SESSION_KEY, payload);
-      }
-    }
-
-    function restoreAdminSession() {
-      const raw = sessionStorage.getItem(ADMIN_SESSION_KEY) || localStorage.getItem(ADMIN_SESSION_KEY);
-      if (!raw) return;
-
-      try {
-        const parsed = JSON.parse(raw);
-        if (!parsed.expiresAt || Date.now() > parsed.expiresAt) {
-          clearAdminSession();
-          return;
-        }
-        state.isAdmin = true;
-      } catch (error) {
-        clearAdminSession();
-      }
-    }
-
-    function clearAdminSession() {
-      sessionStorage.removeItem(ADMIN_SESSION_KEY);
-      localStorage.removeItem(ADMIN_SESSION_KEY);
-    }
-
-    function updateAdminUI() {
-      el.adminBadge.classList.toggle("hidden", !state.isAdmin);
-      el.adminLogoutButton.classList.toggle("hidden", !state.isAdmin);
-
-      if (state.isAdmin) {
-        el.adminButton.innerHTML = iconShield() + "<span>Admin active</span>";
-        el.adminSummary.classList.remove("hidden");
-      } else {
-        el.adminButton.innerHTML = iconLock() + "<span>Admin</span>";
-        el.adminSummary.classList.add("hidden");
-      }
-
-      updateAdminSummary();
-    }
-
-    function updateAdminSummary() {
-      if (!state.isAdmin) {
-        el.adminSummary.innerHTML = "";
-        return;
-      }
-
-      const total = state.reviews.length;
-      const imageCount = state.reviews.filter((review) => !!review.image).length;
-
-      el.adminSummary.innerHTML = `
-        <strong>Admin controls enabled.</strong><br>
-        You can now delete review documents from the list below. This homepage file embeds admin mode because the current brief only asked for a single repo-root <span class="mono">index.html</span>. For true production security, replace this client-side passcode with Firebase Authentication and secure rules.<br><br>
-        <span class="mono">${total}</span> total reviews loaded • <span class="mono">${imageCount}</span> with photos
-      `;
+      state.observer.observe(el.reviewSentinel);
     }
 
     function loadReviews() {
@@ -1961,43 +1818,45 @@ service firebase.storage {
       el.reviewsList.setAttribute("aria-busy", "true");
       el.reviewsMetaLine.textContent = "Connecting to Firestore…";
 
-      if (typeof state.reviewListenerUnsub === "function") {
-        state.reviewListenerUnsub();
+      if (typeof state.unsubReviews === "function") {
+        state.unsubReviews();
       }
 
-      state.reviewListenerUnsub = db.collection("reviews").onSnapshot(
-        (snapshot) => {
-          state.reviews = snapshot.docs.map(mapReview).sort((a, b) => b.time - a.time);
-          el.reviewStatTotal.textContent = String(state.reviews.length);
-          updateFilterCounts();
-          applyReviewFilters(false);
-          updateAdminSummary();
-          el.reviewsList.setAttribute("aria-busy", "false");
-          loadingBarDone();
-        },
-        (error) => {
-          console.error("Firestore listener error:", error);
-          el.reviewsList.setAttribute("aria-busy", "false");
-          loadingBarDone();
-          handleFirebaseError(error, "Could not load reviews.");
-        }
-      );
-    }
+      // Real-time listener as requested.
+      state.unsubReviews = db.collection("reviews")
+        .orderBy("time", "desc")
+        .onSnapshot(
+          (snapshot) => {
+            state.reviews = snapshot.docs.map((doc) => {
+              const data = doc.data() || {};
+              return {
+                id: doc.id,
+                name: typeof data.name === "string" ? data.name : "Unknown reviewer",
+                text: typeof data.text === "string" ? data.text : "",
+                image: typeof data.image === "string" ? data.image : "",
+                time: normaliseTime(data.time)
+              };
+            });
 
-    function mapReview(doc) {
-      const data = doc.data() || {};
-      return {
-        id: doc.id,
-        name: typeof data.name === "string" ? data.name : "Unknown reviewer",
-        text: typeof data.text === "string" ? data.text : "",
-        image: typeof data.image === "string" ? data.image : "",
-        time: normaliseTime(data.time)
-      };
+            el.reviewStatTotal.textContent = String(state.reviews.length);
+            updateFilterCounts();
+            applyReviewFilters(false);
+            el.reviewsList.setAttribute("aria-busy", "false");
+            loadingBarDone();
+          },
+          (error) => {
+            console.error("Firestore listener error:", error);
+            el.reviewsList.setAttribute("aria-busy", "false");
+            loadingBarDone();
+            handleFirebaseError(error, "Could not load reviews.");
+          }
+        );
     }
 
     function updateFilterCounts() {
       const withImage = state.reviews.filter((review) => !!review.image).length;
       const withoutImage = state.reviews.length - withImage;
+
       el.filterCountAll.textContent = String(state.reviews.length);
       el.filterCountWithImage.textContent = String(withImage);
       el.filterCountWithoutImage.textContent = String(withoutImage);
@@ -2005,6 +1864,7 @@ service firebase.storage {
 
     function setQuickFilter(filter) {
       state.quickFilter = filter;
+
       el.reviewFilterButtons.forEach((button) => {
         const active = button.dataset.filter === filter;
         button.classList.toggle("active", active);
@@ -2012,19 +1872,18 @@ service firebase.storage {
       });
     }
 
-    function applyReviewFilters(resetVisible = true) {
-      const quickFilter = state.quickFilter;
-      const term = state.searchTerm;
+    function applyReviewFilters(resetVisible) {
+      const q = state.searchTerm;
+      const f = state.quickFilter;
 
       state.filteredReviews = state.reviews.filter((review) => {
-        const matchesFilter =
-          quickFilter === "all" ||
-          (quickFilter === "with-image" && !!review.image) ||
-          (quickFilter === "without-image" && !review.image);
+        const matchesImageFilter =
+          f === "all" ||
+          (f === "with-image" && !!review.image) ||
+          (f === "without-image" && !review.image);
 
-        if (!matchesFilter) return false;
-
-        if (!term) return true;
+        if (!matchesImageFilter) return false;
+        if (!q) return true;
 
         const haystack = [
           review.name,
@@ -2033,7 +1892,7 @@ service firebase.storage {
           formatDate(review.time)
         ].join(" ").toLowerCase();
 
-        return haystack.includes(term);
+        return haystack.includes(q);
       });
 
       if (resetVisible) {
@@ -2047,23 +1906,31 @@ service firebase.storage {
       el.reviewsList.innerHTML = "";
 
       const visible = state.filteredReviews.slice(0, state.visibleCount);
+      const fragment = document.createDocumentFragment();
 
       visible.forEach((review) => {
-        el.reviewsList.appendChild(buildReviewCard(review));
+        fragment.appendChild(buildReviewCard(review));
       });
 
-      const totalVisible = state.filteredReviews.length;
+      el.reviewsList.appendChild(fragment);
+
+      const total = state.filteredReviews.length;
       const shown = visible.length;
       const photoCount = state.filteredReviews.filter((review) => !!review.image).length;
 
-      el.reviewsMetaLine.textContent = `${totalVisible} visible review${totalVisible === 1 ? "" : "s"} • ${photoCount} with photo${photoCount === 1 ? "" : "s"}`;
+      el.reviewsMetaLine.textContent = `${total} visible review${total === 1 ? "" : "s"} • ${photoCount} with photo${photoCount === 1 ? "" : "s"}`;
       el.reviewsRenderedLine.textContent = `${shown} shown`;
 
-      const hasAny = totalVisible > 0;
-      const hasMore = shown < totalVisible;
+      const hasAny = total > 0;
+      const hasMore = shown < total;
 
       el.reviewsEmpty.classList.toggle("hidden", hasAny);
       el.loadMoreReviewsButton.classList.toggle("hidden", !hasMore);
+    }
+
+    function renderMoreReviews() {
+      state.visibleCount += REVIEW_STEP;
+      renderReviews();
     }
 
     function buildReviewCard(review) {
@@ -2091,13 +1958,8 @@ service firebase.storage {
       meta.appendChild(name);
       meta.appendChild(date);
 
-      const id = document.createElement("div");
-      id.className = "review-id";
-      id.textContent = state.isAdmin ? review.id : "Review";
-
       head.appendChild(avatar);
       head.appendChild(meta);
-      head.appendChild(id);
       card.appendChild(head);
 
       const text = document.createElement("p");
@@ -2105,29 +1967,33 @@ service firebase.storage {
       text.textContent = review.text || "No review text supplied.";
       card.appendChild(text);
 
-      const safeUrl = sanitiseHttpUrl(review.image);
-      if (safeUrl) {
-        const thumb = document.createElement("button");
-        thumb.type = "button";
-        thumb.className = "review-media";
-        thumb.setAttribute("aria-label", `Open supporter photo from ${review.name}`);
-        thumb.addEventListener("click", () => {
-          openLightbox(safeUrl, `Supporter photo from ${review.name}`, `Review by ${review.name}`);
+      const safeImageUrl = sanitiseHttpUrl(review.image);
+      if (safeImageUrl) {
+        const media = document.createElement("button");
+        media.type = "button";
+        media.className = "review-media";
+        media.setAttribute("aria-label", `Open supporter photo from ${review.name}`);
+        media.addEventListener("click", () => {
+          openLightbox(
+            safeImageUrl,
+            `Supporter photo from ${review.name}`,
+            `Review image posted by ${review.name}`
+          );
         });
 
         const img = document.createElement("img");
+        img.src = safeImageUrl;
+        img.alt = `Supporter photo shared in a review by ${review.name}`;
         img.loading = "lazy";
         img.decoding = "async";
-        img.src = safeUrl;
-        img.alt = `Supporter photo attached to a review by ${review.name}`;
 
         const badge = document.createElement("div");
         badge.className = "review-media-badge";
         badge.textContent = "Supporter photo";
 
-        thumb.appendChild(img);
-        thumb.appendChild(badge);
-        card.appendChild(thumb);
+        media.appendChild(img);
+        media.appendChild(badge);
+        card.appendChild(media);
       }
 
       const foot = document.createElement("div");
@@ -2136,48 +2002,19 @@ service firebase.storage {
       const tinyMeta = document.createElement("div");
       tinyMeta.className = "tiny-meta";
 
-      const textPill = document.createElement("span");
-      textPill.className = "tiny-pill";
-      textPill.textContent = safeUrl ? "Has photo" : "Text only";
+      const typePill = document.createElement("span");
+      typePill.className = "tiny-pill";
+      typePill.textContent = safeImageUrl ? "Has photo" : "Text only";
 
       const timePill = document.createElement("span");
       timePill.className = "tiny-pill";
       timePill.textContent = formatTimeOnly(review.time);
 
-      tinyMeta.appendChild(textPill);
+      tinyMeta.appendChild(typePill);
       tinyMeta.appendChild(timePill);
-
-      const actions = document.createElement("div");
-      actions.className = "review-actions";
-
-      if (state.isAdmin) {
-        const copyBtn = document.createElement("button");
-        copyBtn.type = "button";
-        copyBtn.className = "btn-ghost";
-        copyBtn.innerHTML = iconCopy() + "<span>Copy ID</span>";
-        copyBtn.addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(review.id);
-            toast("Review document ID copied.", "success");
-          } catch (error) {
-            toast("Could not copy the review ID.", "warning");
-          }
-        });
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.className = "btn-danger";
-        deleteBtn.innerHTML = iconTrash() + "<span>Delete</span>";
-        deleteBtn.addEventListener("click", () => openDeleteModal(review));
-
-        actions.appendChild(copyBtn);
-        actions.appendChild(deleteBtn);
-      }
-
       foot.appendChild(tinyMeta);
-      foot.appendChild(actions);
-      card.appendChild(foot);
 
+      card.appendChild(foot);
       return card;
     }
 
@@ -2212,6 +2049,7 @@ service firebase.storage {
         URL.revokeObjectURL(state.previewObjectUrl);
         state.previewObjectUrl = "";
       }
+
       el.imageInput.value = "";
       el.imagePreview.src = "";
       el.imagePreview.alt = "";
@@ -2221,12 +2059,15 @@ service firebase.storage {
 
     function validateImageFile(file) {
       if (!file) return { ok: true };
+
       if (!file.type || !file.type.startsWith("image/")) {
         return { ok: false, message: "Please choose an image file." };
       }
+
       if (file.size > MAX_IMAGE_SIZE) {
         return { ok: false, message: "Image must be under 2MB." };
       }
+
       return { ok: true };
     }
 
@@ -2235,10 +2076,10 @@ service firebase.storage {
 
       if (state.posting) return;
 
-      const remaining = secondsLeftOnCooldown();
-      if (remaining > 0) {
-        toast(`Please wait ${remaining}s before posting again.`, "warning");
-        setFormStatus(`Cooldown active. You can post again in ${remaining}s.`);
+      const cooldownLeft = getCooldownSecondsLeft();
+      if (cooldownLeft > 0) {
+        toast(`Please wait ${cooldownLeft}s before posting again.`, "warning");
+        setFormStatus(`Cooldown active. You can post again in ${cooldownLeft}s.`);
         return;
       }
 
@@ -2260,23 +2101,23 @@ service firebase.storage {
       }
 
       state.posting = true;
-      el.postButton.disabled = true;
-      el.postButtonLabel.textContent = "Posting…";
+      setPostButtonBusy(true, "Posting…");
       showFormProgress(true);
       updateFormProgress(8, "Preparing review…");
       loadingBarStart();
 
       let imageUrl = "";
-      let uploadedRef = null;
+      let uploadRef = null;
+      let reviewSaved = false;
 
       try {
         if (file) {
-          updateFormProgress(12, "Uploading image…");
-
           const safeName = file.name.replace(/\s+/g, "-").replace(/[^\w.-]/g, "");
-          const fileName = `reviews/${Date.now()}-${safeName}`;
-          uploadedRef = storage.ref(fileName);
-          const uploadTask = uploadedRef.put(file);
+          const storagePath = `reviews/${Date.now()}-${safeName}`;
+          uploadRef = storage.ref(storagePath);
+          const uploadTask = uploadRef.put(file);
+
+          updateFormProgress(12, "Uploading image… 0%");
 
           await new Promise((resolve, reject) => {
             uploadTask.on(
@@ -2285,7 +2126,9 @@ service firebase.storage {
                 const percent = snapshot.totalBytes
                   ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
                   : 0;
-                const uiPercent = Math.max(12, Math.min(88, percent));
+
+                // Keep the UI moving smoothly even before Firestore save begins.
+                const uiPercent = Math.max(12, Math.min(92, percent));
                 updateFormProgress(uiPercent, `Uploading image… ${percent}%`);
               },
               (error) => reject(error),
@@ -2293,12 +2136,13 @@ service firebase.storage {
             );
           });
 
-          imageUrl = await uploadedRef.getDownloadURL();
-          updateFormProgress(92, "Saving review…");
+          imageUrl = await uploadRef.getDownloadURL();
+          updateFormProgress(95, "Saving review…");
         } else {
-          updateFormProgress(55, "Saving review…");
+          updateFormProgress(62, "Saving review…");
         }
 
+        // Preserve the requested Firestore document shape exactly.
         await db.collection("reviews").add({
           name: name,
           text: text,
@@ -2306,6 +2150,7 @@ service firebase.storage {
           time: Date.now()
         });
 
+        reviewSaved = true;
         updateFormProgress(100, "Posted successfully.");
         toast("Review posted successfully.", "success");
         clearReviewForm();
@@ -2313,16 +2158,17 @@ service firebase.storage {
       } catch (error) {
         console.error("Post review failed:", error);
 
-        if (uploadedRef) {
+        // If upload succeeded but Firestore save failed, attempt cleanup.
+        if (uploadRef && !reviewSaved) {
           try {
-            await uploadedRef.delete();
+            await uploadRef.delete();
           } catch (cleanupError) {
             console.warn("Uploaded image cleanup failed:", cleanupError);
           }
         }
 
         handleFirebaseError(error, "Could not post review.");
-        resetPostButtonIfNeeded();
+        setPostButtonBusy(false, "Post review");
       } finally {
         state.posting = false;
         loadingBarDone();
@@ -2335,50 +2181,6 @@ service firebase.storage {
       clearSelectedImage();
     }
 
-    function startCooldown(seconds) {
-      state.cooldownUntil = Date.now() + (seconds * 1000);
-      updateCooldownUI();
-      if (state.cooldownInterval) {
-        clearInterval(state.cooldownInterval);
-      }
-
-      state.cooldownInterval = window.setInterval(() => {
-        const remaining = secondsLeftOnCooldown();
-        if (remaining <= 0) {
-          clearInterval(state.cooldownInterval);
-          state.cooldownInterval = null;
-          state.cooldownUntil = 0;
-          hideFormProgressSoon();
-          setFormStatus("Ready to post another review.");
-          resetPostButtonIfNeeded();
-          return;
-        }
-        updateCooldownUI();
-      }, 250);
-    }
-
-    function secondsLeftOnCooldown() {
-      if (!state.cooldownUntil) return 0;
-      return Math.max(0, Math.ceil((state.cooldownUntil - Date.now()) / 1000));
-    }
-
-    function updateCooldownUI() {
-      const remaining = secondsLeftOnCooldown();
-      el.postButton.disabled = true;
-      el.postButtonLabel.textContent = remaining > 0 ? `Post review (${remaining}s)` : "Post review";
-      setFormStatus(remaining > 0 ? `Cooldown active. You can post again in ${remaining}s.` : "Ready to post another review.");
-      updateFormProgress(100, remaining > 0 ? `Cooldown active. You can post again in ${remaining}s.` : "Ready.");
-    }
-
-    function resetPostButtonIfNeeded() {
-      if (secondsLeftOnCooldown() > 0) {
-        updateCooldownUI();
-        return;
-      }
-      el.postButton.disabled = false;
-      el.postButtonLabel.textContent = "Post review";
-    }
-
     function showFormProgress(show) {
       el.formProgressWrap.style.display = show ? "grid" : "none";
     }
@@ -2389,137 +2191,54 @@ service firebase.storage {
       setFormStatus(message);
     }
 
-    function hideFormProgressSoon() {
-      window.setTimeout(() => {
-        if (state.posting || secondsLeftOnCooldown() > 0) return;
-        el.formProgressBar.style.width = "0%";
-        showFormProgress(false);
-      }, 450);
-    }
-
     function setFormStatus(message) {
       el.formStatus.textContent = message || "";
     }
 
-    function openDeleteModal(review) {
-      if (!state.isAdmin) return;
-
-      state.deleteTarget = review;
-      el.deletePreview.innerHTML = "";
-
-      const strong = document.createElement("strong");
-      strong.textContent = review.name;
-
-      const text = document.createElement("div");
-      text.textContent = review.text || "No review text supplied.";
-
-      const id = document.createElement("div");
-      id.className = "mono";
-      id.textContent = `Document ID: ${review.id}`;
-
-      const note = document.createElement("div");
-      note.textContent = review.image
-        ? "A review image is attached and deletion will be attempted."
-        : "No review image is attached.";
-
-      el.deletePreview.appendChild(strong);
-      el.deletePreview.appendChild(text);
-      el.deletePreview.appendChild(id);
-      el.deletePreview.appendChild(note);
-
-      setDeleteProgress(0);
-      setDeleteStatus("Waiting for confirmation.");
-      el.deleteConfirmButton.disabled = false;
-      el.deleteCancelButton.disabled = false;
-
-      openModal("deleteModal", el.deleteConfirmButton);
+    function setPostButtonBusy(disabled, label) {
+      el.postButton.disabled = !!disabled;
+      el.postButtonLabel.textContent = label;
     }
 
-    async function performDelete() {
-      if (!state.deleteTarget || state.deleteBusy) return;
+    function startCooldown(seconds) {
+      state.cooldownUntil = Date.now() + (seconds * 1000);
+      updateCooldownUI();
 
-      state.deleteBusy = true;
-      el.deleteConfirmButton.disabled = true;
-      el.deleteCancelButton.disabled = true;
-      loadingBarStart();
+      if (state.cooldownTimer) {
+        clearInterval(state.cooldownTimer);
+      }
 
-      try {
-        setDeleteProgress(18);
-        setDeleteStatus("Deleting Firestore document…");
-        await db.collection("reviews").doc(state.deleteTarget.id).delete();
+      state.cooldownTimer = window.setInterval(() => {
+        const left = getCooldownSecondsLeft();
 
-        let imageDeleted = true;
-        if (state.deleteTarget.image) {
-          setDeleteProgress(64);
-          setDeleteStatus("Review removed. Deleting Storage image…");
-          try {
-            await deleteImageByUrl(state.deleteTarget.image);
-          } catch (storageError) {
-            imageDeleted = false;
-            console.warn("Image deletion failed:", storageError);
-          }
+        if (left <= 0) {
+          clearInterval(state.cooldownTimer);
+          state.cooldownTimer = null;
+          state.cooldownUntil = 0;
+          setPostButtonBusy(false, "Post review");
+          setFormStatus("Ready to post another review.");
+          window.setTimeout(() => {
+            if (!state.posting) {
+              el.formProgressBar.style.width = "0%";
+              showFormProgress(false);
+            }
+          }, 500);
+          return;
         }
 
-        setDeleteProgress(100);
-        setDeleteStatus(imageDeleted ? "Delete complete." : "Review deleted, but the image could not be removed.");
-        toast(
-          imageDeleted
-            ? "Review deleted successfully."
-            : "Review deleted, but the image could not be removed from Storage.",
-          imageDeleted ? "success" : "warning",
-          imageDeleted ? 3200 : 5200
-        );
-
-        window.setTimeout(() => closeModal("deleteModal"), 350);
-      } catch (error) {
-        console.error("Delete review failed:", error);
-        handleFirebaseError(error, "Delete failed.");
-        setDeleteStatus("Delete failed. Check rules and bucket settings.");
-        el.deleteConfirmButton.disabled = false;
-        el.deleteCancelButton.disabled = false;
-      } finally {
-        state.deleteBusy = false;
-        loadingBarDone();
-      }
+        updateCooldownUI();
+      }, 250);
     }
 
-    async function deleteImageByUrl(url) {
-      if (!url) return;
-
-      try {
-        await storage.refFromURL(url).delete();
-        return;
-      } catch (firstError) {
-        const path = extractStoragePath(url);
-        if (!path) throw firstError;
-        await storage.ref(path).delete();
-      }
+    function getCooldownSecondsLeft() {
+      if (!state.cooldownUntil) return 0;
+      return Math.max(0, Math.ceil((state.cooldownUntil - Date.now()) / 1000));
     }
 
-    function extractStoragePath(url) {
-      try {
-        if (url.startsWith("gs://")) {
-          const parts = url.replace(/^gs:\/\//, "").split("/");
-          parts.shift();
-          return decodeURIComponent(parts.join("/"));
-        }
-
-        const parsed = new URL(url);
-
-        const match = parsed.pathname.match(/\/o\/(.+)$/);
-        if (match && match[1]) {
-          return decodeURIComponent(match[1]);
-        }
-
-        const pieces = parsed.pathname.split("/").filter(Boolean);
-        if ((parsed.hostname === "storage.googleapis.com" || parsed.hostname.endsWith(".storage.googleapis.com")) && pieces.length >= 2) {
-          pieces.shift();
-          return decodeURIComponent(pieces.join("/"));
-        }
-      } catch (error) {
-        return "";
-      }
-      return "";
+    function updateCooldownUI() {
+      const left = getCooldownSecondsLeft();
+      setPostButtonBusy(true, left > 0 ? `Post review (${left}s)` : "Post review");
+      updateFormProgress(100, left > 0 ? `Cooldown active. You can post again in ${left}s.` : "Ready.");
     }
 
     function openLightbox(src, title, desc) {
@@ -2527,26 +2246,26 @@ service firebase.storage {
       if (!safe) return;
 
       el.lightboxTitle.textContent = title || "Image preview";
-      el.lightboxDesc.textContent = desc || title || "Image preview";
+      el.lightboxDesc.textContent = desc || "Preview";
       el.lightboxImage.src = safe;
       el.lightboxImage.alt = title || "Image preview";
       openModal("lightboxModal");
     }
 
-    function openModal(id, focusEl) {
+    function openModal(id) {
       const modal = document.getElementById(id);
       if (!modal) return;
 
       state.activeModalId = id;
-      state.restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      state.modalRestoreFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
       el.body.classList.add("modal-open");
 
-      const target = focusEl || modal.querySelector("button, input, textarea, [href], [tabindex]:not([tabindex='-1'])");
-      if (target && target.focus) {
-        window.setTimeout(() => target.focus(), 20);
+      const focusTarget = modal.querySelector("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])");
+      if (focusTarget && focusTarget.focus) {
+        window.setTimeout(() => focusTarget.focus(), 20);
       }
     }
 
@@ -2556,6 +2275,8 @@ service firebase.storage {
 
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
+      state.activeModalId = null;
+      el.body.classList.remove("modal-open");
 
       if (id === "lightboxModal") {
         el.lightboxImage.src = "";
@@ -2564,25 +2285,8 @@ service firebase.storage {
         el.lightboxDesc.textContent = "Preview";
       }
 
-      if (id === "deleteModal") {
-        state.deleteTarget = null;
-        setDeleteProgress(0);
-        setDeleteStatus("Waiting for confirmation.");
-      }
-
-      if (id === "adminModal") {
-        el.adminPasswordInput.value = "";
-        el.adminLoginError.textContent = "";
-        el.adminLoginError.style.display = "none";
-      }
-
-      state.activeModalId = null;
-      if (getOpenModal()) return;
-
-      el.body.classList.remove("modal-open");
-
-      if (state.restoreFocusEl && state.restoreFocusEl.focus) {
-        state.restoreFocusEl.focus();
+      if (state.modalRestoreFocus && state.modalRestoreFocus.focus) {
+        state.modalRestoreFocus.focus();
       }
     }
 
@@ -2591,8 +2295,9 @@ service firebase.storage {
     }
 
     function trapFocus(event, modal) {
-      const focusable = Array.from(modal.querySelectorAll("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])"))
-        .filter((node) => !node.hasAttribute("disabled"));
+      const focusable = Array.from(
+        modal.querySelectorAll("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])")
+      ).filter((node) => !node.hasAttribute("disabled"));
 
       if (!focusable.length) return;
 
@@ -2624,14 +2329,6 @@ service firebase.storage {
       }, 220);
     }
 
-    function setDeleteProgress(percent) {
-      el.deleteProgressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-    }
-
-    function setDeleteStatus(message) {
-      el.deleteStatus.textContent = message || "";
-    }
-
     function handleFirebaseError(error, fallback) {
       const code = String(error && error.code || "");
       let message = fallback || "Something went wrong.";
@@ -2640,16 +2337,14 @@ service firebase.storage {
         message = "Permission denied. Check your Firestore or Storage rules.";
       } else if (code.includes("storage/unauthorized")) {
         message = "Storage denied the request. Check your Storage Security Rules.";
-      } else if (code.includes("storage/object-not-found")) {
-        message = "The review was deleted, but the Storage image could not be found.";
       } else if (code.includes("storage/bucket-not-found")) {
         message = "Storage bucket not found. Check the exact storageBucket value in firebaseConfig.";
       } else if (code.includes("storage/project-not-found")) {
         message = "Storage project not found. Make sure Cloud Storage is enabled for this Firebase project.";
       } else if (code.includes("storage/unknown")) {
-        message = "Cloud Storage returned an unknown error. Check bucket spelling, rules, and any raw GCS CORS setup.";
+        message = "Cloud Storage returned an unknown error. Check the bucket name, rules and any raw GCS CORS setup.";
       } else if (code.includes("failed-precondition")) {
-        message = "Operation failed a precondition. If Firestore suggests an index in the console, create it and wait for it to finish.";
+        message = "Operation failed a precondition. If Firebase suggests an index or setup action in the console, complete it and try again.";
       } else if (code.includes("unavailable")) {
         message = "Firebase is temporarily unavailable. Please try again in a moment.";
       }
@@ -2669,6 +2364,7 @@ service firebase.storage {
         iconInfo();
 
       const textWrap = document.createElement("div");
+
       const title = document.createElement("div");
       title.className = "toast-title";
       title.textContent =
@@ -2684,16 +2380,16 @@ service firebase.storage {
       textWrap.appendChild(title);
       textWrap.appendChild(msg);
 
-      const close = document.createElement("button");
-      close.className = "toast-close";
-      close.type = "button";
-      close.setAttribute("aria-label", "Dismiss notification");
-      close.innerHTML = iconClose();
-      close.addEventListener("click", () => removeToast(node));
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "toast-close";
+      closeBtn.type = "button";
+      closeBtn.setAttribute("aria-label", "Dismiss notification");
+      closeBtn.innerHTML = iconClose();
+      closeBtn.addEventListener("click", () => removeToast(node));
 
       node.appendChild(iconWrap);
       node.appendChild(textWrap);
-      node.appendChild(close);
+      node.appendChild(closeBtn);
 
       el.toastWrap.appendChild(node);
       window.setTimeout(() => removeToast(node), duration);
@@ -2710,19 +2406,28 @@ service firebase.storage {
 
     function normaliseTime(value) {
       if (!value) return 0;
-      if (typeof value === "number" && Number.isFinite(value)) return value;
+
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return value;
+      }
+
       if (typeof value === "string") {
-        const asNumber = Number(value);
-        if (Number.isFinite(asNumber) && asNumber > 0) return asNumber;
+        const numeric = Number(value);
+        if (Number.isFinite(numeric) && numeric > 0) {
+          return numeric;
+        }
         const parsed = Date.parse(value);
         return Number.isFinite(parsed) ? parsed : 0;
       }
+
       if (typeof value.toMillis === "function") {
         try { return value.toMillis(); } catch (error) {}
       }
+
       if (typeof value.seconds === "number") {
         return value.seconds * 1000;
       }
+
       return 0;
     }
 
@@ -2754,13 +2459,15 @@ service firebase.storage {
       if (!bytes && bytes !== 0) return "";
       const units = ["B", "KB", "MB", "GB"];
       let size = bytes;
-      let unit = units[0];
-      for (let i = 0; i < units.length; i += 1) {
-        unit = units[i];
-        if (size < 1024 || i === units.length - 1) break;
-        size = size / 1024;
+      let unitIndex = 0;
+
+      while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex += 1;
       }
-      return `${size < 10 && unit !== "B" ? size.toFixed(1) : Math.round(size)} ${unit}`;
+
+      const formatted = size < 10 && unitIndex > 0 ? size.toFixed(1) : Math.round(size);
+      return `${formatted} ${units[unitIndex]}`;
     }
 
     function initialsOf(name) {
@@ -2793,22 +2500,6 @@ service firebase.storage {
         clearTimeout(timer);
         timer = window.setTimeout(() => fn.apply(this, args), wait);
       };
-    }
-
-    function iconLock() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 11V8a6 6 0 0 1 12 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><rect x="4" y="11" width="16" height="10" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="16" r="1.2" fill="currentColor"/></svg>`;
-    }
-
-    function iconShield() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4.5 6.8v5.5c0 4.7 2.8 7.7 7.5 9.2 4.7-1.5 7.5-4.5 7.5-9.2V6.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m8.8 12.2 2 2 4.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    }
-
-    function iconCopy() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="5" y="5" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/></svg>`;
-    }
-
-    function iconTrash() {
-      return `<svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 11v5M14 11v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 7l1 12.2A2 2 0 0 0 9 21h6a2 2 0 0 0 2-1.8L18 7M9 7V5.7A1.7 1.7 0 0 1 10.7 4h2.6A1.7 1.7 0 0 1 15 5.7V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     }
 
     function iconCheck() {

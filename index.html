@@ -1,1662 +1,1957 @@
-<!--
-Minimal public homepage for Bin Men FC.
-Assumption: hero.jpg exists but is intentionally unused here; the gallery uses only photo1.jpg..photo4.jpg.
-If uploads fail, re-check the exact storageBucket value.
--->
 <!DOCTYPE html>
-<html lang="en-IE">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="dark" />
-  <title>Bin Men Football Club</title>
-
+  <title>Leaving Cert Physics Study App</title>
   <style>
-    :root {
-      --bg: #07100c;
-      --bg-2: #0b1611;
-      --panel: rgba(10, 18, 14, 0.92);
-      --panel-2: rgba(8, 13, 10, 0.96);
-      --line: rgba(126, 169, 141, 0.16);
-      --line-strong: rgba(126, 169, 141, 0.34);
-      --text: #f2fcf5;
-      --text-2: #cbdbd0;
-      --muted: #90a59a;
-      --accent: #55e98f;
-      --accent-2: #9dfdc8;
-      --danger: #ff748b;
-      --warning: #ffd56f;
-      --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --radius-sm: 12px;
-      --ring: rgba(85, 233, 143, 0.55);
-      --content: 1120px;
-      --fast: 160ms ease;
-      --med: 240ms ease;
-    }
-
-    * { box-sizing: border-box; }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(85, 233, 143, 0.08), transparent 28%),
-        radial-gradient(circle at top right, rgba(157, 253, 200, 0.06), transparent 24%),
-        linear-gradient(180deg, #06100c 0%, #09140f 100%);
-      background-attachment: fixed;
-      letter-spacing: 0.01em;
-    }
-
-    body.modal-open {
-      overflow: hidden;
-    }
-
-    img {
-      display: block;
-      max-width: 100%;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button,
-    input,
-    textarea {
-      font: inherit;
-      color: inherit;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    :focus-visible {
-      outline: 3px solid var(--ring);
-      outline-offset: 3px;
-      border-radius: 12px;
-    }
-
-    .sr-only {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      margin: -1px !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      clip: rect(0 0 0 0) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
-    }
-
-    .container {
-      width: min(var(--content), calc(100% - 28px));
-      margin: 0 auto;
-    }
-
-    .top {
-      padding: 36px 0 20px;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text);
-    }
-
-    .crest {
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      color: var(--accent);
-      background: rgba(85, 233, 143, 0.10);
-      border: 1px solid rgba(85, 233, 143, 0.24);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    .section {
-      padding: 26px 0 58px;
-    }
-
-    .section-title {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1;
-      letter-spacing: -0.05em;
-    }
-
-    .section-copy {
-      margin: 0 0 22px;
-      color: var(--text-2);
-      line-height: 1.7;
-      font-size: 0.98rem;
-    }
-
-    .panel {
-      padding: 22px;
-      border-radius: var(--radius-xl);
-      background: linear-gradient(180deg, var(--panel), var(--panel-2));
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .gallery-tile {
-      position: relative;
-      min-height: 300px;
-      overflow: hidden;
-      padding: 0;
-      border-radius: 24px;
-      border: 1px solid var(--line);
-      background: #030805;
-      box-shadow: var(--shadow);
-      transition: transform var(--med), border-color var(--med), box-shadow var(--med);
-    }
-
-    .gallery-tile:hover,
-    .gallery-tile:focus-visible {
-      transform: translateY(-2px);
-      border-color: var(--line-strong);
-      box-shadow: 0 34px 90px rgba(0,0,0,0.46);
-    }
-
-    .gallery-tile img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 320ms ease;
-    }
-
-    .gallery-tile:hover img,
-    .gallery-tile:focus-visible img {
-      transform: scale(1.035);
-    }
-
-    .gallery-caption {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      background: rgba(0,0,0,0.48);
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-    }
-
-    .gallery-caption strong {
-      display: block;
-      font-size: 0.98rem;
-      letter-spacing: -0.02em;
-    }
-
-    .gallery-caption span {
-      display: block;
-      margin-top: 3px;
-      color: rgba(255,255,255,0.76);
-      font-size: 0.88rem;
-    }
-
-    .reviews-grid {
-      display: grid;
-      grid-template-columns: 400px 1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .form-card,
-    .list-card {
-      padding: 22px;
-      border-radius: var(--radius-xl);
-      background: linear-gradient(180deg, var(--panel), var(--panel-2));
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-    }
-
-    .card-title {
-      margin: 0 0 8px;
-      font-size: 1.3rem;
-      letter-spacing: -0.03em;
-    }
-
-    .card-copy {
-      margin: 0 0 14px;
-      color: var(--text-2);
-      font-size: 0.95rem;
-      line-height: 1.65;
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .field label {
-      color: var(--text-2);
-      font-weight: 800;
-      font-size: 0.92rem;
-    }
-
-    .field small {
-      color: var(--muted);
-      line-height: 1.45;
-      font-size: 0.86rem;
-    }
-
-    .input,
-    .textarea,
-    .search {
-      width: 100%;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(3, 8, 5, 0.82);
-      color: var(--text);
-      transition: border-color var(--fast), box-shadow var(--fast), background var(--fast);
-    }
-
-    .input,
-    .search {
-      min-height: 48px;
-      padding: 0 14px;
-    }
-
-    .textarea {
-      min-height: 136px;
-      padding: 14px;
-      resize: vertical;
-      line-height: 1.6;
-    }
-
-    .input:hover,
-    .textarea:hover,
-    .search:hover {
-      border-color: var(--line-strong);
-    }
-
-    .input:focus,
-    .textarea:focus,
-    .search:focus {
-      outline: none;
-      border-color: rgba(85, 233, 143, 0.45);
-      box-shadow: 0 0 0 4px rgba(85, 233, 143, 0.10);
-    }
-
-    .file-input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px dashed rgba(85, 233, 143, 0.30);
-      background: rgba(3, 8, 5, 0.7);
-      color: var(--text-2);
-      transition: border-color var(--fast), background var(--fast);
-    }
-
-    .file-input:hover,
-    .file-input:focus {
-      border-color: rgba(85, 233, 143, 0.5);
-      background: rgba(3, 8, 5, 0.9);
-    }
-
-    .preview {
-      display: none;
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 20px;
-      border: 1px dashed rgba(85, 233, 143, 0.34);
-      background: rgba(85, 233, 143, 0.055);
-    }
-
-    .preview-frame {
-      overflow: hidden;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: #030805;
-    }
-
-    .preview-frame img {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-    }
-
-    .preview-row {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      color: var(--text-2);
-      font-size: 0.88rem;
-    }
-
-    .ghost-btn,
-    .submit-btn,
-    .load-more-btn {
-      min-height: 46px;
-      padding: 0 16px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-weight: 800;
-      transition: transform var(--fast), background var(--fast), border-color var(--fast), opacity var(--fast);
-    }
-
-    .ghost-btn:hover,
-    .submit-btn:hover,
-    .load-more-btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .ghost-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--line);
-      color: var(--text);
-    }
-
-    .submit-btn {
-      width: 100%;
-      margin-top: 10px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #05110a;
-      box-shadow: 0 18px 40px rgba(85, 233, 143, 0.18);
-    }
-
-    .submit-btn:disabled,
-    .ghost-btn:disabled,
-    .load-more-btn:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .progress-wrap {
-      display: none;
-      margin-top: 14px;
-    }
-
-    .progress {
-      width: 100%;
-      height: 11px;
-      overflow: hidden;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--line);
-    }
-
-    .progress > span {
-      display: block;
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2), #ddfff0);
-      transition: width 220ms ease;
-      box-shadow: 0 0 16px rgba(85, 233, 143, 0.35);
-    }
-
-    .status {
-      min-height: 24px;
-      margin-top: 10px;
-      color: var(--accent-2);
-      font-weight: 700;
-      font-size: 0.93rem;
-      line-height: 1.45;
-    }
-
-    .toolbar {
-      display: grid;
-      gap: 12px;
-      margin-top: 6px;
-    }
-
-    .search-wrap {
-      position: relative;
-    }
-
-    .search-wrap svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-    }
-
-    .search {
-      padding-left: 42px;
-      padding-right: 14px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .chip {
-      min-height: 38px;
-      padding: 0 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
-      color: var(--text-2);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-weight: 800;
-      transition: transform var(--fast), background var(--fast), border-color var(--fast), color var(--fast);
-    }
-
-    .chip:hover {
-      transform: translateY(-1px);
-      border-color: var(--line-strong);
-    }
-
-    .chip.active {
-      background: rgba(85, 233, 143, 0.09);
-      border-color: rgba(85, 233, 143, 0.28);
-      color: var(--accent-2);
-    }
-
-    .meta {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .reviews-list {
-      margin-top: 18px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .review {
-      padding: 18px;
-      border-radius: 22px;
-      border: 1px solid var(--line);
-      background: rgba(3, 8, 5, 0.76);
-      transition: transform var(--med), border-color var(--med), box-shadow var(--med);
-    }
-
-    .review:hover {
-      transform: translateY(-2px);
-      border-color: var(--line-strong);
-      box-shadow: 0 24px 58px rgba(0,0,0,0.26);
-    }
-
-    .review-head {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .avatar {
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      border-radius: 50%;
-      background: rgba(85, 233, 143, 0.12);
-      border: 1px solid rgba(85, 233, 143, 0.24);
-      color: var(--accent-2);
-      font-weight: 900;
-      flex: 0 0 auto;
-    }
-
-    .review-name {
-      font-weight: 900;
-      line-height: 1.15;
-    }
-
-    .review-date {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 0.86rem;
-    }
-
-    .review-text {
-      color: var(--text-2);
-      line-height: 1.7;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .review-image-btn {
-      position: relative;
-      margin-top: 14px;
-      width: min(300px, 100%);
-      padding: 0;
-      overflow: hidden;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: #030805;
-    }
-
-    .review-image-btn img {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-      transition: transform 300ms ease;
-    }
-
-    .review-image-btn:hover img,
-    .review-image-btn:focus-visible img {
-      transform: scale(1.03);
-    }
-
-    .review-image-badge {
-      position: absolute;
-      left: 10px;
-      bottom: 10px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.54);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #f4fff8;
-      font-size: 0.78rem;
-      font-weight: 800;
-    }
-
-    .empty {
-      display: none;
-      margin-top: 18px;
-      padding: 26px;
-      border-radius: 22px;
-      border: 1px dashed var(--line-strong);
-      color: var(--muted);
-      text-align: center;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .load-more-wrap {
-      margin-top: 18px;
-      text-align: center;
-    }
-
-    .load-more-btn {
-      display: none;
-      margin: 0 auto;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--line);
-      color: var(--text);
-    }
-
-    .sentinel {
-      height: 10px;
-    }
-
-    .footer {
-      padding: 30px 0 44px;
-      color: var(--muted);
-      text-align: center;
-      font-size: 0.92rem;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(12px);
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-      animation: fadeIn 160ms ease both;
-    }
-
-    .modal {
-      width: min(920px, 100%);
-      max-height: calc(100vh - 36px);
-      overflow: auto;
-      padding: 18px;
-      border-radius: 28px;
-      background: linear-gradient(180deg, rgba(12, 22, 16, 0.98), rgba(7, 13, 10, 0.99));
-      border: 1px solid var(--line-strong);
-      box-shadow: var(--shadow);
-    }
-
-    .modal-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .modal-top h3 {
-      margin: 0;
-      letter-spacing: -0.03em;
-    }
-
-    .close-btn {
-      width: 42px;
-      height: 42px;
-      display: inline-grid;
-      place-items: center;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--line);
-      color: var(--text);
-      font-size: 1.1rem;
-    }
-
-    .modal-img {
-      width: 100%;
-      max-height: 76vh;
-      object-fit: contain;
-      border-radius: 20px;
-      background: #030805;
-      border: 1px solid var(--line);
-    }
-
-    .toast-wrap {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 130;
-      width: min(380px, calc(100vw - 32px));
-      display: grid;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .toast {
-      pointer-events: auto;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(10, 18, 14, 0.98);
-      border: 1px solid var(--line-strong);
-      color: var(--text);
-      box-shadow: var(--shadow);
-      animation: toastIn 180ms ease;
-    }
-
-    .toast.success { border-color: rgba(85, 233, 143, 0.3); }
-    .toast.warning { border-color: rgba(255, 213, 111, 0.3); }
-    .toast.error { border-color: rgba(255, 116, 139, 0.3); }
-
-    .kbd-note {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 0.84rem;
-    }
-
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    }
-
-    svg.icon {
-      width: 18px;
-      height: 18px;
-      flex: 0 0 auto;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 980px) {
-      .gallery-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .reviews-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .container {
-        width: min(var(--content), calc(100% - 20px));
-      }
-
-      .gallery-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .top {
-        padding-top: 22px;
-      }
-
-      .panel,
-      .form-card,
-      .list-card {
-        padding: 18px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: 1ms !important;
-        transition-duration: 1ms !important;
-      }
-
-      html { scroll-behavior: auto; }
+    :root{
+      --bg:#0b1020;
+      --panel:#121933;
+      --panel-2:#1a2347;
+      --ink:#eef2ff;
+      --muted:#b8c0e0;
+      --line:#2a3565;
+      --accent:#77c3ff;
+      --accent-2:#9bf6c8;
+      --warn:#ffd37a;
+      --danger:#ff9f9f;
+      --good:#9bf6c8;
+      --bad:#ffb4b4;
+      --shadow:0 10px 22px rgba(0,0,0,.25);
+      --radius:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1020,#0f1630 35%,#0b1020);color:var(--ink);font-family:var(--sans);line-height:1.5}
+    a{color:var(--accent)}
+    button,input,select,textarea{font:inherit}
+    .app{
+      max-width:1400px;
+      margin:0 auto;
+      padding:18px;
+    }
+    header{
+      display:flex;
+      flex-wrap:wrap;
+      gap:16px;
+      align-items:flex-end;
+      justify-content:space-between;
+      margin-bottom:18px;
+    }
+    .title-card{
+      background:linear-gradient(180deg, rgba(119,195,255,.14), rgba(155,246,200,.08));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:18px 20px;
+      box-shadow:var(--shadow);
+      flex:1 1 520px;
+    }
+    h1,h2,h3,h4{margin:.2rem 0 .65rem 0;line-height:1.15}
+    h1{font-size:clamp(1.6rem,2.7vw,2.5rem)}
+    h2{font-size:1.35rem}
+    h3{font-size:1.05rem}
+    p{margin:.55rem 0}
+    .subtitle{color:var(--muted);max-width:75ch}
+    .status-chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.03);margin-top:8px;color:var(--muted)
+    }
+    nav{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      width:min(100%,780px);
+    }
+    nav button{
+      padding:12px 14px;border-radius:14px;border:1px solid var(--line);
+      background:var(--panel);color:var(--ink);cursor:pointer;
+      transition:transform .15s ease, background .15s ease, border-color .15s ease;
+      min-height:48px;
+    }
+    nav button:hover{transform:translateY(-1px);border-color:var(--accent)}
+    nav button.active{background:linear-gradient(180deg, rgba(119,195,255,.18), rgba(155,246,200,.12));border-color:var(--accent)}
+    .section{display:none}
+    .section.active{display:block}
+    .grid{
+      display:grid;
+      gap:16px;
+    }
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{
+      background:linear-gradient(180deg,var(--panel),var(--panel-2));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .small{font-size:.94rem;color:var(--muted)}
+    .muted{color:var(--muted)}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .kpi{
+      padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)
+    }
+    .kpi strong{display:block;font-size:1.45rem;color:var(--accent-2)}
+    .pill-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .pill{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(255,255,255,.03);font-size:.9rem
+    }
+    .topic-card h3{display:flex;justify-content:space-between;gap:12px}
+    details{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.03)
+    }
+    details + details{margin-top:10px}
+    summary{cursor:pointer;font-weight:700}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.95rem;
+      overflow:hidden;
+      border-radius:14px;
+    }
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+    th{text-align:left;background:rgba(255,255,255,.04)}
+    tr:last-child td{border-bottom:none}
+    .table-wrap{
+      overflow:auto;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03)
+    }
+    .toolbar{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px
+    }
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+      background:#0b1229;color:var(--ink)
+    }
+    textarea{min-height:110px;resize:vertical}
+    .toolbar > *{flex:1 1 180px}
+    .btn{
+      padding:10px 14px;border-radius:12px;border:1px solid var(--line);cursor:pointer;background:var(--panel);color:var(--ink)
+    }
+    .btn.primary{background:linear-gradient(180deg, rgba(119,195,255,.22), rgba(155,246,200,.16));border-color:var(--accent)}
+    .btn.good{background:rgba(155,246,200,.12)}
+    .btn.warn{background:rgba(255,211,122,.12)}
+    .btn.bad{background:rgba(255,159,159,.12)}
+    .question{
+      padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)
+    }
+    .meta{
+      display:flex;flex-wrap:wrap;gap:8px;margin:.5rem 0 1rem 0
+    }
+    .tag{
+      padding:4px 8px;border:1px solid var(--line);border-radius:999px;font-size:.82rem;color:var(--muted)
+    }
+    .question-actions{
+      display:flex;flex-wrap:wrap;gap:8px;margin-top:10px
+    }
+    .feedback{
+      margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)
+    }
+    .feedback.ok{background:rgba(155,246,200,.08);border-color:rgba(155,246,200,.4)}
+    .feedback.nope{background:rgba(255,159,159,.08);border-color:rgba(255,159,159,.35)}
+    .solution,.marking-note,.hint-box{
+      margin-top:10px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);background:#0b1229
+    }
+    .flash-wrap{
+      display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px
+    }
+    .flashcard{
+      min-height:260px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+      text-align:center;padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg, rgba(119,195,255,.14), rgba(155,246,200,.08))
+    }
+    .flash-face{max-width:52ch}
+    .flash-controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+    .timer{
+      font:700 2rem var(--mono);
+      letter-spacing:.05em;
+      color:var(--warn)
+    }
+    .progress-bar{
+      height:12px;border-radius:999px;background:#0b1229;border:1px solid var(--line);overflow:hidden
+    }
+    .progress-bar > span{
+      display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))
+    }
+    canvas{
+      width:100%;background:#fff;border-radius:14px;border:1px solid var(--line);touch-action:none
+    }
+    .tools-grid{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px
+    }
+    .danger-note,.info-note,.success-note{
+      border-radius:14px;padding:12px 14px;border:1px solid var(--line)
+    }
+    .danger-note{background:rgba(255,159,159,.08)}
+    .info-note{background:rgba(119,195,255,.08)}
+    .success-note{background:rgba(155,246,200,.08)}
+    .cheat-sheet{
+      background:white;color:#101828;border-radius:14px;padding:24px
+    }
+    .cheat-sheet h2,.cheat-sheet h3,.cheat-sheet h4{color:#101828}
+    .cheat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .mono{font-family:var(--mono)}
+    .week-plan{display:grid;gap:10px}
+    .plan-row{display:grid;grid-template-columns:110px 1fr 120px;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
+    .plan-row:last-child{border-bottom:none}
+    .storage-status{font-weight:700}
+    .source-note{font-size:.9rem;color:var(--muted)}
+    .svg-wrap svg{width:100%;height:auto;background:#fff;border-radius:12px}
+    .empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+    .two-up{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .right{margin-left:auto}
+    .hidden{display:none}
+    .footer-pad{height:40px}
+    @media (max-width: 1100px){
+      nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid.cols-3,.grid.cols-2,.flash-wrap,.tools-grid,.cheat-grid,.two-up{grid-template-columns:1fr}
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .plan-row{grid-template-columns:1fr}
+    }
+    @media (max-width: 680px){
+      .kpis{grid-template-columns:1fr}
+      nav{grid-template-columns:1fr}
+    }
+    @media print{
+      body{background:#fff;color:#000}
+      header,nav,.section:not(#cheat),#cheat .hide-on-print,.footer-pad{display:none !important}
+      #cheat{display:block !important}
+      .cheat-sheet{box-shadow:none;border:none;padding:0}
+      .cheat-grid{grid-template-columns:1fr 1fr}
+      .app{max-width:none;padding:0}
     }
   </style>
 </head>
 <body>
-  <main class="container">
-    <header class="top" aria-label="Site title">
-      <div class="brand">
-        <span class="crest" aria-hidden="true">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M12 3 4.5 6.8v5.5c0 4.7 2.8 7.7 7.5 9.2 4.7-1.5 7.5-4.5 7.5-9.2V6.8L12 3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="m8.8 12.2 2 2 4.4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        <span>Bin Men Football Club</span>
+  <div class="app">
+    <header>
+      <div class="title-card">
+        <h1>Leaving Cert Physics Study App</h1>
+        <p class="subtitle">Chapters only: Lenses; Speed, Displacement and Velocity; Acceleration; Heat Transfer and Temperature Change; Waves and Wave Motion; Vibrations and Sound; The Wave Nature of Light. Built for local use in a modern browser, with practice, flashcards, a timed mock, graph and ray-diagram tools, and export/import saves.</p>
+        <div class="status-chip"><span>Local-first</span><span id="storageChip">Checking save support…</span></div>
       </div>
+      <nav id="nav"></nav>
     </header>
 
-    <section class="section" aria-labelledby="galleryHeading">
-      <h1 id="galleryHeading" class="section-title">Gallery</h1>
-      <p class="section-copy">Four moments from the club.</p>
-
-      <div class="gallery-grid">
-        <button class="gallery-tile" type="button" data-lightbox-src="photo1.jpg" data-lightbox-title="Matchday Focus" data-lightbox-desc="Ready from the first whistle.">
-          <img src="photo1.jpg" alt="Bin Men FC photo 1" loading="lazy" decoding="async" />
-          <span class="gallery-caption">
-            <strong>Matchday Focus</strong>
-            <span>Ready from the first whistle</span>
-          </span>
-        </button>
-
-        <button class="gallery-tile" type="button" data-lightbox-src="photo2.jpg" data-lightbox-title="The Lads" data-lightbox-desc="Together for the day.">
-          <img src="photo2.jpg" alt="Bin Men FC photo 2" loading="lazy" decoding="async" />
-          <span class="gallery-caption">
-            <strong>The Lads</strong>
-            <span>Together for the day</span>
-          </span>
-        </button>
-
-        <button class="gallery-tile" type="button" data-lightbox-src="photo3.jpg" data-lightbox-title="Touchline Energy" data-lightbox-desc="Noise, football and good company.">
-          <img src="photo3.jpg" alt="Bin Men FC photo 3" loading="lazy" decoding="async" />
-          <span class="gallery-caption">
-            <strong>Touchline Energy</strong>
-            <span>Noise, football and good company</span>
-          </span>
-        </button>
-
-        <button class="gallery-tile" type="button" data-lightbox-src="photo4.jpg" data-lightbox-title="Full-Time Scenes" data-lightbox-desc="One for the memory bank.">
-          <img src="photo4.jpg" alt="Bin Men FC photo 4" loading="lazy" decoding="async" />
-          <span class="gallery-caption">
-            <strong>Full-Time Scenes</strong>
-            <span>One for the memory bank</span>
-          </span>
-        </button>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="reviewsHeading">
-      <h2 id="reviewsHeading" class="section-title">Reviews</h2>
-      <p class="section-copy">Leave a message for the club, with an optional photo.</p>
-
-      <div class="reviews-grid">
-        <section class="form-card" aria-labelledby="postHeading">
-          <h3 id="postHeading" class="card-title">Post a review</h3>
-          <p class="card-copy">Name, message, optional photo.</p>
-
-          <form id="reviewForm" novalidate>
-            <div class="field">
-              <label for="nameInput">Name</label>
-              <input id="nameInput" class="input" type="text" maxlength="60" autocomplete="name" placeholder="Your name" />
-            </div>
-
-            <div class="field">
-              <label for="reviewInput">Message</label>
-              <textarea id="reviewInput" class="textarea" maxlength="1200" placeholder="Write your message..."></textarea>
-            </div>
-
-            <div class="field">
-              <label for="imageInput">Photo</label>
-              <input id="imageInput" class="file-input" type="file" accept="image/*" aria-describedby="imageHelp" />
-              <small id="imageHelp">Optional · image only · under 2MB</small>
-            </div>
-
-            <div id="previewBox" class="preview" aria-live="polite">
-              <div class="preview-frame">
-                <img id="previewImage" alt="" />
-              </div>
-              <div class="preview-row">
-                <span id="previewText">Selected image</span>
-                <button id="clearImageButton" class="ghost-btn" type="button">Remove</button>
-              </div>
-            </div>
-
-            <div id="progressWrap" class="progress-wrap">
-              <div class="progress">
-                <span id="progressBar"></span>
-              </div>
-            </div>
-
-            <div id="statusText" class="status" role="status" aria-live="polite"></div>
-
-            <button id="postButton" class="submit-btn" type="submit">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M4 11.5 20 4l-4 16-4.5-5L4 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <path d="M11.5 15 20 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              </svg>
-              <span id="postButtonLabel">Post review</span>
-            </button>
-          </form>
-        </section>
-
-        <section class="list-card" aria-labelledby="latestHeading">
-          <h3 id="latestHeading" class="card-title">Latest</h3>
-          <p class="card-copy">Live posts from the club and supporters.</p>
-
-          <div class="toolbar">
-            <div class="search-wrap">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/>
-                <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              </svg>
-              <input id="searchInput" class="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search reviews" aria-label="Search reviews" />
-            </div>
-
-            <div class="filters" role="tablist" aria-label="Review filters">
-              <button class="chip active" type="button" data-filter="all" aria-pressed="true">All</button>
-              <button class="chip" type="button" data-filter="photos" aria-pressed="false">With photos</button>
-              <button class="chip" type="button" data-filter="text" aria-pressed="false">Text only</button>
-            </div>
-          </div>
-
-          <div id="reviewsMeta" class="meta" aria-live="polite">Loading reviews…</div>
-          <div class="kbd-note">Press <span class="mono">/</span> to focus search.</div>
-
-          <div id="reviewsList" class="reviews-list" aria-live="polite" aria-busy="true"></div>
-
-          <div id="emptyState" class="empty">No reviews match that search.</div>
-
-          <div id="reviewSentinel" class="sentinel" aria-hidden="true"></div>
-
-          <div class="load-more-wrap">
-            <button id="loadMoreButton" class="load-more-btn" type="button">Show more</button>
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <footer class="footer">
-      © 2026 Bin Men Football Club
-    </footer>
-  </main>
-
-  <div id="lightboxModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lightboxTitle" aria-describedby="lightboxDesc">
-      <div class="modal-top">
-        <div>
-          <h3 id="lightboxTitle">Image</h3>
-          <div id="lightboxDesc" class="meta" style="margin-top:4px;">Preview</div>
-        </div>
-        <button class="close-btn" type="button" data-close-modal="lightboxModal" aria-label="Close image preview">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-        </button>
-      </div>
-      <img id="lightboxImage" class="modal-img" alt="" />
-    </div>
+    <section id="dashboard" class="section active"></section>
+    <section id="topics" class="section"></section>
+    <section id="formulae" class="section"></section>
+    <section id="practice" class="section"></section>
+    <section id="flashcards" class="section"></section>
+    <section id="mock" class="section"></section>
+    <section id="tools" class="section"></section>
+    <section id="cheat" class="section"></section>
+    <section id="settings" class="section"></section>
+    <div class="footer-pad"></div>
   </div>
 
-  <div id="toastWrap" class="toast-wrap" aria-live="polite" aria-atomic="true"></div>
-
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
   <script>
-    // Exact user-provided Firebase config.
-    const firebaseConfig = {
-      apiKey: "AIzaSyBx1W3gp9LdFyN3dDtRUoZm52o6P2DLJso",
-      authDomain: "bin-men-fc.firebaseapp.com",
-      projectId: "bin-men-fc",
-      storageBucket: "bin-men-fc.firebasestorage.app",
-      messagingSenderId: "960901793838",
-      appId: "1:960901793838:web:eeee2926789e3e846d77bf"
+    const APP_KEY = 'lc_physics_ch4_5_6_14_15_16_17_v1';
+
+    const NAV_ITEMS = [
+      ['dashboard', 'Dashboard'],
+      ['topics', 'Notes'],
+      ['formulae', 'Formulae'],
+      ['practice', 'Practice'],
+      ['flashcards', 'Flashcards'],
+      ['mock', 'Timed mock'],
+      ['tools', 'Tools'],
+      ['cheat', 'Cheat-sheet'],
+      ['settings', 'Save & settings']
+    ];
+
+    const STUDY_PLAN = [
+      {day:'Day 1', focus:'Speed, displacement, velocity and graph reading', minutes:'35–40 min', task:'Definitions, slope of displacement–time graph, easy kinematics, one graph question.'},
+      {day:'Day 2', focus:'Acceleration and constant-acceleration formulas', minutes:'35–45 min', task:'SUVAT, free-fall, velocity–time graphs, two medium calculations.'},
+      {day:'Day 3', focus:'Lenses and ray diagrams', minutes:'35–40 min', task:'Converging/diverging images, lens formula, power, one ray-diagram and one numeric.'},
+      {day:'Day 4', focus:'Heat and temperature', minutes:'40–45 min', task:'Temperature scales, Q = mcΔθ, latent heat, calorimetry method and accuracy points.'},
+      {day:'Day 5', focus:'Waves and sound', minutes:'40–45 min', task:'c = fλ, resonance, Doppler effect, harmonics, sound intensity and inverse-square questions.'},
+      {day:'Day 6', focus:'Wave nature of light', minutes:'35–45 min', task:'Interference, diffraction grating, polarisation, dispersion, electromagnetic spectrum.'},
+      {day:'Day 7', focus:'Mixed timed mock and weak-topic patching', minutes:'40–45 min', task:'Run the built-in mock, mark it immediately, review wrong answers, print the cheat-sheet.'}
+    ];
+
+    const TOPICS = [
+      {
+        id:'motion',
+        chapter:'5–6',
+        title:'Speed, Displacement, Velocity and Acceleration',
+        priority:'High foundation',
+        notes:`
+          <p><strong>Speed</strong> is distance per unit time and is a scalar. <strong>Velocity</strong> is displacement per unit time and is a vector. <strong>Acceleration</strong> is the rate of change of velocity.</p>
+          <p>The two graph rules you must be able to use quickly are:</p>
+          <ul>
+            <li>slope of a displacement–time graph = velocity</li>
+            <li>slope of a velocity–time graph = acceleration; area under a velocity–time graph = displacement</li>
+          </ul>
+          <p>For constant acceleration questions, always write the known quantities first, convert units immediately, and then choose the cleanest equation rather than trying to force one formula.</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 520 190" xmlns="http://www.w3.org/2000/svg">
+              <rect width="520" height="190" fill="white"/>
+              <line x1="55" y1="155" x2="245" y2="155" stroke="#222" stroke-width="2"/>
+              <line x1="55" y1="155" x2="55" y2="25" stroke="#222" stroke-width="2"/>
+              <polyline points="55,145 95,130 135,105 175,70 225,35" fill="none" stroke="#1363df" stroke-width="3"/>
+              <text x="130" y="175" font-size="15" fill="#111">time</text>
+              <text x="6" y="35" font-size="15" fill="#111">displacement</text>
+              <text x="88" y="20" font-size="15" fill="#111">slope = velocity</text>
+              <line x1="295" y1="155" x2="485" y2="155" stroke="#222" stroke-width="2"/>
+              <line x1="295" y1="155" x2="295" y2="25" stroke="#222" stroke-width="2"/>
+              <polyline points="295,145 350,120 405,95 460,55" fill="none" stroke="#13aa52" stroke-width="3"/>
+              <polygon points="295,155 460,155 460,55" fill="rgba(19,170,82,.18)"/>
+              <text x="370" y="175" font-size="15" fill="#111">time</text>
+              <text x="252" y="35" font-size="15" fill="#111">velocity</text>
+              <text x="330" y="22" font-size="15" fill="#111">slope = acceleration</text>
+              <text x="332" y="90" font-size="15" fill="#111">area = displacement</text>
+            </svg>
+          </div>
+          <p><strong>Usual traps:</strong> mixing distance and displacement, leaving cm or km h<sup>-1</sup> unconverted, and forgetting that a negative slope or negative acceleration is still perfectly valid.</p>
+        `
+      },
+      {
+        id:'lenses',
+        chapter:'4',
+        title:'Lenses',
+        priority:'High',
+        notes:`
+          <p>A <strong>converging lens</strong> is thicker at the centre and can form either a real or a virtual image. A <strong>diverging lens</strong> is thinner at the centre and forms a virtual, upright, diminished image.</p>
+          <p>For a converging lens ray diagram, use the three standard rays: parallel ray through the focal point, focal ray out parallel, and central ray straight through the optical centre.</p>
+          <p>In the focal-length experiment, the usual method is to find an approximate focal length first by focusing a distant object on a screen, then measure <span class="mono">u</span> and <span class="mono">v</span> for several positions and use <span class="mono">1/f = 1/u + 1/v</span>.</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 650 240" xmlns="http://www.w3.org/2000/svg">
+              <rect width="650" height="240" fill="white"/>
+              <line x1="25" y1="120" x2="625" y2="120" stroke="#111" stroke-width="2"/>
+              <line x1="335" y1="40" x2="335" y2="200" stroke="#1363df" stroke-width="6"/>
+              <path d="M335 40 Q360 120 335 200" fill="none" stroke="#1363df" stroke-width="3"/>
+              <path d="M335 40 Q310 120 335 200" fill="none" stroke="#1363df" stroke-width="3"/>
+              <line x1="110" y1="120" x2="110" y2="55" stroke="#c1121f" stroke-width="4"/>
+              <polygon points="110,45 101,62 119,62" fill="#c1121f"/>
+              <circle cx="235" cy="120" r="4" fill="#111"/>
+              <circle cx="435" cy="120" r="4" fill="#111"/>
+              <text x="228" y="142" font-size="14" fill="#111">F</text>
+              <text x="428" y="142" font-size="14" fill="#111">F</text>
+              <line x1="110" y1="70" x2="335" y2="70" stroke="#111" stroke-width="2"/>
+              <line x1="335" y1="70" x2="435" y2="120" stroke="#111" stroke-width="2"/>
+              <line x1="110" y1="70" x2="335" y2="120" stroke="#111" stroke-width="2"/>
+              <line x1="335" y1="120" x2="485" y2="120" stroke="#111" stroke-width="2"/>
+              <line x1="485" y1="120" x2="485" y2="170" stroke="#13aa52" stroke-width="4"/>
+              <polygon points="485,180 476,163 494,163" fill="#13aa52"/>
+              <text x="58" y="38" font-size="15" fill="#111">object</text>
+              <text x="465" y="205" font-size="15" fill="#111">real inverted image</text>
+            </svg>
+          </div>
+          <p><strong>Quick checks:</strong> object inside focal length of a converging lens gives a virtual image; object at large distance gives image near the focal plane; lens power is positive for converging and negative for diverging lenses when you use the standard sign convention.</p>
+        `
+      },
+      {
+        id:'heat',
+        chapter:'14',
+        title:'Heat Transfer and Temperature Change',
+        priority:'Very high',
+        notes:`
+          <p><strong>Temperature</strong> measures hotness; <strong>heat</strong> is energy transferred because of a temperature difference. Keep heat capacity and specific heat capacity separate:</p>
+          <ul>
+            <li><span class="mono">C</span> tells you how much energy changes the temperature of the whole object by 1 K.</li>
+            <li><span class="mono">c</span> tells you how much energy changes 1 kg of the material by 1 K.</li>
+          </ul>
+          <p>Calorimetry is always an <strong>energy lost = energy gained</strong> problem. Split it into clear terms: calorimeter, original water, ice or steam, and final warming or cooling. Do not skip the calorimeter unless the question clearly tells you to ignore it.</p>
+          <p>For latent heat, remember that the temperature stays constant during the change of state but energy is still being transferred. In written answers, define latent heat carefully.</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="600" height="200" fill="white"/>
+              <line x1="60" y1="160" x2="550" y2="160" stroke="#111" stroke-width="2"/>
+              <line x1="60" y1="160" x2="60" y2="20" stroke="#111" stroke-width="2"/>
+              <polyline points="60,150 130,110 220,110 300,70 390,70 470,35" fill="none" stroke="#e76f51" stroke-width="4"/>
+              <text x="18" y="30" font-size="14" fill="#111">temperature</text>
+              <text x="250" y="185" font-size="14" fill="#111">energy supplied</text>
+              <text x="95" y="102" font-size="14" fill="#111">warm solid</text>
+              <text x="150" y="102" font-size="14" fill="#111">melting</text>
+              <text x="260" y="62" font-size="14" fill="#111">warm liquid</text>
+              <text x="338" y="62" font-size="14" fill="#111">boiling</text>
+              <text x="430" y="28" font-size="14" fill="#111">warm gas</text>
+            </svg>
+          </div>
+          <p><strong>Heat transfer:</strong> conduction is mainly through solids, convection requires moving fluid, radiation needs no medium. In exam scripts, use those distinctions explicitly.</p>
+        `
+      },
+      {
+        id:'waves',
+        chapter:'15–16',
+        title:'Waves, Vibrations and Sound',
+        priority:'Very high',
+        notes:`
+          <p>All wave questions come back to a few core ideas: wave speed, frequency, wavelength, amplitude, resonance, and energy transfer. If one value changes, work from <span class="mono">c = fλ</span> before doing anything else.</p>
+          <p>For sound:</p>
+          <ul>
+            <li>sound is a <strong>longitudinal mechanical wave</strong></li>
+            <li>pitch depends on frequency</li>
+            <li>loudness depends mainly on amplitude / intensity</li>
+            <li>quality (timbre) depends on waveform / overtones</li>
+          </ul>
+          <p>For stretched strings and pipes, fixed ends are nodes. Harmonic questions become easy if you sketch the standing wave first and then identify how many half-wavelengths fit into the vibrating length.</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg">
+              <rect width="620" height="220" fill="white"/>
+              <line x1="40" y1="65" x2="580" y2="65" stroke="#222" stroke-width="2"/>
+              <path d="M40 150 C90 95, 130 205, 180 150 S270 95, 320 150 S410 205, 460 150 S530 95,580 150" fill="none" stroke="#1363df" stroke-width="4"/>
+              <line x1="40" y1="150" x2="580" y2="150" stroke="#aaa" stroke-dasharray="4 4"/>
+              <text x="40" y="32" font-size="16" fill="#111">third harmonic on a stretched string</text>
+              <circle cx="40" cy="150" r="4" fill="#111"/><circle cx="220" cy="150" r="4" fill="#111"/><circle cx="400" cy="150" r="4" fill="#111"/><circle cx="580" cy="150" r="4" fill="#111"/>
+              <text x="32" y="172" font-size="13" fill="#111">N</text>
+              <text x="212" y="172" font-size="13" fill="#111">N</text>
+              <text x="392" y="172" font-size="13" fill="#111">N</text>
+              <text x="572" y="172" font-size="13" fill="#111">N</text>
+              <text x="100" y="118" font-size="13" fill="#111">A</text>
+              <text x="280" y="185" font-size="13" fill="#111">A</text>
+              <text x="460" y="118" font-size="13" fill="#111">A</text>
+            </svg>
+          </div>
+          <p><strong>Doppler effect:</strong> approaching source gives a higher observed frequency because wavefronts are compressed; receding source gives a lower observed frequency.</p>
+        `
+      },
+      {
+        id:'light',
+        chapter:'17',
+        title:'Wave Nature of Light',
+        priority:'High',
+        notes:`
+          <p>This chapter is a compact high-yield cluster: interference, diffraction, polarisation, dispersion, colour, diffraction gratings, the electromagnetic spectrum, and solar irradiance.</p>
+          <p>For diffraction-grating questions, the fastest reliable routine is:</p>
+          <ol>
+            <li>convert lines per mm into lines per metre and then into grating spacing <span class="mono">d</span></li>
+            <li>if the question gives the separation of <span class="mono">+n</span> and <span class="mono">-n</span> images, halve it first</li>
+            <li>find <span class="mono">θ</span> from the geometry, then use <span class="mono">nλ = d sin θ</span></li>
+          </ol>
+          <p>Polarisation is one of the cleanest proofs that light is transverse. Dispersion happens because refractive index depends on wavelength, so different colours bend by different amounts.</p>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+              <rect width="640" height="220" fill="white"/>
+              <line x1="60" y1="110" x2="210" y2="110" stroke="#111" stroke-width="4"/>
+              <rect x="250" y="55" width="12" height="110" fill="#111"/>
+              <line x1="262" y1="110" x2="560" y2="40" stroke="#c1121f" stroke-width="3"/>
+              <line x1="262" y1="110" x2="560" y2="70" stroke="#f48c06" stroke-width="3"/>
+              <line x1="262" y1="110" x2="560" y2="110" stroke="#2a9d8f" stroke-width="3"/>
+              <line x1="262" y1="110" x2="560" y2="150" stroke="#4361ee" stroke-width="3"/>
+              <line x1="262" y1="110" x2="560" y2="180" stroke="#7209b7" stroke-width="3"/>
+              <text x="70" y="94" font-size="14" fill="#111">white light</text>
+              <text x="208" y="40" font-size="14" fill="#111">prism / grating</text>
+              <text x="565" y="43" font-size="13" fill="#111">red</text>
+              <text x="565" y="72" font-size="13" fill="#111">orange</text>
+              <text x="565" y="113" font-size="13" fill="#111">green</text>
+              <text x="565" y="153" font-size="13" fill="#111">blue</text>
+              <text x="565" y="183" font-size="13" fill="#111">violet</text>
+            </svg>
+          </div>
+          <p><strong>Key distinction:</strong> diffraction and interference are wave effects; colour and spectrum questions often combine wave ideas with wavelength ordering.</p>
+        `
+      }
+    ];
+
+    const FORMULAE = [
+      {topic:'Motion', formula:'speed = distance / time', units:'m s⁻¹', rearrangements:'distance = speed × time; time = distance / speed', status:'Memorise'},
+      {topic:'Motion', formula:'velocity = displacement / time', units:'m s⁻¹', rearrangements:'displacement = velocity × time', status:'Memorise'},
+      {topic:'Acceleration', formula:'a = (v − u) / t', units:'m s⁻²', rearrangements:'v = u + at; u = v − at; t = (v − u)/a', status:'Definition'},
+      {topic:'Acceleration', formula:'v = u + at', units:'m s⁻¹', rearrangements:'a = (v − u)/t; t = (v − u)/a', status:'Booklet'},
+      {topic:'Acceleration', formula:'s = ut + ½at²', units:'m', rearrangements:'a = 2(s − ut)/t²', status:'Booklet'},
+      {topic:'Acceleration', formula:'v² = u² + 2as', units:'m² s⁻²', rearrangements:'a = (v² − u²)/(2s); s = (v² − u²)/(2a)', status:'Booklet'},
+      {topic:'Graphs', formula:'slope of s–t graph = velocity', units:'m s⁻¹', rearrangements:'—', status:'Memorise'},
+      {topic:'Graphs', formula:'slope of v–t graph = acceleration; area under v–t graph = displacement', units:'m s⁻²; m', rearrangements:'—', status:'Memorise'},
+      {topic:'Temperature', formula:'t / °C = T / K − 273.15', units:'°C or K', rearrangements:'T = t + 273.15', status:'Booklet'},
+      {topic:'Heat', formula:'Q = mcΔθ', units:'J', rearrangements:'c = Q/(mΔθ); m = Q/(cΔθ)', status:'Booklet'},
+      {topic:'Heat', formula:'Q = CΔθ', units:'J', rearrangements:'C = Q/Δθ', status:'Booklet'},
+      {topic:'Latent heat', formula:'Q = ml', units:'J', rearrangements:'l = Q/m; m = Q/l', status:'Booklet'},
+      {topic:'Waves', formula:'c = fλ', units:'m s⁻¹', rearrangements:'f = c/λ; λ = c/f', status:'Booklet'},
+      {topic:'Waves', formula:'T = 1/f', units:'s', rearrangements:'f = 1/T', status:'Memorise'},
+      {topic:'Strings', formula:'f = (1/2L)√(T/μ)', units:'Hz', rearrangements:'T = μ(2Lf)²; μ = T/(2Lf)²', status:'Booklet'},
+      {topic:'Strings', formula:'μ = m / L', units:'kg m⁻¹', rearrangements:'m = μL', status:'Memorise'},
+      {topic:'Harmonics', formula:'fₙ = n f₁ and λₙ = 2L / n', units:'Hz; m', rearrangements:'n = fₙ/f₁', status:'Memorise'},
+      {topic:'Doppler', formula:"f' = fc / (c ± u)", units:'Hz', rearrangements:'rearrange algebraically for u', status:'Booklet'},
+      {topic:'Sound intensity', formula:'I = P / (4πr²)', units:'W m⁻²', rearrangements:'P = I4πr²; r = √(P/4πI)', status:'Memorise'},
+      {topic:'Sound level', formula:'Δβ = 10 log₁₀(I₂/I₁)', units:'dB', rearrangements:'I₂/I₁ = 10^(Δβ/10)', status:'Useful extension'},
+      {topic:'Lenses', formula:'1/f = 1/u + 1/v', units:'1/m', rearrangements:'f = uv/(u + v); u = fv/(v − f); v = fu/(u − f)', status:'Booklet'},
+      {topic:'Lenses', formula:'m = v / u = image height / object height', units:'no unit', rearrangements:'v = mu; u = v/m', status:'Booklet + geometry'},
+      {topic:'Lenses', formula:'P = 1/f', units:'m⁻¹ (dioptre)', rearrangements:'f = 1/P', status:'Booklet'},
+      {topic:'Lenses', formula:'Pₜ = P₁ + P₂', units:'m⁻¹', rearrangements:'P₂ = Pₜ − P₁', status:'Booklet'},
+      {topic:'Diffraction grating', formula:'nλ = d sinθ', units:'m', rearrangements:'λ = d sinθ / n; d = nλ/sinθ', status:'Booklet'},
+      {topic:'Diffraction grating', formula:'d = 1 / (lines per metre)', units:'m', rearrangements:'lines per metre = 1/d', status:'Memorise'}
+    ];
+
+    const FLASHCARDS = [
+      {id:'fc1', topic:'Motion', front:'What is the difference between distance and displacement?', back:'Distance is total path length and is scalar. Displacement is the straight-line change in position with direction and is vector.'},
+      {id:'fc2', topic:'Motion', front:'What does the slope of a displacement–time graph represent?', back:'Velocity.'},
+      {id:'fc3', topic:'Motion', front:'What does the area under a velocity–time graph represent?', back:'Displacement.'},
+      {id:'fc4', topic:'Lenses', front:'Where must an object be placed to produce a virtual image with a converging lens?', back:'Inside the focal length.'},
+      {id:'fc5', topic:'Lenses', front:'What kind of image does a diverging lens form?', back:'Virtual, upright, diminished.'},
+      {id:'fc6', topic:'Heat', front:'State the difference between heat capacity and specific heat capacity.', back:'Heat capacity refers to the whole object; specific heat capacity refers to 1 kg of a material.'},
+      {id:'fc7', topic:'Heat', front:'What stays constant during a change of state?', back:'Temperature, while energy is still transferred as latent heat.'},
+      {id:'fc8', topic:'Heat', front:'How do you define conduction?', back:'Heat transfer through a material without bulk motion of the material.'},
+      {id:'fc9', topic:'Waves', front:'State the wave equation.', back:'c = fλ'},
+      {id:'fc10', topic:'Waves', front:'What is resonance?', back:'Large-amplitude vibration caused when a system is driven at its natural frequency.'},
+      {id:'fc11', topic:'Sound', front:'Which wave property determines pitch?', back:'Frequency.'},
+      {id:'fc12', topic:'Sound', front:'Which wave property mainly determines loudness?', back:'Amplitude / intensity.'},
+      {id:'fc13', topic:'Sound', front:'What happens to observed frequency when a source approaches?', back:'It increases because wavefronts are compressed.'},
+      {id:'fc14', topic:'Strings', front:'For a string fixed at both ends, what are the ends?', back:'Nodes.'},
+      {id:'fc15', topic:'Light', front:'Why is polarisation evidence that light is transverse?', back:'Only transverse waves can be polarised.'},
+      {id:'fc16', topic:'Light', front:'What must you do first if a grating question gives the distance between +n and −n images?', back:'Halve the distance to get the offset from the central maximum to one image of order n.'},
+      {id:'fc17', topic:'Light', front:'Order visible light from longest to shortest wavelength.', back:'Red, orange, yellow, green, blue, indigo, violet.'},
+      {id:'fc18', topic:'Light', front:'State the diffraction-grating formula.', back:'nλ = d sinθ'},
+      {id:'fc19', topic:'Formulas', front:'Write the lens formula.', back:'1/f = 1/u + 1/v'},
+      {id:'fc20', topic:'Formulas', front:'Write the stretched-string formula for the fundamental frequency.', back:'f = (1/2L)√(T/μ)'}
+    ];
+
+    const QUESTION_BANK = [
+      {
+        id:'q01', topic:'heat', difficulty:'medium', source:'Past paper 2022', sourceType:'past', marks:12,
+        title:'Fulacht fiadh maximum temperature',
+        type:'number', expected:36.95, tolerance:0.25, unit:'°C',
+        prompt:`<p>A 2022 Higher Level question described a <em>fulacht fiadh</em> containing 750 litres of water at 4 °C. Fifty heated stones at 280 °C were added, each with heat capacity 8.5 kJ K<sup>-1</sup>. Find the highest temperature the water could reach.</p>`,
+        hint:'Set heat lost by the stones equal to heat gained by the water. Take 750 litres of water as 750 kg.',
+        solution:`<p>Water gain: <span class="mono">mcΔθ = 750 × 4180 × (T − 4)</span>.</p>
+                  <p>Stone loss: <span class="mono">50 × 8500 × (280 − T)</span>.</p>
+                  <p>Equate them: <span class="mono">750 × 4180 × (T − 4) = 50 × 8500 × (280 − T)</span>.</p>
+                  <p>Solving gives <strong>T ≈ 36.95 °C</strong>.</p>`,
+        marking:`Define the energy balance clearly, substitute correctly, and solve for the final temperature. In the 2022 marking scheme this answer was worth full credit when the setup and final temperature were correct.`
+      },
+      {
+        id:'q02', topic:'waves', difficulty:'hard', source:'Past paper 2022', sourceType:'past', marks:12,
+        title:'Lyre-string tension',
+        type:'number', expected:29.1, tolerance:0.25, unit:'N',
+        prompt:`<p>A string of mass 0.21 g and total length 65 cm is stretched between points 34.1 cm apart and must vibrate at a fundamental frequency of 440 Hz. Find the tension.</p>`,
+        hint:'First find linear density μ from the full 65 cm string. Then use f = (1/2L)√(T/μ) with vibrating length L = 34.1 cm.',
+        solution:`<p>Linear density: <span class="mono">μ = m/L = 0.00021 / 0.65 = 3.23 × 10<sup>-4</sup> kg m<sup>-1</sup></span>.</p>
+                  <p>Use <span class="mono">f = (1/2l)√(T/μ)</span>, so <span class="mono">T = μ(2lf)²</span>.</p>
+                  <p><span class="mono">T = 3.23 × 10<sup>-4</sup> × (2 × 0.341 × 440)² ≈ 29.1 N</span>.</p>`,
+        marking:`Common error: using 0.65 m instead of the vibrating length 0.341 m in the frequency formula. The 2022 marking scheme gave separate credit for μ and for the final substitution.`
+      },
+      {
+        id:'q03', topic:'waves', difficulty:'hard', source:'Past paper 2022', sourceType:'past', marks:12,
+        title:'Doppler effect from falling toy',
+        type:'number', expected:460.2, tolerance:1.0, unit:'Hz',
+        prompt:`<p>A toy emits 500 Hz and is dropped from rest. After 3.0 s, what frequency is heard by the observer at the top? Take the speed of sound as 340 m s<sup>-1</sup>.</p>`,
+        hint:'Find the toy speed after 3.0 s, then use the moving-source Doppler formula for a source moving away from the observer.',
+        solution:`<p>Speed after 3.0 s: <span class="mono">u = gt = 9.8 × 3 = 29.4 m s<sup>-1</sup></span>.</p>
+                  <p>Because the source is moving away, use <span class="mono">f' = fc / (c + u)</span>.</p>
+                  <p><span class="mono">f' = 500 × 340 / (340 + 29.4) ≈ 460.2 Hz</span>.</p>`,
+        marking:`Earn marks for the fall-speed step and for choosing the correct Doppler sign. The final frequency in the published 2022 marking scheme was 460.2 Hz.`
+      },
+      {
+        id:'q04', topic:'waves', difficulty:'medium', source:'Past paper 2022', sourceType:'past', marks:9,
+        title:'Power of a sound source',
+        type:'number', expected:20.4, tolerance:0.5, unit:'mW',
+        prompt:`<p>The sound intensity is 0.18 mW m<sup>-2</sup> at a distance of 3.0 m from a source. Find the source power.</p>`,
+        hint:'Use the sphere formula I = P / 4πr².',
+        solution:`<p>Convert intensity: <span class="mono">0.18 mW m<sup>-2</sup> = 1.8 × 10<sup>-4</sup> W m<sup>-2</sup></span>.</p>
+                  <p><span class="mono">P = I4πr² = 1.8 × 10<sup>-4</sup> × 4π × 3² ≈ 2.04 × 10<sup>-2</sup> W</span>.</p>
+                  <p>So <strong>P ≈ 20.4 mW</strong>.</p>`,
+        marking:`Show the unit conversion first. A very common slip is to forget to convert mW m^-2 to W m^-2.`
+      },
+      {
+        id:'q05', topic:'lenses', difficulty:'medium', source:'Past paper 2022', sourceType:'past', marks:7,
+        title:'Virtual image with a converging lens',
+        type:'text',
+        prompt:`<p>State the condition needed for a converging lens to produce a virtual image, and name two characteristics of that image.</p>`,
+        checker:(answer)=>{
+          const a = answer.toLowerCase();
+          return (a.includes('inside') || a.includes('within')) &&
+                 a.includes('focal') &&
+                 (a.includes('upright') || a.includes('erect')) &&
+                 (a.includes('virtual')) &&
+                 (a.includes('magnified') || a.includes('larger'));
+        },
+        hint:'Think ray diagram: object position first, then image nature.',
+        solution:`<p>The object must be placed <strong>inside the focal length</strong> of the converging lens. The image is <strong>virtual</strong>, <strong>upright</strong>, and usually <strong>magnified</strong>.</p>`,
+        marking:`The 2022 marking scheme required the object to be inside the focal point and the rays to appear to meet on the object side.`
+      },
+      {
+        id:'q06', topic:'light', difficulty:'hard', source:'Past paper 2023', sourceType:'past', marks:12,
+        title:'Diffraction-grating wavelength',
+        type:'number', expected:6.33e-7, tolerance:2e-9, unit:'m',
+        prompt:`<p>A diffraction grating has 300 lines per mm. The screen is 75 cm away and the distance between the third-order images is 1.04 m. Find the wavelength of the red light.</p>`,
+        hint:'Compute d first. The 1.04 m is the distance from +3 to −3, so halve it before finding θ.',
+        solution:`<p><span class="mono">d = 1 / 300000 = 3.33 × 10<sup>-6</sup> m</span>.</p>
+                  <p>Half-separation to one third-order image: <span class="mono">y = 1.04 / 2 = 0.52 m</span>.</p>
+                  <p><span class="mono">tanθ = y / 0.75</span>, so <span class="mono">θ ≈ 34.74°</span>.</p>
+                  <p><span class="mono">nλ = d sinθ</span> gives <span class="mono">λ = (3.33 × 10<sup>-6</sup> × sin34.74°)/3 ≈ 6.33 × 10<sup>-7</sup> m</span>.</p>`,
+        marking:`The 2023 marking scheme awarded separate marks for d, halving the image spacing, finding θ and applying nλ = d sinθ.`
+      },
+      {
+        id:'q07', topic:'heat', difficulty:'hard', source:'Past paper 2023', sourceType:'past', marks:16,
+        title:'Specific latent heat of vaporisation',
+        type:'number', expected:2.22e6, tolerance:5e4, unit:'J kg⁻¹',
+        prompt:`<p>Using the 2023 calorimetry data (65.8 g copper calorimeter; 45.8 g water initially at 5.5 °C; 2.7 g steam added; final temperature 36.4 °C), calculate the specific latent heat of vaporisation of water.</p>`,
+        hint:'Steam first condenses, then the condensed water cools from 100 °C to 36.4 °C. Energy released by steam = energy gained by water + calorimeter.',
+        solution:`<p>Water + calorimeter gain:</p>
+                  <p><span class="mono">Q<sub>gain</sub> = (0.0458 × 4180 × 30.9) + (0.0658 × 390 × 30.9) ≈ 6712 J</span>.</p>
+                  <p>Steam cooling after condensing:</p>
+                  <p><span class="mono">Q<sub>cool</sub> = 0.0027 × 4180 × (100 − 36.4) ≈ 718 J</span>.</p>
+                  <p>So latent-heat term is <span class="mono">ml = 6712 − 718 = 5994 J</span>.</p>
+                  <p><span class="mono">l = 5994 / 0.0027 ≈ 2.22 × 10<sup>6</sup> J kg<sup>-1</sup></span>.</p>`,
+        marking:`The 2023 marking scheme gave full credit for 2.22 × 10^6 J kg^-1. The most common mistake is forgetting the cooling of the condensed steam from 100 °C to the final temperature.`
+      },
+      {
+        id:'q08', topic:'lenses', difficulty:'medium', source:'Past paper 2023', sourceType:'past', marks:7,
+        title:'Power of a lens combination',
+        type:'number', expected:-13.33, tolerance:0.2, unit:'m⁻¹',
+        prompt:`<p>A converging lens of focal length 15 cm is placed in contact with a diverging lens of focal length 5 cm. Find the total power of the combination.</p>`,
+        hint:'Use sign carefully: converging positive, diverging negative.',
+        solution:`<p><span class="mono">P₁ = 1 / 0.15 = +6.67 m<sup>-1</sup></span>.</p>
+                  <p><span class="mono">P₂ = 1 / (−0.05) = −20.0 m<sup>-1</sup></span>.</p>
+                  <p><span class="mono">Pₜ = P₁ + P₂ = −13.33 m<sup>-1</sup></span>.</p>`,
+        marking:`The 2023 marking scheme gave full credit for −13.33 m^-1. Sign errors are the main trap here.`
+      },
+      {
+        id:'q09', topic:'waves', difficulty:'medium', source:'Past paper 2023', sourceType:'past', marks:8,
+        title:'Effect of changing string variables',
+        type:'mcq', expected:'A',
+        prompt:`<p>If the tension of a stretched string is increased by a factor of four, what happens to the fundamental frequency?</p>`,
+        choices:[
+          ['A', 'It doubles.'],
+          ['B', 'It halves.'],
+          ['C', 'It increases by a factor of four.'],
+          ['D', 'It stays the same.']
+        ],
+        hint:'Use f ∝ √T.',
+        solution:`<p>From <span class="mono">f = (1/2L)√(T/μ)</span>, frequency is proportional to the square root of tension. A factor of four in tension gives a factor of two in frequency.</p>`,
+        marking:`This exact relationship was tested explicitly on the 2023 paper.`
+      },
+      {
+        id:'q10', topic:'waves', difficulty:'medium', source:'Past paper 2023', sourceType:'past', marks:6,
+        title:'Third-harmonic frequency on a string',
+        type:'number', expected:919.4, tolerance:2.0, unit:'Hz',
+        prompt:`<p>A string 62 cm long supports standing waves. The wave speed on the string is 380 m s<sup>-1</sup>. Find the frequency of the third harmonic.</p>`,
+        hint:'For the third harmonic, λ = 2L/3.',
+        solution:`<p><span class="mono">λ = 2L / 3 = 2 × 0.62 / 3 = 0.4133 m</span>.</p>
+                  <p><span class="mono">f = c / λ = 380 / 0.4133 ≈ 919.4 Hz</span>.</p>`,
+        marking:`Shown in the published 2023 marking scheme. Sketching the third harmonic first reduces errors.`
+      },
+      {
+        id:'q11', topic:'waves', difficulty:'hard', source:'Past paper 2023', sourceType:'past', marks:9,
+        title:'Doppler speed of a speaker',
+        type:'number', expected:56.7, tolerance:1.0, unit:'m s⁻¹',
+        prompt:`<p>A speaker moving towards an observer is heard at a frequency 20% greater than the emitted frequency. Find the speed of the speaker. Use speed of sound 340 m s<sup>-1</sup>.</p>`,
+        hint:'Use f′ = 1.2f and solve for u in the moving-source formula.',
+        solution:`<p><span class="mono">1.2f = fc/(c − u)</span>.</p>
+                  <p>Cancel <span class="mono">f</span>: <span class="mono">1.2 = 340/(340 − u)</span>.</p>
+                  <p><span class="mono">340 − u = 340 / 1.2 = 283.3</span>, so <span class="mono">u ≈ 56.7 m s<sup>-1</sup></span>.</p>`,
+        marking:`The official 2023 marking scheme gives 56.7 m s^-1. The sign must reflect an approaching source.`
+      },
+      {
+        id:'q12', topic:'waves', difficulty:'easy', source:'Past paper 2023', sourceType:'past', marks:6,
+        title:'Sound intensity level change',
+        type:'number', expected:6, tolerance:0.2, unit:'dB',
+        prompt:`<p>A fixed speaker of power P is replaced by a speaker of power 4P at the same distance. By how many decibels does the sound intensity level increase?</p>`,
+        hint:'Quadruple power means quadruple intensity at the same distance.',
+        solution:`<p>At fixed distance, <span class="mono">I ∝ P</span>, so the intensity becomes 4 times larger.</p>
+                  <p><span class="mono">Δβ = 10 log₁₀(4) ≈ 6.0 dB</span>.</p>`,
+        marking:`The 2023 scheme accepted the simple ‘doubling twice gives 3 dB + 3 dB’ argument.`
+      },
+      {
+        id:'q13', topic:'lenses', difficulty:'hard', source:'Past paper 2024', sourceType:'past', marks:16,
+        title:'Focal length of a converging lens',
+        type:'number', expected:16.04, tolerance:0.25, unit:'cm',
+        prompt:`<p>Using the 2024 data set u = 20.0, 30.0, 40.0, 50.0 cm and v = 78.7, 35.2, 26.9, 23.4 cm, calculate the focal length of the converging lens using all the data.</p>`,
+        hint:'Find f from each u,v pair and average the four values.',
+        solution:`<p>For each pair use <span class="mono">f = uv / (u + v)</span>.</p>
+                  <p>The four values are approximately 15.95 cm, 16.20 cm, 16.08 cm and 15.94 cm.</p>
+                  <p>Average: <strong>f ≈ 16.04 cm</strong>, so a sensible final answer is <strong>16.0 cm</strong>.</p>`,
+        marking:`A full-mark script should show all four calculations or one clear substitution plus the repeated method. The official paper explicitly says to use all the data.`
+      },
+      {
+        id:'q14', topic:'heat', difficulty:'hard', source:'Past paper 2024', sourceType:'past', marks:16,
+        title:'Specific latent heat of fusion of ice',
+        type:'number', expected:3.30e5, tolerance:1.5e4, unit:'J kg⁻¹',
+        prompt:`<p>Using the 2024 data (83.2 g copper calorimeter; water mass before ice = 49.7 g; ice mass = 5.6 g; temperature falls from 26.8 °C to 17.4 °C), calculate the specific latent heat of fusion of ice.</p>`,
+        hint:'Energy lost by warm water and calorimeter = energy for melting the ice + warming the melted ice to 17.4 °C.',
+        solution:`<p>Calorimeter loss: <span class="mono">Q_c = 0.0832 × 390 × 9.4 ≈ 305 J</span>.</p>
+                  <p>Water loss: <span class="mono">Q_w = 0.0497 × 4180 × 9.4 ≈ 1953 J</span>.</p>
+                  <p>Total loss: <span class="mono">≈ 2258 J</span>.</p>
+                  <p>Heating the melted ice from 0 °C to 17.4 °C needs <span class="mono">0.0056 × 4180 × 17.4 ≈ 407 J</span>.</p>
+                  <p>So latent term is <span class="mono">2258 − 407 = 1851 J</span>.</p>
+                  <p><span class="mono">l = 1851 / 0.0056 ≈ 3.30 × 10<sup>5</sup> J kg<sup>-1</sup></span>.</p>`,
+        marking:`Write the energy balance explicitly. This topic is repeatedly examined, and missing the sensible-heat term for the melted ice is the classic error.`
+      },
+      {
+        id:'q15', topic:'heat', difficulty:'easy', source:'Past paper 2024', sourceType:'past', marks:4,
+        title:'Conduction versus convection',
+        type:'text',
+        prompt:`<p>State one clear difference between conduction and convection.</p>`,
+        checker:(answer)=>{
+          const a = answer.toLowerCase();
+          return ((a.includes('conduction') && a.includes('solid')) ||
+                 (a.includes('conduction') && a.includes('without bulk movement')) ||
+                 (a.includes('convection') && (a.includes('fluid') || a.includes('liquid') || a.includes('gas')) && a.includes('movement')));
+        },
+        hint:'Think particles and bulk movement.',
+        solution:`<p><strong>Conduction</strong> transfers heat through a material without bulk movement of the material, whereas <strong>convection</strong> transfers heat by the bulk movement of a fluid such as a liquid or gas.</p>`,
+        marking:`A concise distinction using “no bulk movement” versus “bulk movement of a fluid” is exam-safe.`
+      },
+      {
+        id:'q16', topic:'waves', difficulty:'medium', source:'Past paper 2024', sourceType:'past', marks:9,
+        title:'Sound wave and inverse-square distance',
+        type:'number', expected:9.90, tolerance:0.25, unit:'m',
+        prompt:`<p>A loudspeaker produces 80 mW. For a person at 7.0 m, the sound intensity is I. At what distance is the intensity I/2?</p>`,
+        hint:'Use I ∝ 1/r².',
+        solution:`<p>If intensity halves, <span class="mono">r²</span> must double.</p>
+                  <p><span class="mono">d = 7√2 ≈ 9.90 m</span>.</p>`,
+        marking:`This is faster than calculating absolute intensity first. The 2024 paper tested exactly this inverse-square step.`
+      },
+      {
+        id:'q17', topic:'waves', difficulty:'easy', source:'Past paper 2025', sourceType:'past', marks:4,
+        title:'Third harmonic from first harmonic',
+        type:'number', expected:588, tolerance:2, unit:'Hz',
+        prompt:`<p>A guitar string vibrates at its first harmonic with frequency 196 Hz. What is its third-harmonic frequency?</p>`,
+        hint:'Harmonic frequencies are whole-number multiples of the fundamental.',
+        solution:`<p><span class="mono">f₃ = 3f₁ = 3 × 196 = 588 Hz</span>.</p>`,
+        marking:`A one-line answer is enough if the harmonic rule is stated or clearly used.`
+      },
+      {
+        id:'q18', topic:'heat', difficulty:'hard', source:'Past paper 2025', sourceType:'past', marks:16,
+        title:'Mass of steam in calorimeter',
+        type:'number', expected:22.72, tolerance:0.6, unit:'g',
+        prompt:`<p>In the 2025 steam calorimetry problem, a 200 g copper calorimeter contains 450 g of water and 50 g of ice, all initially at 0 °C. Final temperature is 20 °C. Find the mass of dry steam added. Use c<sub>Cu</sub> = 390, c<sub>w</sub> = 4180, l<sub>f</sub> = 3.3×10<sup>5</sup>, l<sub>v</sub> = 2.3×10<sup>6</sup> in SI units.</p>`,
+        hint:'Energy gained by calorimeter + melted ice + all final water equals energy released by steam on condensing and then cooling from 100 °C to 20 °C.',
+        solution:`<p>Energy gained:</p>
+                  <p><span class="mono">Q = (0.20 × 390 × 20) + (0.05 × 3.3×10<sup>5</sup>) + (0.50 × 4180 × 20)</span></p>
+                  <p><span class="mono">Q = 1560 + 16500 + 41800 = 59860 J</span>.</p>
+                  <p>Each kilogram of steam releases</p>
+                  <p><span class="mono">l<sub>v</sub> + cΔθ = 2.3×10<sup>6</sup> + 4180×80 = 2.6344×10<sup>6</sup> J kg<sup>-1</sup></span>.</p>
+                  <p><span class="mono">m = 59860 / 2.6344×10<sup>6</sup> ≈ 0.02272 kg = 22.72 g</span>.</p>`,
+        marking:`A strong solution separates (i) calorimeter warming, (ii) ice melting, (iii) water warming, and then steam condensation plus cooling.`
+      },
+      {
+        id:'q19', topic:'light', difficulty:'medium', source:'Past paper 2025', sourceType:'past', marks:8,
+        title:'Why light is transverse',
+        type:'text',
+        prompt:`<p>Name one experiment that shows light is transverse, and state the observation that proves it.</p>`,
+        checker:(answer)=>{
+          const a = answer.toLowerCase();
+          const experiment = a.includes('polar') || a.includes('polaroid') || a.includes('polariser');
+          const observation = a.includes('light disappears') || a.includes('dark') || a.includes('intensity') || a.includes('blocked') || a.includes('90');
+          return experiment && observation;
+        },
+        hint:'Think of two Polaroids turned relative to each other.',
+        solution:`<p>Pass light through one Polaroid and then a second. Rotate the second Polaroid. The transmitted light becomes minimum or disappears when the polarisers are crossed. That shows the light is <strong>transverse</strong>, because only transverse waves can be polarised.</p>`,
+        marking:`The safest response mentions polaroids/polarisers explicitly and ties the observation to the conclusion “only transverse waves can be polarised.”`
+      },
+      {
+        id:'q20', topic:'light', difficulty:'hard', source:'Past paper 2025', sourceType:'past', marks:12,
+        title:'Diffraction-grating lines per mm',
+        type:'number', expected:301, tolerance:8, unit:'lines mm⁻¹',
+        prompt:`<p>Laser light of wavelength 691 nm produces second-order images. If the angle between the +2 and −2 images is 49°, estimate the number of lines per mm on the diffraction grating.</p>`,
+        hint:'Use θ = 49° / 2 for one second-order image.',
+        solution:`<p>For one image, <span class="mono">θ = 24.5°</span>.</p>
+                  <p><span class="mono">d = nλ / sinθ = 2 × 691×10<sup>-9</sup> / sin24.5° ≈ 3.32×10<sup>-6</sup> m</span>.</p>
+                  <p>Lines per metre: <span class="mono">1/d ≈ 3.01×10<sup>5</sup></span>.</p>
+                  <p>So the grating has about <strong>301 lines per mm</strong>.</p>`,
+        marking:`The key step is halving the total separation angle before using the grating formula.`
+      },
+
+      { id:'q21', topic:'motion', difficulty:'easy', source:'Original', sourceType:'original', marks:5,
+        title:'Distance versus displacement',
+        type:'number', expected:1.75, tolerance:0.05, unit:'m s⁻¹ east',
+        prompt:`<p>A student walks 12 m east and then 5 m west in 4.0 s. Find the average velocity.</p>`,
+        hint:'Average velocity uses displacement, not distance.',
+        solution:`<p>Net displacement = 12 − 5 = 7 m east.</p><p>Average velocity = 7 / 4 = <strong>1.75 m s<sup>-1</sup> east</strong>.</p>`,
+        marking:`State the direction. Many students incorrectly use total distance and calculate average speed instead.`
+      },
+      { id:'q22', topic:'motion', difficulty:'medium', source:'Original', sourceType:'original', marks:6,
+        title:'Constant acceleration from rest',
+        type:'number', expected:4.0, tolerance:0.05, unit:'m s⁻²',
+        prompt:`<p>A skateboard starts from rest and travels 18 m in 3.0 s with constant acceleration. Find the acceleration.</p>`,
+        hint:'Rest means u = 0, so s = ½at².',
+        solution:`<p><span class="mono">18 = ½a(3²) = 4.5a</span>, so <strong>a = 4.0 m s<sup>-2</sup></strong>.</p>`,
+        marking:`Write u = 0 explicitly so the choice of formula is obvious.`
+      },
+      { id:'q23', topic:'motion', difficulty:'medium', source:'Original', sourceType:'original', marks:6,
+        title:'Final speed by v² = u² + 2as',
+        type:'number', expected:13.0, tolerance:0.1, unit:'m s⁻¹',
+        prompt:`<p>A cyclist moving at 5.0 m s<sup>-1</sup> accelerates uniformly at 4.0 m s<sup>-2</sup> for 18 m. Find the final speed.</p>`,
+        hint:'This is a clean v² = u² + 2as question.',
+        solution:`<p><span class="mono">v² = 5² + 2 × 4 × 18 = 25 + 144 = 169</span>, so <strong>v = 13.0 m s<sup>-1</sup></strong>.</p>`,
+        marking:`The square-root step is essential. Do not leave the answer as v².`
+      },
+      { id:'q24', topic:'lenses', difficulty:'easy', source:'Original', sourceType:'original', marks:4,
+        title:'Image by a diverging lens',
+        type:'text',
+        prompt:`<p>State the type of image formed by a diverging lens for a real object.</p>`,
+        checker:(answer)=>{
+          const a = answer.toLowerCase();
+          return a.includes('virtual') && (a.includes('upright') || a.includes('erect')) && (a.includes('diminished') || a.includes('smaller'));
+        },
+        hint:'All three descriptive words matter here.',
+        solution:`<p>A diverging lens forms a <strong>virtual</strong>, <strong>upright</strong>, <strong>diminished</strong> image.</p>`,
+        marking:`This is a standard definition-style fact worth memorising exactly.`
+      },
+      { id:'q25', topic:'lenses', difficulty:'medium', source:'Original', sourceType:'original', marks:6,
+        title:'Lens power from focal length',
+        type:'number', expected:-5.0, tolerance:0.05, unit:'D',
+        prompt:`<p>A diverging lens has focal length 20 cm. Find its power.</p>`,
+        hint:'Convert to metres and use the correct sign.',
+        solution:`<p><span class="mono">f = −0.20 m</span>, so <span class="mono">P = 1/f = −5.0 D</span>.</p>`,
+        marking:`Use metres, not centimetres.`
+      },
+      { id:'q26', topic:'heat', difficulty:'easy', source:'Original', sourceType:'original', marks:5,
+        title:'Heat needed to warm water',
+        type:'number', expected:52250, tolerance:300, unit:'J',
+        prompt:`<p>How much heat is needed to raise 0.25 kg of water from 20 °C to 70 °C? Take c = 4180 J kg<sup>-1</sup> K<sup>-1</sup>.</p>`,
+        hint:'Use Q = mcΔθ.',
+        solution:`<p><span class="mono">Q = 0.25 × 4180 × 50 = 52,250 J</span>.</p>`,
+        marking:`Include the temperature change, not the final temperature.`
+      },
+      { id:'q27', topic:'heat', difficulty:'medium', source:'Original', sourceType:'original', marks:5,
+        title:'Energy to melt ice',
+        type:'number', expected:26400, tolerance:300, unit:'J',
+        prompt:`<p>Find the energy needed to melt 0.080 kg of ice at 0 °C. Take l<sub>f</sub> = 3.3 × 10<sup>5</sup> J kg<sup>-1</sup>.</p>`,
+        hint:'No temperature rise here: just latent heat.',
+        solution:`<p><span class="mono">Q = ml = 0.080 × 3.3 × 10<sup>5</sup> = 26,400 J</span>.</p>`,
+        marking:`Do not add a sensible-heat term unless the ice or water temperature changes.`
+      },
+      { id:'q28', topic:'waves', difficulty:'easy', source:'Original', sourceType:'original', marks:4,
+        title:'Wave speed',
+        type:'number', expected:20.0, tolerance:0.05, unit:'m s⁻¹',
+        prompt:`<p>A wave has frequency 50 Hz and wavelength 0.40 m. Find its speed.</p>`,
+        hint:'Use c = fλ.',
+        solution:`<p><span class="mono">c = 50 × 0.40 = 20 m s<sup>-1</sup></span>.</p>`,
+        marking:`Straight substitution, but always include units.`
+      },
+      { id:'q29', topic:'waves', difficulty:'medium', source:'Original', sourceType:'original', marks:6,
+        title:'Distance effect on intensity',
+        type:'number', expected:2.22e-5, tolerance:2e-6, unit:'W m⁻²',
+        prompt:`<p>The sound intensity is 2.0 × 10<sup>-4</sup> W m<sup>-2</sup> at 2.0 m from a source. What is the intensity at 6.0 m?</p>`,
+        hint:'Use the inverse-square ratio I₂/I₁ = r₁²/r₂².',
+        solution:`<p><span class="mono">I₂ = I₁ × (r₁²/r₂²) = 2.0×10<sup>-4</sup> × (2²/6²)</span></p>
+                  <p><span class="mono">I₂ = 2.22 × 10<sup>-5</sup> W m<sup>-2</sup></span>.</p>`,
+        marking:`This question rewards writing the ratio before plugging numbers in.`
+      },
+      { id:'q30', topic:'waves', difficulty:'medium', source:'Original', sourceType:'original', marks:6,
+        title:'Third-harmonic wavelength on a string',
+        type:'number', expected:0.8, tolerance:0.02, unit:'m',
+        prompt:`<p>A string fixed at both ends has vibrating length 1.2 m. Find the wavelength of the third harmonic.</p>`,
+        hint:'For the nth harmonic on a string, L = nλ/2.',
+        solution:`<p><span class="mono">L = nλ/2</span> gives <span class="mono">1.2 = 3λ/2</span>.</p>
+                  <p>So <span class="mono">λ = 0.80 m</span>.</p>`,
+        marking:`Always sketch the standing wave if you are unsure which multiple appears.`
+      },
+      { id:'q31', topic:'light', difficulty:'medium', source:'Original', sourceType:'original', marks:6,
+        title:'First-order diffraction angle',
+        type:'number', expected:17.46, tolerance:0.2, unit:'°',
+        prompt:`<p>A diffraction grating has 500 lines per mm. Monochromatic light of wavelength 600 nm is incident normally. Find the first-order angle.</p>`,
+        hint:'Convert lines per mm to lines per metre, then find d.',
+        solution:`<p><span class="mono">d = 1 / 500000 = 2.0 × 10<sup>-6</sup> m</span>.</p>
+                  <p><span class="mono">sinθ = λ/d = 600×10<sup>-9</sup> / 2.0×10<sup>-6</sup> = 0.30</span>.</p>
+                  <p><span class="mono">θ ≈ 17.46°</span>.</p>`,
+        marking:`The unit conversion from lines per mm to lines per metre is the key first step.`
+      },
+      { id:'q32', topic:'light', difficulty:'easy', source:'Original', sourceType:'original', marks:4,
+        title:'EM spectrum ordering',
+        type:'mcq', expected:'C',
+        prompt:`<p>Which option lists electromagnetic radiation in order of increasing wavelength?</p>`,
+        choices:[
+          ['A','infrared, visible, ultraviolet, X-rays'],
+          ['B','visible, gamma, infrared, radio'],
+          ['C','gamma, X-rays, ultraviolet, visible'],
+          ['D','radio, microwaves, infrared, visible']
+        ],
+        hint:'Shorter wavelength means higher frequency and higher energy.',
+        solution:`<p>The correct order here is <strong>gamma, X-rays, ultraviolet, visible</strong>.</p>`,
+        marking:`This is a quick recall mark if you know the standard spectrum ordering.`
+      }
+    ];
+
+    const NOTES_TEMPLATE = {
+      weakPointHints: {
+        motion:['Re-read the graph rules.', 'Practise unit conversions first.', 'Use one kinematics equation per step rather than mixing them immediately.'],
+        lenses:['Sketch the principal axis before writing.', 'Identify whether the image is real or virtual before calculating.', 'Convert focal length to metres for power.'],
+        heat:['Separate each energy term.', 'Always ask whether the calorimeter matters.', 'State whether heat is gained or lost by each part.'],
+        waves:['Write c = fλ at the top of the page.', 'Sketch the standing wave.', 'For Doppler, decide approach or recession before choosing the sign.'],
+        light:['Halve the screen separation if the question gives +n to −n.', 'Convert grating lines to spacing early.', 'Use polarisation as the clean proof that light is transverse.']
+      }
     };
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+    const STORAGE = (() => {
+      try{
+        const key = '__storage_probe__';
+        localStorage.setItem(key, '1');
+        localStorage.removeItem(key);
+        return localStorage;
+      }catch(err){
+        return null;
+      }
+    })();
+
+    function deepClone(obj){
+      return JSON.parse(JSON.stringify(obj));
     }
 
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-
-    const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
-    const INITIAL_VISIBLE = 6;
-    const STEP_VISIBLE = 6;
-
-    const state = {
-      allReviews: [],
-      filteredReviews: [],
-      visibleCount: INITIAL_VISIBLE,
-      activeFilter: "all",
-      searchTerm: "",
-      posting: false,
-      cooldownUntil: 0,
-      cooldownTimer: null,
-      previewUrl: "",
-      unsubscribeReviews: null,
-      activeModalId: null,
-      restoreFocusEl: null,
-      observer: null
+    const DEFAULT_STATE = {
+      answers:{},
+      attempts:{},
+      flash:{},
+      mock:{active:false, ids:[], duration:2400, remaining:2400, startedAt:null},
+      userNotes:{},
+      settings:{theme:'dark'},
+      sessionOnly: !STORAGE
     };
 
-    const el = {
-      reviewForm: document.getElementById("reviewForm"),
-      nameInput: document.getElementById("nameInput"),
-      reviewInput: document.getElementById("reviewInput"),
-      imageInput: document.getElementById("imageInput"),
-      previewBox: document.getElementById("previewBox"),
-      previewImage: document.getElementById("previewImage"),
-      previewText: document.getElementById("previewText"),
-      clearImageButton: document.getElementById("clearImageButton"),
-      progressWrap: document.getElementById("progressWrap"),
-      progressBar: document.getElementById("progressBar"),
-      statusText: document.getElementById("statusText"),
-      postButton: document.getElementById("postButton"),
-      postButtonLabel: document.getElementById("postButtonLabel"),
-      searchInput: document.getElementById("searchInput"),
-      filterButtons: Array.from(document.querySelectorAll("[data-filter]")),
-      reviewsMeta: document.getElementById("reviewsMeta"),
-      reviewsList: document.getElementById("reviewsList"),
-      emptyState: document.getElementById("emptyState"),
-      loadMoreButton: document.getElementById("loadMoreButton"),
-      reviewSentinel: document.getElementById("reviewSentinel"),
-      lightboxModal: document.getElementById("lightboxModal"),
-      lightboxTitle: document.getElementById("lightboxTitle"),
-      lightboxDesc: document.getElementById("lightboxDesc"),
-      lightboxImage: document.getElementById("lightboxImage"),
-      toastWrap: document.getElementById("toastWrap")
-    };
+    let state = loadState();
+    let mockInterval = null;
 
-    document.addEventListener("DOMContentLoaded", init);
-
-    function init() {
-      bindEvents();
-      setupInfiniteScroll();
-      loadReviews();
-    }
-
-    function bindEvents() {
-      // Gallery lightbox triggers.
-      document.querySelectorAll("[data-lightbox-src]").forEach((button) => {
-        button.addEventListener("click", () => {
-          openLightbox(
-            button.getAttribute("data-lightbox-src") || "",
-            button.getAttribute("data-lightbox-title") || "Image",
-            button.getAttribute("data-lightbox-desc") || "Preview"
-          );
-        });
-      });
-
-      // Form actions.
-      el.reviewForm.addEventListener("submit", handleReviewSubmit);
-      el.imageInput.addEventListener("change", handleImageSelection);
-      el.clearImageButton.addEventListener("click", clearImage);
-
-      // Search and filters.
-      el.searchInput.addEventListener("input", debounce(() => {
-        state.searchTerm = el.searchInput.value.trim().toLowerCase();
-        applyFilters(true);
-      }, 120));
-
-      el.filterButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          setFilter(button.dataset.filter || "all");
-          applyFilters(true);
-        });
-      });
-
-      // Pagination.
-      el.loadMoreButton.addEventListener("click", renderMore);
-
-      // Modal close triggers.
-      document.querySelectorAll("[data-close-modal]").forEach((button) => {
-        button.addEventListener("click", () => closeModal(button.getAttribute("data-close-modal")));
-      });
-
-      el.lightboxModal.addEventListener("mousedown", (event) => {
-        if (event.target === el.lightboxModal) {
-          closeModal("lightboxModal");
-        }
-      });
-
-      // Keyboard shortcuts.
-      document.addEventListener("keydown", handleGlobalKeys);
-    }
-
-    function handleGlobalKeys(event) {
-      const modal = getOpenModal();
-
-      if (event.key === "Escape" && modal) {
-        event.preventDefault();
-        closeModal(modal.id);
-        return;
-      }
-
-      if (event.key === "/" && !modal && !isTextInput(event.target)) {
-        event.preventDefault();
-        el.searchInput.focus();
-        el.searchInput.select();
-        return;
-      }
-
-      if (event.key === "Tab" && modal) {
-        trapFocus(event, modal);
+    function loadState(){
+      const base = deepClone(DEFAULT_STATE);
+      if(!STORAGE) return base;
+      try{
+        const raw = STORAGE.getItem(APP_KEY);
+        if(!raw) return base;
+        return Object.assign(base, JSON.parse(raw));
+      }catch(err){
+        return base;
       }
     }
 
-    function setupInfiniteScroll() {
-      if (!("IntersectionObserver" in window)) return;
-
-      state.observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && state.visibleCount < state.filteredReviews.length) {
-            renderMore();
-          }
-        });
-      }, {
-        rootMargin: "280px 0px"
-      });
-
-      state.observer.observe(el.reviewSentinel);
+    function saveState(){
+      if(!STORAGE) return;
+      try{ STORAGE.setItem(APP_KEY, JSON.stringify(state)); }catch(err){}
+      renderDashboard();
+      renderPractice();
+      renderFlashcards();
+      renderMock();
+      renderSettings();
     }
 
-    function loadReviews() {
-      el.reviewsList.setAttribute("aria-busy", "true");
-      el.reviewsMeta.textContent = "Loading reviews…";
+    function resetState(){
+      state = deepClone(DEFAULT_STATE);
+      saveState();
+      renderAll();
+    }
 
-      if (typeof state.unsubscribeReviews === "function") {
-        state.unsubscribeReviews();
+    function initNav(){
+      const nav = document.getElementById('nav');
+      nav.innerHTML = '';
+      NAV_ITEMS.forEach(([id,label])=>{
+        const btn = document.createElement('button');
+        btn.textContent = label;
+        btn.className = id === 'dashboard' ? 'active' : '';
+        btn.addEventListener('click',()=>showSection(id));
+        nav.appendChild(btn);
+      });
+    }
+
+    function showSection(id){
+      document.querySelectorAll('.section').forEach(sec=>sec.classList.toggle('active', sec.id === id));
+      document.querySelectorAll('nav button').forEach((btn, index)=>{
+        btn.classList.toggle('active', NAV_ITEMS[index][0] === id);
+      });
+      if(id === 'tools'){
+        setupCanvasIfNeeded();
       }
-
-      // Realtime listener for the public review wall.
-      state.unsubscribeReviews = db.collection("reviews")
-        .orderBy("time", "desc")
-        .onSnapshot(
-          (snapshot) => {
-            state.allReviews = snapshot.docs.map((doc) => {
-              const data = doc.data() || {};
-              return {
-                id: doc.id,
-                name: typeof data.name === "string" ? data.name : "Unknown",
-                text: typeof data.text === "string" ? data.text : "",
-                image: typeof data.image === "string" ? data.image : "",
-                time: normaliseTime(data.time)
-              };
-            });
-
-            applyFilters(false);
-            el.reviewsList.setAttribute("aria-busy", "false");
-          },
-          (error) => {
-            console.error("Could not load reviews:", error);
-            el.reviewsList.setAttribute("aria-busy", "false");
-            el.reviewsMeta.textContent = "Could not load reviews.";
-            toast("Could not load reviews.", "error");
-          }
-        );
     }
 
-    function setFilter(filter) {
-      state.activeFilter = filter;
+    function topicName(id){
+      return TOPICS.find(t=>t.id===id)?.title || id;
+    }
 
-      el.filterButtons.forEach((button) => {
-        const active = button.dataset.filter === filter;
-        button.classList.toggle("active", active);
-        button.setAttribute("aria-pressed", active ? "true" : "false");
+    function shortTopic(id){
+      return ({
+        motion:'Motion',
+        lenses:'Lenses',
+        heat:'Heat',
+        waves:'Waves/Sound',
+        light:'Wave light'
+      })[id] || id;
+    }
+
+    function questionById(id){
+      return QUESTION_BANK.find(q=>q.id===id);
+    }
+
+    function countAnswered(){
+      return Object.keys(state.attempts).length;
+    }
+
+    function countCorrect(){
+      return Object.values(state.attempts).filter(a=>a.correct).length;
+    }
+
+    function accuracy(){
+      const total = countAnswered();
+      return total ? Math.round((countCorrect()/total)*100) : 0;
+    }
+
+    function attemptsForTopic(topic){
+      return QUESTION_BANK.filter(q=>q.topic===topic && state.attempts[q.id]).length;
+    }
+
+    function correctForTopic(topic){
+      return QUESTION_BANK.filter(q=>q.topic===topic && state.attempts[q.id]?.correct).length;
+    }
+
+    function dueFlashcards(){
+      const today = todayISO();
+      return FLASHCARDS.filter(card=>{
+        const record = state.flash[card.id];
+        return !record || !record.due || record.due <= today;
       });
     }
 
-    function applyFilters(resetVisible) {
-      const q = state.searchTerm;
-      const f = state.activeFilter;
-
-      state.filteredReviews = state.allReviews.filter((review) => {
-        const matchesFilter =
-          f === "all" ||
-          (f === "photos" && !!review.image) ||
-          (f === "text" && !review.image);
-
-        if (!matchesFilter) return false;
-
-        if (!q) return true;
-
-        const haystack = [
-          review.name,
-          review.text,
-          formatDate(review.time)
-        ].join(" ").toLowerCase();
-
-        return haystack.includes(q);
-      });
-
-      if (resetVisible) {
-        state.visibleCount = INITIAL_VISIBLE;
-      }
-
-      renderReviews();
+    function todayISO(){
+      return new Date().toISOString().slice(0,10);
     }
 
-    function renderReviews() {
-      el.reviewsList.innerHTML = "";
-
-      const visible = state.filteredReviews.slice(0, state.visibleCount);
-      const fragment = document.createDocumentFragment();
-
-      visible.forEach((review) => {
-        fragment.appendChild(buildReview(review));
-      });
-
-      el.reviewsList.appendChild(fragment);
-
-      const total = state.filteredReviews.length;
-      const shown = visible.length;
-
-      el.reviewsMeta.textContent = `${total} review${total === 1 ? "" : "s"} • ${shown} shown`;
-      el.emptyState.style.display = total === 0 ? "block" : "none";
-      el.loadMoreButton.style.display = shown < total ? "inline-flex" : "none";
+    function addDaysISO(days){
+      const d = new Date();
+      d.setDate(d.getDate()+days);
+      return d.toISOString().slice(0,10);
     }
 
-    function renderMore() {
-      state.visibleCount += STEP_VISIBLE;
-      renderReviews();
+    function formatDuration(sec){
+      const s = Math.max(0, sec|0);
+      const m = Math.floor(s/60);
+      const r = s%60;
+      return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
     }
 
-    function buildReview(review) {
-      const card = document.createElement("article");
-      card.className = "review";
+    function renderDashboard(){
+      const cont = document.getElementById('dashboard');
+      const weakest = TOPICS.map(t=>{
+        const tried = attemptsForTopic(t.id);
+        const correct = correctForTopic(t.id);
+        const pct = tried ? correct/tried : 0;
+        return {id:t.id, title:t.title, tried, correct, pct};
+      }).sort((a,b)=>a.pct-b.pct || a.tried-b.tried);
 
-      const initials = initialsOf(review.name);
-      const safeImageUrl = sanitiseHttpUrl(review.image);
+      const weakHtml = weakest.map(w=>{
+        const pct = w.tried ? Math.round(w.pct*100) : 0;
+        const width = w.tried ? pct : 0;
+        return `<div class="kpi">
+          <div class="small">${shortTopic(w.id)}</div>
+          <strong>${w.tried ? pct + '%' : '—'}</strong>
+          <div class="small">${w.correct} correct from ${w.tried || 0} attempted</div>
+          <div class="progress-bar" style="margin-top:10px"><span style="width:${width}%"></span></div>
+        </div>`;
+      }).join('');
 
-      card.innerHTML = `
-        <div class="review-head">
-          <div class="avatar" aria-hidden="true">${escapeHTML(initials)}</div>
-          <div>
-            <div class="review-name">${escapeHTML(review.name)}</div>
-            <div class="review-date">${formatDate(review.time)}</div>
+      const weakHints = weakest.slice(0,2).map(w=>{
+        const tips = NOTES_TEMPLATE.weakPointHints[w.id].map(t=>`<li>${t}</li>`).join('');
+        return `<details open><summary>${shortTopic(w.id)} quick fix</summary><ul>${tips}</ul></details>`;
+      }).join('');
+
+      cont.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h2>At-a-glance progress</h2>
+            <div class="kpis">
+              <div class="kpi"><div class="small">Questions attempted</div><strong>${countAnswered()}</strong><div class="small">out of ${QUESTION_BANK.length}</div></div>
+              <div class="kpi"><div class="small">Correct on latest attempt</div><strong>${countCorrect()}</strong><div class="small">tracked across all topics</div></div>
+              <div class="kpi"><div class="small">Accuracy</div><strong>${accuracy()}%</strong><div class="small">latest-answer accuracy</div></div>
+              <div class="kpi"><div class="small">Flashcards due</div><strong>${dueFlashcards().length}</strong><div class="small">review cards today</div></div>
+            </div>
+            <div class="pill-row" style="margin-top:14px">
+              <span class="pill">Question bank: ${QUESTION_BANK.filter(q=>q.sourceType==='past').length} past-paper + ${QUESTION_BANK.filter(q=>q.sourceType==='original').length} original</span>
+              <span class="pill">Storage: <span class="storage-status">${state.sessionOnly ? 'session only / export recommended' : 'persistent save available'}</span></span>
+              <span class="pill">Mock timer: ${state.mock.active ? 'running' : 'ready'}</span>
+            </div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="card">
+              <h2>Priority by topic</h2>
+              ${weakHtml}
+            </div>
+
+            <div class="card">
+              <h2>Seven-day study plan</h2>
+              <div class="week-plan">
+                ${STUDY_PLAN.map(item=>`
+                  <div class="plan-row">
+                    <strong>${item.day}</strong>
+                    <div><div>${item.focus}</div><div class="small">${item.task}</div></div>
+                    <div class="small">${item.minutes}</div>
+                  </div>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="card">
+              <h2>Weakest areas to attack next</h2>
+              <p class="small">This list is based on your latest attempts and updates automatically.</p>
+              ${weakHints}
+            </div>
+            <div class="card">
+              <h2>How to use this app in a week</h2>
+              <ol>
+                <li>Read one Notes topic before you do questions.</li>
+                <li>Do 3–5 Practice questions from that topic and check the worked solutions immediately.</li>
+                <li>Use Flashcards for formulas and definitions you missed.</li>
+                <li>Finish with a short Timed mock on Day 6 and a longer mixed mock on Day 7.</li>
+                <li>Print the Cheat-sheet on the final night.</li>
+              </ol>
+              ${state.sessionOnly ? `<div class="danger-note">This browser is not offering reliable local storage for this file. The app still works, but you should use <strong>Export save</strong> in the settings panel if you want to keep your progress.</div>` : `<div class="success-note">Your browser is allowing persistent saves for this file, so progress should remain available on this device.</div>`}
+            </div>
           </div>
         </div>
-        <div class="review-text">${escapeHTML(review.text)}</div>
+      `;
+      document.getElementById('storageChip').textContent = state.sessionOnly ? 'Save fallback in use' : 'Persistent save ready';
+    }
+
+    function renderTopics(){
+      const cont = document.getElementById('topics');
+      cont.innerHTML = `
+        <div class="grid cols-2">
+          ${TOPICS.map(t=>`
+            <article class="card topic-card">
+              <h2>${t.title}</h2>
+              <div class="meta"><span class="tag">Chapter ${t.chapter}</span><span class="tag">${t.priority}</span></div>
+              ${t.notes}
+              <details>
+                <summary>Quick exam reminders</summary>
+                <ul>
+                  ${NOTES_TEMPLATE.weakPointHints[t.id].map(item=>`<li>${item}</li>`).join('')}
+                </ul>
+              </details>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderFormulae(){
+      const cont = document.getElementById('formulae');
+      cont.innerHTML = `
+        <div class="card">
+          <h2>Formula quick-reference</h2>
+          <div class="toolbar">
+            <input id="formulaSearch" type="text" placeholder="Search by topic, formula or keyword…" />
+            <button class="btn primary" id="printFormulaBtn">Open cheat-sheet for printing</button>
+          </div>
+          <div class="table-wrap">
+            <table id="formulaTable">
+              <thead>
+                <tr><th>Topic</th><th>Formula</th><th>Units</th><th>Common rearrangements</th><th>Status</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="source-note">“Status” helps you decide what to memorise exactly and what you can derive quickly under pressure.</p>
+        </div>
+      `;
+      const tbody = cont.querySelector('tbody');
+      const renderRows = (term='')=>{
+        const q = term.trim().toLowerCase();
+        tbody.innerHTML = FORMULAE.filter(row=>{
+          const hay = (row.topic + ' ' + row.formula + ' ' + row.rearrangements + ' ' + row.status).toLowerCase();
+          return !q || hay.includes(q);
+        }).map(row=>`
+          <tr>
+            <td>${row.topic}</td>
+            <td class="mono">${row.formula}</td>
+            <td>${row.units}</td>
+            <td>${row.rearrangements}</td>
+            <td>${row.status}</td>
+          </tr>
+        `).join('');
+      };
+      renderRows();
+      cont.querySelector('#formulaSearch').addEventListener('input', e=>renderRows(e.target.value));
+      cont.querySelector('#printFormulaBtn').addEventListener('click', ()=>showSection('cheat'));
+    }
+
+    function renderPractice(){
+      const cont = document.getElementById('practice');
+      cont.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h2>Practice bank</h2>
+            <div class="toolbar">
+              <select id="practiceTopic">
+                <option value="">All topics</option>
+                ${TOPICS.map(t=>`<option value="${t.id}">${t.title}</option>`).join('')}
+              </select>
+              <select id="practiceDifficulty">
+                <option value="">All difficulties</option>
+                <option>easy</option>
+                <option>medium</option>
+                <option>hard</option>
+              </select>
+              <select id="practiceSource">
+                <option value="">All sources</option>
+                <option value="past">Past-paper</option>
+                <option value="original">Original</option>
+              </select>
+              <input id="practiceSearch" type="text" placeholder="Search question titles or prompts…" />
+              <button class="btn primary" id="pastSetBtn">Generate random past-paper set</button>
+            </div>
+            <div id="practiceList" class="grid"></div>
+          </div>
+        </div>
       `;
 
-      if (safeImageUrl) {
-        const imageButton = document.createElement("button");
-        imageButton.type = "button";
-        imageButton.className = "review-image-btn";
-        imageButton.setAttribute("aria-label", `Open review image from ${review.name}`);
-        imageButton.innerHTML = `
-          <img src="${safeImageUrl}" alt="Review photo from ${escapeHTML(review.name)}" loading="lazy" decoding="async">
-          <span class="review-image-badge">Photo</span>
+      const filters = {
+        topic: cont.querySelector('#practiceTopic'),
+        difficulty: cont.querySelector('#practiceDifficulty'),
+        source: cont.querySelector('#practiceSource'),
+        search: cont.querySelector('#practiceSearch')
+      };
+
+      Object.values(filters).forEach(el=>el.addEventListener('input', renderList));
+      cont.querySelector('#pastSetBtn').addEventListener('click', ()=>{
+        const ids = generatePastPaperSet();
+        renderList(ids);
+      });
+
+      function renderList(forceIds=null){
+        let data = QUESTION_BANK.slice();
+
+        if(forceIds){
+          data = forceIds.map(id=>questionById(id)).filter(Boolean);
+        }else{
+          const q = filters.search.value.trim().toLowerCase();
+          if(filters.topic.value) data = data.filter(item=>item.topic===filters.topic.value);
+          if(filters.difficulty.value) data = data.filter(item=>item.difficulty===filters.difficulty.value);
+          if(filters.source.value) data = data.filter(item=>item.sourceType===filters.source.value);
+          if(q){
+            data = data.filter(item=>(item.title + ' ' + stripTags(item.prompt)).toLowerCase().includes(q));
+          }
+        }
+
+        const list = cont.querySelector('#practiceList');
+        list.innerHTML = data.length ? data.map(renderQuestionCard).join('') : `<div class="empty">No questions match the current filters.</div>`;
+        attachQuestionHandlers(list);
+      }
+
+      renderList();
+    }
+
+    function stripTags(html){
+      const d = document.createElement('div');
+      d.innerHTML = html;
+      return d.textContent || '';
+    }
+
+    function renderQuestionCard(q){
+      const rec = state.attempts[q.id] || {};
+      const answerValue = state.answers[q.id] ?? '';
+      const feedback = rec.status ? `<div class="feedback ${rec.correct ? 'ok' : 'nope'}">${rec.message}</div>` : '';
+      const answerInput = q.type === 'number' ? `
+          <label class="small">Your answer ${q.unit ? '(' + q.unit + ')' : ''}</label>
+          <input type="number" step="any" id="answer-${q.id}" value="${escapeHtml(String(answerValue))}" />
+        ` : q.type === 'mcq' ? `
+          <div id="answer-${q.id}">
+            ${q.choices.map(([key,label])=>`
+              <label style="display:flex;gap:10px;align-items:flex-start;margin:8px 0">
+                <input type="radio" name="mcq-${q.id}" value="${key}" ${answerValue===key ? 'checked' : ''}/>
+                <span><strong>${key}.</strong> ${label}</span>
+              </label>`).join('')}
+          </div>
+        ` : `
+          <label class="small">Your answer</label>
+          <textarea id="answer-${q.id}">${escapeHtml(String(answerValue))}</textarea>
         `;
-        imageButton.addEventListener("click", () => {
-          openLightbox(
-            safeImageUrl,
-            `Photo from ${review.name}`,
-            formatDate(review.time)
-          );
-        });
-        card.appendChild(imageButton);
-      }
 
-      return card;
+      return `
+        <article class="question" data-qid="${q.id}">
+          <h3>${q.title}</h3>
+          <div class="meta">
+            <span class="tag">${shortTopic(q.topic)}</span>
+            <span class="tag">${q.difficulty}</span>
+            <span class="tag">${q.source}</span>
+            <span class="tag">${q.marks} marks</span>
+            ${rec.correct ? '<span class="tag">latest: correct</span>' : rec.status ? '<span class="tag">latest: needs work</span>' : ''}
+          </div>
+          <div>${q.prompt}</div>
+          <div style="margin-top:12px">${answerInput}</div>
+          <div class="question-actions">
+            <button class="btn primary check-btn">Check answer</button>
+            <button class="btn hint-btn">Hint</button>
+            <button class="btn solution-btn">Worked solution</button>
+            <button class="btn">Marking notes</button>
+          </div>
+          ${feedback}
+          <div class="hint-box hidden">${q.hint}</div>
+          <div class="solution hidden">${q.solution}</div>
+          <div class="marking-note hidden">${q.marking}</div>
+        </article>
+      `;
     }
 
-    function handleImageSelection() {
-      const file = el.imageInput.files && el.imageInput.files[0];
-
-      if (!file) {
-        clearImage();
-        return;
-      }
-
-      const validation = validateImageFile(file);
-      if (!validation.ok) {
-        toast(validation.message, "error");
-        clearImage();
-        return;
-      }
-
-      if (state.previewUrl) {
-        URL.revokeObjectURL(state.previewUrl);
-      }
-
-      state.previewUrl = URL.createObjectURL(file);
-      el.previewImage.src = state.previewUrl;
-      el.previewImage.alt = `Preview of selected image ${file.name}`;
-      el.previewText.textContent = `${file.name} • ${formatBytes(file.size)}`;
-      el.previewBox.style.display = "block";
-      setStatus("Image ready.");
+    function escapeHtml(str){
+      return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
     }
 
-    function clearImage() {
-      if (state.previewUrl) {
-        URL.revokeObjectURL(state.previewUrl);
-        state.previewUrl = "";
-      }
+    function attachQuestionHandlers(container){
+      container.querySelectorAll('.question').forEach(card=>{
+        const id = card.dataset.qid;
+        const q = questionById(id);
+        const [checkBtn, hintBtn, solutionBtn, markingBtn] = card.querySelectorAll('.question-actions .btn');
+        const hintBox = card.querySelector('.hint-box');
+        const solutionBox = card.querySelector('.solution');
+        const markingBox = card.querySelector('.marking-note');
 
-      el.imageInput.value = "";
-      el.previewImage.src = "";
-      el.previewImage.alt = "";
-      el.previewText.textContent = "Selected image";
-      el.previewBox.style.display = "none";
-    }
+        const persistAnswer = ()=>{
+          let value = '';
+          if(q.type === 'mcq'){
+            value = card.querySelector(`input[name="mcq-${id}"]:checked`)?.value || '';
+          }else{
+            value = card.querySelector('#answer-' + id).value;
+          }
+          state.answers[id] = value;
+          saveState();
+        };
 
-    function validateImageFile(file) {
-      if (!file) return { ok: true };
-
-      if (!file.type || !file.type.startsWith("image/")) {
-        return { ok: false, message: "Please choose an image file." };
-      }
-
-      if (file.size > MAX_IMAGE_SIZE) {
-        return { ok: false, message: "Image must be under 2MB." };
-      }
-
-      return { ok: true };
-    }
-
-    async function handleReviewSubmit(event) {
-      event.preventDefault();
-
-      if (state.posting) return;
-
-      const cooldownLeft = getCooldownLeft();
-      if (cooldownLeft > 0) {
-        toast(`Please wait ${cooldownLeft}s before posting again.`, "warning");
-        setStatus(`Ready again in ${cooldownLeft}s.`);
-        return;
-      }
-
-      const name = el.nameInput.value.trim();
-      const text = el.reviewInput.value.trim();
-      const file = el.imageInput.files && el.imageInput.files[0];
-
-      if (!name || !text) {
-        toast("Please enter your name and message.", "warning");
-        setStatus("Name and message are required.");
-        return;
-      }
-
-      const validation = validateImageFile(file);
-      if (!validation.ok) {
-        toast(validation.message, "error");
-        setStatus(validation.message);
-        return;
-      }
-
-      state.posting = true;
-      setSubmitState(true, "Posting…");
-      showProgress(true);
-      updateProgress(8, "Preparing review…");
-
-      let imageUrl = "";
-      let uploadRef = null;
-      let reviewSaved = false;
-
-      try {
-        if (file) {
-          const safeName = file.name.replace(/\s+/g, "-").replace(/[^\w.-]/g, "");
-          const path = `reviews/${Date.now()}-${safeName}`;
-          uploadRef = storage.ref(path);
-          const uploadTask = uploadRef.put(file);
-
-          updateProgress(12, "Uploading image… 0%");
-
-          // Firebase compat upload task progress.
-          await new Promise((resolve, reject) => {
-            uploadTask.on(
-              "state_changed",
-              (snapshot) => {
-                const percent = snapshot.totalBytes
-                  ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                  : 0;
-                const uiPercent = Math.max(12, Math.min(92, percent));
-                updateProgress(uiPercent, `Uploading image… ${percent}%`);
-              },
-              (error) => reject(error),
-              () => resolve()
-            );
-          });
-
-          imageUrl = await uploadRef.getDownloadURL();
-          updateProgress(95, "Saving review…");
-        } else {
-          updateProgress(62, "Saving review…");
+        if(q.type === 'mcq'){
+          card.querySelectorAll(`input[name="mcq-${id}"]`).forEach(r=>r.addEventListener('change', persistAnswer));
+        }else{
+          card.querySelector('#answer-' + id).addEventListener('input', persistAnswer);
         }
 
-        // Public review document: exactly {name, text, image, time}.
-        await db.collection("reviews").add({
-          name: name,
-          text: text,
-          image: imageUrl,
-          time: Date.now()
+        checkBtn.addEventListener('click', ()=>{
+          persistAnswer();
+          const input = state.answers[id];
+          const result = checkQuestion(q, input);
+          const prevAttempts = state.attempts[id]?.attempts || 0;
+          state.attempts[id] = {
+            attempts: prevAttempts + 1,
+            correct: result.correct,
+            message: result.message,
+            status: true,
+            lastAnswer: input
+          };
+          saveState();
+          renderPractice();
         });
 
-        reviewSaved = true;
-        updateProgress(100, "Posted.");
-        toast("Review posted.", "success");
-        resetForm();
-        startCooldown(5);
-      } catch (error) {
-        console.error("Post review failed:", error);
+        hintBtn.addEventListener('click', ()=>hintBox.classList.toggle('hidden'));
+        solutionBtn.addEventListener('click', ()=>solutionBox.classList.toggle('hidden'));
+        markingBtn.addEventListener('click', ()=>markingBox.classList.toggle('hidden'));
+      });
+    }
 
-        // Best-effort cleanup if upload succeeded but Firestore save failed.
-        if (uploadRef && !reviewSaved) {
-          try { await uploadRef.delete(); } catch (cleanupError) {}
+    function approxEqual(a,b,tol){
+      return Math.abs(a-b) <= tol;
+    }
+
+    function checkQuestion(q, input){
+      if(q.type === 'number'){
+        const value = parseFloat(input);
+        if(Number.isNaN(value)){
+          return {correct:false, message:'Enter a numeric answer before checking.'};
         }
+        const ok = approxEqual(value, q.expected, q.tolerance ?? 0.01);
+        const shown = formatExpected(q.expected);
+        return {
+          correct: ok,
+          message: ok ? `Correct. A good target answer is ${shown}${q.unit ? ' ' + q.unit : ''}.`
+                      : `Not quite. A good target answer is about ${shown}${q.unit ? ' ' + q.unit : ''}. Use the worked solution to see the setup.`
+        };
+      }
+      if(q.type === 'mcq'){
+        const ok = input === q.expected;
+        return {correct: ok, message: ok ? 'Correct.' : `Not quite. The correct option is ${q.expected}.`};
+      }
+      const ok = q.checker(String(input || ''));
+      return {correct: ok, message: ok ? 'Good. Your answer includes the core marking points.' : 'Partly there or missing a key point. Compare your wording with the worked solution and marking notes.'};
+    }
 
-        toast(friendlyFirebaseError(error), "error", 5200);
-        setSubmitState(false, "Post review");
-      } finally {
-        state.posting = false;
+    function formatExpected(value){
+      if(Math.abs(value) >= 10000 || (Math.abs(value) < 0.001 && value !== 0)){
+        return Number(value).toExponential(3);
+      }
+      return (Math.round(value*1000)/1000).toString();
+    }
+
+    function generatePastPaperSet(){
+      const buckets = {
+        heat: QUESTION_BANK.filter(q=>q.sourceType==='past' && q.topic==='heat'),
+        lenses: QUESTION_BANK.filter(q=>q.sourceType==='past' && q.topic==='lenses'),
+        waves: QUESTION_BANK.filter(q=>q.sourceType==='past' && q.topic==='waves'),
+        light: QUESTION_BANK.filter(q=>q.sourceType==='past' && q.topic==='light'),
+        motion: QUESTION_BANK.filter(q=>q.sourceType==='past' && q.topic==='motion')
+      };
+      const ids = [];
+      ['heat','lenses','waves','light'].forEach(key=>{
+        if(buckets[key].length) ids.push(sampleOne(buckets[key]).id);
+      });
+      const remaining = QUESTION_BANK.filter(q=>q.sourceType==='past' && !ids.includes(q.id));
+      while(ids.length < 8 && remaining.length){
+        const q = remaining.splice(Math.floor(Math.random()*remaining.length),1)[0];
+        ids.push(q.id);
+      }
+      return ids;
+    }
+
+    function sampleOne(arr){
+      return arr[Math.floor(Math.random()*arr.length)];
+    }
+
+    function renderFlashcards(){
+      const cont = document.getElementById('flashcards');
+      const due = dueFlashcards();
+      const current = due[0] || FLASHCARDS[0];
+      const record = state.flash[current.id] || {box:1, due:todayISO()};
+      cont.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h2>Spaced-repetition flashcards</h2>
+            <div class="flash-wrap">
+              <div>
+                <div class="flashcard">
+                  <div class="flash-face">
+                    <div class="small">${current.topic}</div>
+                    <h3 id="flashFront">${current.front}</h3>
+                    <div id="flashBack" class="hidden"><p>${current.back}</p></div>
+                  </div>
+                  <div class="flash-controls">
+                    <button class="btn primary" id="showFlashBtn">Show answer</button>
+                    <button class="btn bad hidden" id="againFlashBtn">Again</button>
+                    <button class="btn warn hidden" id="hardFlashBtn">Hard</button>
+                    <button class="btn good hidden" id="goodFlashBtn">Good</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Card stats</h3>
+                <p><strong>Due now:</strong> ${due.length}</p>
+                <p><strong>Current box:</strong> ${record.box || 1}</p>
+                <p><strong>Next due:</strong> ${record.due || todayISO()}</p>
+                <div class="table-wrap">
+                  <table>
+                    <thead><tr><th>Box</th><th>Typical interval</th></tr></thead>
+                    <tbody>
+                      <tr><td>1</td><td>today</td></tr>
+                      <tr><td>2</td><td>1 day</td></tr>
+                      <tr><td>3</td><td>3 days</td></tr>
+                      <tr><td>4</td><td>7 days</td></tr>
+                      <tr><td>5</td><td>14 days</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="small">Because this is a one-week cram tool, the interval ladder is deliberately short.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      const showBtn = cont.querySelector('#showFlashBtn');
+      const againBtn = cont.querySelector('#againFlashBtn');
+      const hardBtn = cont.querySelector('#hardFlashBtn');
+      const goodBtn = cont.querySelector('#goodFlashBtn');
+      const back = cont.querySelector('#flashBack');
+      showBtn.addEventListener('click', ()=>{
+        back.classList.remove('hidden');
+        showBtn.classList.add('hidden');
+        againBtn.classList.remove('hidden');
+        hardBtn.classList.remove('hidden');
+        goodBtn.classList.remove('hidden');
+      });
+      againBtn.addEventListener('click', ()=>gradeFlashcard(current.id, 1));
+      hardBtn.addEventListener('click', ()=>gradeFlashcard(current.id, Math.max(1,(record.box||1))));
+      goodBtn.addEventListener('click', ()=>gradeFlashcard(current.id, Math.min(5,(record.box||1)+1)));
+    }
+
+    function gradeFlashcard(id, newBox){
+      const intervals = {1:0,2:1,3:3,4:7,5:14};
+      state.flash[id] = {box:newBox, due:addDaysISO(intervals[newBox])};
+      saveState();
+    }
+
+    function renderMock(){
+      const cont = document.getElementById('mock');
+      const activeIds = state.mock.ids || [];
+      const questions = activeIds.map(questionById).filter(Boolean);
+
+      cont.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h2>Timed mock</h2>
+            <div class="toolbar">
+              <select id="mockDuration">
+                <option value="1800" ${state.mock.duration===1800?'selected':''}>30 minutes</option>
+                <option value="2400" ${state.mock.duration===2400?'selected':''}>40 minutes</option>
+                <option value="2700" ${state.mock.duration===2700?'selected':''}>45 minutes</option>
+              </select>
+              <button class="btn primary" id="startMockBtn">${state.mock.active ? 'Restart mock' : 'Start new mock'}</button>
+              <button class="btn" id="stopMockBtn">End and mark</button>
+              <div class="right timer" id="mockTimer">${formatDuration(state.mock.remaining || state.mock.duration || 2400)}</div>
+            </div>
+            <p class="small">The mock draws a mixed set of nine questions across your selected chapters. It is shorter than a full Leaving Cert paper on purpose so you can fit it into a single evening.</p>
+            <div id="mockQuestions" class="grid">
+              ${questions.length ? questions.map(renderQuestionCard).join('') : '<div class="empty">Start a mock to generate a mixed paper.</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+
+      cont.querySelector('#mockDuration').addEventListener('change', (e)=>{
+        state.mock.duration = parseInt(e.target.value, 10);
+        state.mock.remaining = state.mock.duration;
+        saveState();
+      });
+      cont.querySelector('#startMockBtn').addEventListener('click', startMock);
+      cont.querySelector('#stopMockBtn').addEventListener('click', endMock);
+      if(questions.length){
+        attachQuestionHandlers(cont.querySelector('#mockQuestions'));
+      }
+      if(state.mock.active){
+        startMockTimer();
+      }else{
+        clearInterval(mockInterval);
       }
     }
 
-    function resetForm() {
-      el.nameInput.value = "";
-      el.reviewInput.value = "";
-      clearImage();
-    }
-
-    function showProgress(visible) {
-      el.progressWrap.style.display = visible ? "block" : "none";
-    }
-
-    function updateProgress(percent, message) {
-      showProgress(true);
-      el.progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
-      setStatus(message);
-    }
-
-    function setStatus(message) {
-      el.statusText.textContent = message || "";
-    }
-
-    function setSubmitState(disabled, label) {
-      el.postButton.disabled = !!disabled;
-      el.postButtonLabel.textContent = label;
-    }
-
-    function startCooldown(seconds) {
-      state.cooldownUntil = Date.now() + (seconds * 1000);
-
-      if (state.cooldownTimer) {
-        clearInterval(state.cooldownTimer);
+    function startMock(){
+      const bank = [
+        sampleOne(QUESTION_BANK.filter(q=>q.topic==='motion')),
+        sampleOne(QUESTION_BANK.filter(q=>q.topic==='lenses')),
+        sampleOne(QUESTION_BANK.filter(q=>q.topic==='heat')),
+        sampleOne(QUESTION_BANK.filter(q=>q.topic==='waves')),
+        sampleOne(QUESTION_BANK.filter(q=>q.topic==='light'))
+      ].filter(Boolean);
+      const extra = QUESTION_BANK.filter(q=>!bank.includes(q));
+      while(bank.length < 9 && extra.length){
+        bank.push(extra.splice(Math.floor(Math.random()*extra.length),1)[0]);
       }
+      state.mock.ids = bank.map(q=>q.id);
+      state.mock.active = true;
+      state.mock.remaining = state.mock.duration || 2400;
+      state.mock.startedAt = Date.now();
+      saveState();
+      renderMock();
+    }
 
-      updateCooldownUI();
-
-      state.cooldownTimer = window.setInterval(() => {
-        const left = getCooldownLeft();
-
-        if (left <= 0) {
-          clearInterval(state.cooldownTimer);
-          state.cooldownTimer = null;
-          state.cooldownUntil = 0;
-          setSubmitState(false, "Post review");
-          setStatus("");
-          window.setTimeout(() => {
-            if (!state.posting) {
-              el.progressBar.style.width = "0%";
-              showProgress(false);
-            }
-          }, 350);
-          return;
+    function startMockTimer(){
+      clearInterval(mockInterval);
+      const timerEl = document.getElementById('mockTimer');
+      mockInterval = setInterval(()=>{
+        state.mock.remaining = Math.max(0, state.mock.remaining - 1);
+        if(timerEl) timerEl.textContent = formatDuration(state.mock.remaining);
+        if(state.mock.remaining <= 0){
+          endMock(true);
         }
-
-        updateCooldownUI();
-      }, 250);
+        if(STORAGE){
+          try{ STORAGE.setItem(APP_KEY, JSON.stringify(state)); }catch(err){}
+        }
+      },1000);
     }
 
-    function getCooldownLeft() {
-      if (!state.cooldownUntil) return 0;
-      return Math.max(0, Math.ceil((state.cooldownUntil - Date.now()) / 1000));
-    }
-
-    function updateCooldownUI() {
-      const left = getCooldownLeft();
-      setSubmitState(true, `Post review (${left}s)`);
-      updateProgress(100, `Ready again in ${left}s.`);
-    }
-
-    function openLightbox(src, title, desc) {
-      const safe = sanitiseHttpUrl(src);
-      if (!safe) return;
-
-      el.lightboxTitle.textContent = title || "Image";
-      el.lightboxDesc.textContent = desc || "Preview";
-      el.lightboxImage.src = safe;
-      el.lightboxImage.alt = title || "Image";
-      openModal("lightboxModal");
-    }
-
-    function openModal(id) {
-      const modal = document.getElementById(id);
-      if (!modal) return;
-
-      state.activeModalId = id;
-      state.restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-      document.body.classList.add("modal-open");
-
-      const focusTarget = modal.querySelector("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])");
-      if (focusTarget && focusTarget.focus) {
-        window.setTimeout(() => focusTarget.focus(), 20);
+    function endMock(fromTimer=false){
+      clearInterval(mockInterval);
+      state.mock.active = false;
+      saveState();
+      if(fromTimer){
+        alert('Time is up. The timer has stopped; now mark your answers.');
       }
     }
 
-    function closeModal(id) {
-      const modal = document.getElementById(id);
-      if (!modal) return;
+    let toolsReady = false;
 
-      modal.classList.remove("open");
-      modal.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("modal-open");
-      state.activeModalId = null;
-
-      if (id === "lightboxModal") {
-        el.lightboxImage.src = "";
-        el.lightboxImage.alt = "";
-        el.lightboxTitle.textContent = "Image";
-        el.lightboxDesc.textContent = "Preview";
-      }
-
-      if (state.restoreFocusEl && state.restoreFocusEl.focus) {
-        state.restoreFocusEl.focus();
-      }
+    function renderTools(){
+      const cont = document.getElementById('tools');
+      cont.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h2>Drawing tools</h2>
+            <p class="small">Use these to practise ray diagrams, labelled standing waves, graph sketches, and quick exam layouts. You can also upload an image into the ray-diagram canvas and draw over it.</p>
+            <div class="tools-grid">
+              <div class="card">
+                <h3>Ray-diagram area</h3>
+                <div class="toolbar">
+                  <button class="btn" data-ray-guide="none">Blank</button>
+                  <button class="btn" data-ray-guide="converging">Converging guide</button>
+                  <button class="btn" data-ray-guide="diverging">Diverging guide</button>
+                  <button class="btn" id="clearRayBtn">Clear</button>
+                  <button class="btn" id="saveRayBtn">Save PNG</button>
+                  <input type="file" id="rayUpload" accept="image/*" />
+                </div>
+                <canvas id="rayCanvas" width="900" height="500"></canvas>
+              </div>
+              <div class="card">
+                <h3>Graph sketcher</h3>
+                <div class="toolbar">
+                  <button class="btn" id="clearGraphBtn">Clear</button>
+                  <button class="btn" id="saveGraphBtn">Save PNG</button>
+                </div>
+                <canvas id="graphCanvas" width="900" height="500"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    function getOpenModal() {
-      return document.querySelector(".modal-backdrop.open");
+    function setupCanvasIfNeeded(){
+      if(toolsReady) return;
+      toolsReady = true;
+
+      const rayCanvas = document.getElementById('rayCanvas');
+      const graphCanvas = document.getElementById('graphCanvas');
+      if(!rayCanvas || !graphCanvas) return;
+
+      const ray = createSketchCanvas(rayCanvas, drawRayGuideNone);
+      const graph = createSketchCanvas(graphCanvas, drawGraphGrid);
+
+      document.querySelectorAll('[data-ray-guide]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const guide = btn.dataset.rayGuide;
+          if(guide === 'converging') ray.setGuide(drawRayGuideConverging);
+          else if(guide === 'diverging') ray.setGuide(drawRayGuideDiverging);
+          else ray.setGuide(drawRayGuideNone);
+        });
+      });
+
+      document.getElementById('clearRayBtn').addEventListener('click', ()=>ray.clear());
+      document.getElementById('clearGraphBtn').addEventListener('click', ()=>graph.clear());
+      document.getElementById('saveRayBtn').addEventListener('click', ()=>downloadCanvas(rayCanvas, 'ray-diagram.png'));
+      document.getElementById('saveGraphBtn').addEventListener('click', ()=>downloadCanvas(graphCanvas, 'graph-sketch.png'));
+      document.getElementById('rayUpload').addEventListener('change', async (e)=>{
+        const file = e.target.files?.[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ()=>{
+          const img = new Image();
+          img.onload = ()=>ray.setBackground(img);
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
-    function trapFocus(event, modal) {
-      const focusable = Array.from(
-        modal.querySelectorAll("button, [href], input, textarea, [tabindex]:not([tabindex='-1'])")
-      ).filter((node) => !node.hasAttribute("disabled"));
+    function createSketchCanvas(canvas, guideFn){
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+      let backgroundImg = null;
+      let currentGuide = guideFn;
 
-      if (!focusable.length) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    function friendlyFirebaseError(error) {
-      const code = String(error && error.code || "");
-
-      if (code.includes("permission-denied")) {
-        return "Permission denied.";
-      }
-      if (code.includes("storage/unauthorized")) {
-        return "Upload not allowed.";
-      }
-      if (code.includes("storage/bucket-not-found")) {
-        return "Storage bucket not found.";
-      }
-      if (code.includes("storage/project-not-found")) {
-        return "Storage project not found.";
-      }
-      if (code.includes("storage/unknown")) {
-        return "Storage error.";
-      }
-      if (code.includes("unavailable")) {
-        return "Service temporarily unavailable.";
+      function redraw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if(backgroundImg){
+          ctx.globalAlpha = 0.35;
+          const ratio = Math.min(canvas.width/backgroundImg.width, canvas.height/backgroundImg.height);
+          const w = backgroundImg.width * ratio;
+          const h = backgroundImg.height * ratio;
+          ctx.drawImage(backgroundImg, (canvas.width-w)/2, (canvas.height-h)/2, w, h);
+          ctx.globalAlpha = 1;
+        }
+        currentGuide(ctx, canvas);
       }
 
-      return "Something went wrong.";
-    }
+      redraw();
 
-    function toast(message, type = "success", duration = 3200) {
-      const node = document.createElement("div");
-      node.className = `toast ${type}`;
-      node.textContent = message;
-      el.toastWrap.appendChild(node);
+      const point = (ev)=>{
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {x:(ev.clientX-rect.left)*scaleX, y:(ev.clientY-rect.top)*scaleY};
+      };
 
-      window.setTimeout(() => {
-        node.style.opacity = "0";
-        node.style.transform = "translateY(8px)";
-        window.setTimeout(() => node.remove(), 160);
-      }, duration);
-    }
-
-    function normaliseTime(value) {
-      if (!value) return 0;
-
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-
-      if (typeof value === "string") {
-        const numeric = Number(value);
-        if (Number.isFinite(numeric) && numeric > 0) return numeric;
-        const parsed = Date.parse(value);
-        return Number.isFinite(parsed) ? parsed : 0;
+      function start(ev){
+        drawing = true;
+        const p = point(ev);
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
       }
-
-      if (typeof value.toMillis === "function") {
-        try { return value.toMillis(); } catch (error) {}
+      function move(ev){
+        if(!drawing) return;
+        const p = point(ev);
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineTo(p.x,p.y);
+        ctx.stroke();
       }
+      function end(){ drawing = false; }
 
-      if (typeof value.seconds === "number") {
-        return value.seconds * 1000;
-      }
+      canvas.addEventListener('pointerdown', start);
+      canvas.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', end);
 
-      return 0;
-    }
-
-    function formatDate(time) {
-      if (!time) return "Recently";
-      try {
-        return new Intl.DateTimeFormat("en-IE", {
-          dateStyle: "medium",
-          timeStyle: "short"
-        }).format(new Date(time));
-      } catch (error) {
-        return "Recently";
-      }
-    }
-
-    function formatBytes(bytes) {
-      if (!bytes && bytes !== 0) return "";
-      const units = ["B", "KB", "MB", "GB"];
-      let size = bytes;
-      let unit = 0;
-      while (size >= 1024 && unit < units.length - 1) {
-        size /= 1024;
-        unit += 1;
-      }
-      return `${size < 10 && unit > 0 ? size.toFixed(1) : Math.round(size)} ${units[unit]}`;
-    }
-
-    function initialsOf(name) {
-      const parts = String(name || "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
-      if (!parts.length) return "??";
-      return parts.map((part) => part[0]).join("").toUpperCase();
-    }
-
-    function sanitiseHttpUrl(url) {
-      if (!url) return "";
-      try {
-        const parsed = new URL(url, window.location.href);
-        return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
-      } catch (error) {
-        return "";
-      }
-    }
-
-    function escapeHTML(text) {
-      const div = document.createElement("div");
-      div.textContent = text || "";
-      return div.innerHTML;
-    }
-
-    function isTextInput(target) {
-      return target instanceof HTMLElement && (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      );
-    }
-
-    function debounce(fn, wait) {
-      let timer = null;
-      return function debounced(...args) {
-        clearTimeout(timer);
-        timer = window.setTimeout(() => fn.apply(this, args), wait);
+      return {
+        clear(){
+          backgroundImg = null;
+          redraw();
+        },
+        setGuide(fn){
+          currentGuide = fn;
+          redraw();
+        },
+        setBackground(img){
+          backgroundImg = img;
+          redraw();
+        }
       };
     }
+
+    function drawRayGuideNone(ctx, canvas){
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.strokeStyle = '#e6e6e6';
+      for(let x=0;x<canvas.width;x+=40){
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+      }
+      for(let y=0;y<canvas.height;y+=40){
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+      }
+      ctx.strokeStyle = '#777';
+      ctx.beginPath();
+      ctx.moveTo(30,canvas.height/2);
+      ctx.lineTo(canvas.width-30,canvas.height/2);
+      ctx.stroke();
+    }
+
+    function drawRayGuideConverging(ctx, canvas){
+      drawRayGuideNone(ctx, canvas);
+      const cx = canvas.width/2, cy = canvas.height/2;
+      ctx.strokeStyle = '#1363df';
+      ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(cx,70); ctx.lineTo(cx,canvas.height-70); ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 35, 150, 0, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.fillStyle='#111';
+      [cx-180, cx+180].forEach(x=>{ ctx.beginPath(); ctx.arc(x,cy,5,0,Math.PI*2); ctx.fill(); });
+      ctx.font='16px sans-serif';
+      ctx.fillText('F', cx-188, cy+26);
+      ctx.fillText('F', cx+172, cy+26);
+    }
+
+    function drawRayGuideDiverging(ctx, canvas){
+      drawRayGuideNone(ctx, canvas);
+      const cx = canvas.width/2, cy = canvas.height/2;
+      ctx.strokeStyle = '#1363df';
+      ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(cx,70); ctx.lineTo(cx,canvas.height-70); ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx-24,75); ctx.quadraticCurveTo(cx+25,cy,cx-24,canvas.height-75);
+      ctx.moveTo(cx+24,75); ctx.quadraticCurveTo(cx-25,cy,cx+24,canvas.height-75);
+      ctx.stroke();
+      ctx.fillStyle='#111';
+      [cx-180, cx+180].forEach(x=>{ ctx.beginPath(); ctx.arc(x,cy,5,0,Math.PI*2); ctx.fill(); });
+      ctx.font='16px sans-serif';
+      ctx.fillText('F', cx-188, cy+26);
+      ctx.fillText('F', cx+172, cy+26);
+    }
+
+    function drawGraphGrid(ctx, canvas){
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.strokeStyle = '#e8e8e8';
+      ctx.lineWidth = 1;
+      for(let x=40;x<canvas.width;x+=40){
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+      }
+      for(let y=40;y<canvas.height;y+=40){
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+      }
+      ctx.strokeStyle = '#444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(60,canvas.height-50);
+      ctx.lineTo(canvas.width-30,canvas.height-50);
+      ctx.moveTo(60,canvas.height-50);
+      ctx.lineTo(60,30);
+      ctx.stroke();
+      ctx.font='18px sans-serif';
+      ctx.fillStyle = '#111';
+      ctx.fillText('x', canvas.width-40, canvas.height-58);
+      ctx.fillText('y', 40, 40);
+    }
+
+    function downloadCanvas(canvas, filename){
+      canvas.toBlob(blob=>{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        setTimeout(()=>URL.revokeObjectURL(url), 500);
+      });
+    }
+
+    function renderCheat(){
+      const cont = document.getElementById('cheat');
+      cont.innerHTML = `
+        <div class="card hide-on-print">
+          <h2>Printable cheat-sheet</h2>
+          <div class="toolbar">
+            <button class="btn primary" id="printCheatBtn">Print / save as PDF</button>
+          </div>
+          <p class="small">When you print, only the cheat-sheet below is shown.</p>
+        </div>
+        <div class="cheat-sheet">
+          <h2>Leaving Cert Physics quick sheet</h2>
+          <div class="cheat-grid">
+            <div>
+              <h3>Motion and acceleration</h3>
+              <ul>
+                <li><span class="mono">a = (v − u)/t</span></li>
+                <li><span class="mono">v = u + at</span></li>
+                <li><span class="mono">s = ut + ½at²</span></li>
+                <li><span class="mono">v² = u² + 2as</span></li>
+                <li>slope of s–t = velocity</li>
+                <li>slope of v–t = acceleration</li>
+                <li>area under v–t = displacement</li>
+              </ul>
+
+              <h3>Lenses</h3>
+              <ul>
+                <li><span class="mono">1/f = 1/u + 1/v</span></li>
+                <li><span class="mono">m = v/u</span></li>
+                <li><span class="mono">P = 1/f</span></li>
+                <li><span class="mono">Pₜ = P₁ + P₂</span></li>
+                <li>Converging lens: can form real or virtual images</li>
+                <li>Diverging lens: virtual, upright, diminished</li>
+              </ul>
+
+              <h3>Heat</h3>
+              <ul>
+                <li><span class="mono">Q = mcΔθ</span></li>
+                <li><span class="mono">Q = CΔθ</span></li>
+                <li><span class="mono">Q = ml</span></li>
+                <li>Calorimetry: energy lost = energy gained</li>
+                <li>Conduction: no bulk movement</li>
+                <li>Convection: bulk movement of a fluid</li>
+                <li>Radiation: no medium needed</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3>Waves and sound</h3>
+              <ul>
+                <li><span class="mono">c = fλ</span></li>
+                <li><span class="mono">T = 1/f</span></li>
+                <li><span class="mono">f = (1/2L)√(T/μ)</span></li>
+                <li><span class="mono">μ = m/L</span></li>
+                <li><span class="mono">fₙ = n f₁</span></li>
+                <li><span class="mono">I = P/(4πr²)</span></li>
+                <li>Pitch ↔ frequency; loudness ↔ amplitude/intensity</li>
+                <li>Doppler: approaching source → higher observed frequency</li>
+              </ul>
+
+              <h3>Wave nature of light</h3>
+              <ul>
+                <li><span class="mono">nλ = d sinθ</span></li>
+                <li><span class="mono">d = 1/(lines per metre)</span></li>
+                <li>Polarisation proves light is transverse</li>
+                <li>Diffraction grating: halve the separation of ±n images first</li>
+                <li>Red has longest visible wavelength; violet shortest</li>
+                <li>Dispersion: different colours refract by different amounts</li>
+              </ul>
+
+              <h3>Last-night reminders</h3>
+              <ul>
+                <li>Convert units before substituting.</li>
+                <li>Label every graph axis with units.</li>
+                <li>State relationships in words <em>and</em> equations.</li>
+                <li>Draw the wave or ray before writing long prose.</li>
+                <li>Keep a final line with the answer and unit boxed or clearly isolated.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+      cont.querySelector('#printCheatBtn').addEventListener('click', ()=>window.print());
+    }
+
+    function renderSettings(){
+      const cont = document.getElementById('settings');
+      cont.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h2>Save, export and reset</h2>
+            <div class="${state.sessionOnly ? 'danger-note' : 'success-note'}">
+              ${state.sessionOnly
+                ? 'This file is running without guaranteed local persistence. Progress is still tracked during this session, but you should export your save if you want to keep it.'
+                : 'Persistent local saving appears to be available for this file in this browser.'}
+            </div>
+            <div class="toolbar" style="margin-top:14px">
+              <button class="btn primary" id="exportBtn">Export save</button>
+              <input type="file" id="importInput" accept="application/json" />
+              <button class="btn bad" id="resetBtn">Reset all data</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <tbody>
+                  <tr><th>Questions answered</th><td>${countAnswered()}</td></tr>
+                  <tr><th>Correct answers</th><td>${countCorrect()}</td></tr>
+                  <tr><th>Accuracy</th><td>${accuracy()}%</td></tr>
+                  <tr><th>Due flashcards</th><td>${dueFlashcards().length}</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="small">Importing a save replaces the current state.</p>
+          </div>
+
+          <div class="card">
+            <h2>How to extend the content</h2>
+            <ol>
+              <li>Add or edit topic notes inside the <span class="mono">TOPICS</span> array.</li>
+              <li>Add formulas inside <span class="mono">FORMULAE</span>.</li>
+              <li>Add practice questions inside <span class="mono">QUESTION_BANK</span>. Use <span class="mono">type: 'number'</span>, <span class="mono">'text'</span>, or <span class="mono">'mcq'</span>.</li>
+              <li>Add definition/formula cards inside <span class="mono">FLASHCARDS</span>.</li>
+              <li>If you need more tools, reuse the canvas helper in the Tools section.</li>
+            </ol>
+            <p class="small">Because this is a single file, you can customise it quickly by editing one document and then reopening it in the browser.</p>
+          </div>
+        </div>
+      `;
+      cont.querySelector('#exportBtn').addEventListener('click', exportSave);
+      cont.querySelector('#importInput').addEventListener('change', importSave);
+      cont.querySelector('#resetBtn').addEventListener('click', ()=>{
+        if(confirm('Reset all saved answers, flashcards and mock data?')){
+          resetState();
+        }
+      });
+    }
+
+    function exportSave(){
+      const payload = JSON.stringify(state, null, 2);
+      const blob = new Blob([payload], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lc-physics-study-save.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 500);
+    }
+
+    function importSave(e){
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const parsed = JSON.parse(reader.result);
+          state = Object.assign(deepClone(DEFAULT_STATE), parsed);
+          saveState();
+          renderAll();
+          alert('Save imported.');
+        }catch(err){
+          alert('That file could not be imported.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function renderAll(){
+      renderDashboard();
+      renderTopics();
+      renderFormulae();
+      renderPractice();
+      renderFlashcards();
+      renderMock();
+      renderTools();
+      renderCheat();
+      renderSettings();
+    }
+
+    initNav();
+    renderAll();
   </script>
 </body>
 </html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>♡</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  overflow:hidden;
+  background:black;
+  width:100%;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial,sans-serif;
+}
+
+.container{
+  position:relative;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+.title{
+  position:absolute;
+  top:7%;
+  color:white;
+  font-size:1.4rem;
+  font-weight:500;
+  z-index:5;
+}
+
+.scene{
+  position:relative;
+  width:320px;
+  height:320px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  transform-style:preserve-3d;
+  animation:spin 9s linear infinite;
+}
+
+.word{
+  position:absolute;
+  color:#ff69b4;
+  font-size:11px;
+  font-weight:bold;
+  white-space:nowrap;
+
+  text-shadow:
+  0 0 5px #ff69b4,
+  0 0 10px #ff1493;
+}
+
+.cat{
+  position:absolute;
+  width:130px;
+  border-radius:16px;
+  z-index:2;
+  box-shadow:0 0 25px rgba(255,105,180,0.25);
+}
+
+.tap{
+  position:absolute;
+  bottom:40px;
+  color:#999;
+  font-size:0.9rem;
+  opacity:0.8;
+}
+
+@keyframes spin{
+  from{
+    transform:rotateY(0deg) rotateX(8deg);
+  }
+  to{
+    transform:rotateY(360deg) rotateX(8deg);
+  }
+}
+
+@media(max-width:600px){
+
+  .scene{
+    transform:scale(0.9);
+  }
+
+  .cat{
+    width:110px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="title">hai karolisa.</div>
+
+  <audio id="music" autoplay loop playsinline>
+    <source src="imyourman.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="scene" id="heart">
+
+    <img src="bunnicat.jpg" class="cat">
+
+  </div>
+
+  <div class="tap">tap anywhere if music doesn't play ♡</div>
+
+</div>
+
+<script>
+
+const audio = document.getElementById("music");
+
+audio.play().catch(() => {
+  document.body.addEventListener("click", () => {
+    audio.play();
+    document.querySelector(".tap").style.display = "none";
+  }, { once:true });
+});
+
+const heart = document.getElementById("heart");
+
+const text = "I LOVE YOU";
+
+const points = [];
+
+for(let t = 0; t < Math.PI * 2; t += 0.22){
+
+  const x = 16 * Math.pow(Math.sin(t),3);
+
+  const y =
+    13 * Math.cos(t)
+    - 5 * Math.cos(2*t)
+    - 2 * Math.cos(3*t)
+    - Math.cos(4*t);
+
+  points.push({
+    x:x * 8,
+    y:-y * 8
+  });
+
+}
+
+for(let layer = -2; layer <= 2; layer++){
+
+  points.forEach((p)=>{
+
+    const span = document.createElement("span");
+
+    span.className = "word";
+
+    span.innerText = text;
+
+    const z = layer * 18;
+
+    span.style.left = `${160 + p.x}px`;
+    span.style.top = `${160 + p.y}px`;
+
+    span.style.transform = `translate(-50%, -50%) translateZ(${z}px)`;
+
+    heart.appendChild(span);
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,289 +1,255 @@
 <!--
-  Race Relations & Kennedy/Johnson Foreign Policy Revision Tool
-  - Save this code as `revision_tool.html` and open in a browser.
-  - All CSS/JS are embedded; no internet needed.
-  - Keyboard shortcuts (accessible with Tab/Enter): 
-      F: Flashcards   | T: Timeline   | P: Personalities   | Q: Quick Facts   | G: Question generator   | C: Cheat-sheets
-  - Use search boxes and buttons to interact. Use PRINT to print cheat-sheets.
+  Revision Tool (One-File): Race Relations & JFK/LBJ Foreign Policy
+  Save as “revision_tool.html” and open in a web browser.
+  All CSS/JS is embedded; no external libraries. Accessible (ARIA labels, keyboard).
+  Keyboard shortcuts:
+    F = Flashcards | T = Timeline | P = Personalities | Q = Quick Facts | G = Questions | C = Cheat-sheet
 -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IE">
 <head>
 <meta charset="UTF-8">
-<title>USA Race Relations & Kennedy/Johnson FP Revision Tool</title>
+<title>Revision: Race Relations & Kennedy/Johnson FP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body {font-family: Arial, sans-serif; margin: 1em; line-height:1.5;}
-  h1, h2, h3 {color: #234;}
-  section {margin-bottom: 2em;}
-  .panel {border: 1px solid #888; padding: 1em; margin: 0.5em 0; background: #f9f9f9;}
-  button {margin: 0.2em; padding: 0.5em 1em; font-size:1em;}
-  #flashcard {font-size:1.2em; font-weight:bold; text-align:center; padding:1em; background:#eef;}
-  #definition {font-style:italic; margin-top:0.5em;}
-  table {border-collapse: collapse; width: 100%; margin:0.5em 0;}
-  th, td {border:1px solid #666; padding:0.5em; text-align:left;}
-  th {background:#ccc; cursor:pointer;}
-  tr:nth-child(even) {background:#f0f0f0;}
-  ul {margin:0.5em 0 1em 1.5em;}
-  #timelineSearch, #personSearch {width: 100%; padding:0.3em; margin-bottom:0.5em;}
-  #cheatsheet {border:1px solid #666; padding:1em; }
-  .hidden {display:none;}
+  body {font-family: Arial, sans-serif; margin: 1em; line-height:1.6; background:#fff;}
+  h1,h2,h3 {color:#003366;}
+  section {margin-bottom:2em;}
+  .card {border:1px solid #666; padding:1em; background:#eef; text-align:center;}
+  button {margin:0.3em; padding:0.5em 0.8em; font-size:1em;}
+  table {border-collapse:collapse; width:100%; margin:0.5em 0;}
+  th, td {border:1px solid #aaa; padding:0.5em; text-align:left;}
+  th {background:#ddd; cursor:pointer;}
+  tr:nth-child(even) {background:#f9f9f9;}
+  input[type="text"] {width:100%; padding:0.5em; margin-bottom:0.5em;}
+  #cheatsheet {border:1px solid #666; padding:1em;}
 </style>
 </head>
 <body>
 
-<h1>Revision App: Race Relations (1945–89) & Kennedy/Johnson FP</h1>
+<h1>Revision Tool: Race Relations (1945–89) & Kennedy/Johnson FP</h1>
 
-<!-- Flashcards Section -->
-<section id="flashcardSection">
-  <h2>Flashcards (Terms & Definitions)</h2>
-  <div id="flashcard" tabindex="0" aria-live="polite">Press "Next" to begin</div>
-  <div id="definition" class="hidden"></div>
+<section id="flashcards-section">
+  <h2>Flashcards (Term & Definition)</h2>
+  <div id="flashcard" class="card" tabindex="0" aria-live="polite">Press “Next” to start</div>
+  <div id="definition" style="font-style:italic; margin-top:0.5em; display:none;"></div>
   <button id="prevBtn">Previous</button>
   <button id="showBtn">Show Definition</button>
   <button id="nextBtn">Next</button>
 </section>
 
-<!-- Timeline/Search Section -->
-<section id="timelineSection">
-  <h2>Timeline of Events</h2>
-  <input type="text" id="timelineSearch" placeholder="Search events by keyword or date (e.g., 1963, Berlin)...">
-  <table id="timelineTable" aria-label="Timeline of key events">
+<section id="timeline-section">
+  <h2>Timeline of Events (Searchable)</h2>
+  <input type="text" id="timelineSearch" placeholder="Search timeline...">
+  <table id="timelineTable" aria-label="Key events timeline">
     <thead><tr><th>Date</th><th>Event</th></tr></thead>
     <tbody></tbody>
   </table>
 </section>
 
-<!-- Quick Facts Section -->
-<section id="quickFactsSection">
-  <h2>Quick Facts (Figures & Dates)</h2>
-  <div class="panel" aria-label="Key figures and data">
-    <ul>
-      <li><strong>Executive Order 9981 (1948):</strong> Desegregated US Armed Forces【25†L45-L53】.</li>
-      <li><strong>Brown v. Board (1954):</strong> SCOTUS ruled school segregation unconstitutional【27†L85-L94】.</li>
-      <li><strong>Montgomery Bus Boycott (1955-56):</strong> 381-day protest ended bus segregation【29†L225-L234】.</li>
-      <li><strong>Civil Rights Act (1964):</strong> Banned segregation in public places; passed by LBJ【35†L46-L54】.</li>
-      <li><strong>Voting Rights Act (1965):</strong> Banned literacy tests; federalized voter registration【37†L75-L83】.</li>
-      <li><strong>Bay of Pigs (Apr 1961):</strong> US-backed invasion of Cuba failed【12†L355-L363】.</li>
-      <li><strong>Berlin Wall (Aug 1961):</strong> USSR/East Germany sealed West Berlin; JFK sent troops【7†L478-L486】.</li>
-      <li><strong>Cuban Missile Crisis (Oct 1962):</strong> Soviet nukes in Cuba → US naval blockade → compromise【15†L312-L320】.</li>
-      <li><strong>Gulf of Tonkin (Aug 1964):</strong> Alleged attacks on US ships led Congress to authorize full Vietnam War【17†L198-L207】.</li>
-      <li><strong>Tet Offensive (Jan 1968):</strong> NV attacks on Vietnamese New Year; turned US public opinion against war【21†L91-L100】.</li>
-    </ul>
-  </div>
+<section id="quickfacts-section">
+  <h2>Quick Facts & Figures</h2>
+  <ul>
+    <li><strong>Truman EO 9981 (1948):</strong> Banned racial segregation in US military【25†L45-L53】.</li>
+    <li><strong>Brown v. Board (1954):</strong> Ended school segregation【27†L85-L94】.</li>
+    <li><strong>Montgomery Boycott (1955–56):</strong> 381-day bus boycott ended segregation【29†L225-L234】.</li>
+    <li><strong>Little Rock (1957):</strong> Eisenhower sent troops to enforce school integration【32†L42-L51】.</li>
+    <li><strong>CR Act (1964):</strong> Outlawed discrimination in public places【35†L46-L54】.</li>
+    <li><strong>Voting Rights (1965):</strong> Banned voter suppression tactics【37†L75-L83】.</li>
+    <li><strong>Bay of Pigs (Apr '61):</strong> US-backed Cuban invasion failed【58†L370-L373】.</li>
+    <li><strong>Berlin Wall (Aug '61):</strong> US kept forces in West Berlin【7†L478-L486】.</li>
+    <li><strong>Missile Crisis (Oct '62):</strong> US blockade forced USSR to remove Cuban missiles【15†L312-L320】.</li>
+    <li><strong>Tonkin Res. (Aug '64):</strong> Gave Johnson war powers in Vietnam【17†L198-L207】.</li>
+    <li><strong>Tet Offensive (Jan '68):</strong> Surprise attacks turned US opinion against war【21†L91-L100】.</li>
+  </ul>
 </section>
 
-<!-- Personalities Section -->
-<section id="personSection">
-  <h2>Key Personalities</h2>
-  <input type="text" id="personSearch" placeholder="Search people (e.g., King, Kennedy)...">
+<section id="personalities-section">
+  <h2>Key Personalities (Sortable)</h2>
+  <input type="text" id="personSearch" placeholder="Search names or roles...">
   <table id="personTable" aria-label="Important figures">
     <thead><tr><th>Name</th><th>Role</th><th>Significance</th></tr></thead>
     <tbody></tbody>
   </table>
 </section>
 
-<!-- Question Generator Section -->
-<section id="questionSection">
+<section id="questions-section">
   <h2>Exam-Style Questions</h2>
-  <button id="genQBtn">Generate Question</button>
+  <button id="genQBtn">New Question</button>
   <p id="questionDisplay" style="font-weight:bold; margin:0.5em 0;"></p>
   <ul id="answerList"></ul>
 </section>
 
-<!-- Cheat Sheets Section -->
-<section id="cheatsheetSection">
-  <h2>Cheat-Sheets (Printable)</h2>
+<section id="cheatsheet-section">
+  <h2>Cheat Sheet (Print A4)</h2>
   <div id="cheatsheet">
-    <h3>Race Relations: Key Points</h3>
+    <h3>Race Relations Overview</h3>
     <ul>
-      <li>Post-WWII: Jim Crow segregation; civil rights movement grows.</li>
-      <li>1948: Truman desegregates armed forces【25†L45-L53】.</li>
+      <li>1948: Truman desegregates military【25†L45-L53】.</li>
       <li>1954: <em>Brown v. Board</em> ends school segregation【27†L85-L94】.</li>
-      <li>1955-56: Montgomery Bus Boycott (R. Parks → end bus segregation)【29†L225-L234】.</li>
-      <li>1963: March on Washington, “I Have a Dream” (peaceful mass protest).</li>
-      <li>1964: Civil Rights Act (LBJ signs) bans segregation【35†L46-L54】.</li>
-      <li>1965: Voting Rights Act eliminates literacy tests【37†L75-L83】.</li>
-      <li>1968: Fair Housing Act bans housing bias【41†L221-L224】.</li>
+      <li>1955–56: Montgomery Bus Boycott (Rosa Parks → end bus segregation)【29†L225-L234】.</li>
+      <li>1963: March on Washington; MLK’s “Dream” speech.</li>
+      <li>1964: Civil Rights Act signed (segregation illegal)【35†L46-L54】.</li>
+      <li>1965: Voting Rights Act signed (protects Black voters)【37†L75-L83】.</li>
+      <li>1968: Fair Housing Act (bans housing discrimination)【41†L221-L224】.</li>
     </ul>
-    <h3>Kennedy/Johnson Foreign Policy</h3>
+    <h3>Kennedy/Johnson Summary</h3>
     <ul>
-      <li>1961: Bay of Pigs invasion fails (anti-Castro exiles)【12†L355-L363】.</li>
-      <li>1961: Berlin Wall erected; JFK sends troops【7†L478-L486】.</li>
-      <li>1962: Cuban Missile Crisis – US naval blockade → USSR withdraws missiles【15†L312-L320】.</li>
-      <li>1963: Test Ban Treaty (US/USSR); “Ich bin ein Berliner” speech【8†L690-L698】.</li>
-      <li>1964: Gulf of Tonkin Resolution expands Vietnam War【17†L198-L207】.</li>
-      <li>1968: Tet Offensive → US morale sours【21†L91-L100】; LBJ scales back.</li>
+      <li>1961: Bay of Pigs invasion (failed)【58†L370-L373】.</li>
+      <li>1961: Berlin Wall built; JFK defends West Berlin【7†L478-L486】.</li>
+      <li>1962: Cuban Missile Crisis (US blockade wins)【15†L312-L320】.</li>
+      <li>1963: Hotline and Test Ban Treaty (July 25, 1963)【57†L335-L342】.</li>
+      <li>1964: Gulf of Tonkin Resolution broadens Vietnam War【17†L198-L207】.</li>
+      <li>1968: Tet Offensive (Jan) undermines US confidence【21†L91-L100】.</li>
+      <li>1968: LBJ halts bombing (Mar 31) and seeks talks【21†L99-L107】.</li>
     </ul>
   </div>
 </section>
 
-<!-- Hidden mermaid timeline (for reference) -->
-<!-- 
-mermaid
-gantt
-  title Cold War Crises (1961-1968)
-  dateFormat  YYYY-MM-DD
-  section Kennedy
-    Bay of Pigs              :1961-04-17, 1d
-    Berlin Wall              :1961-08-13, 1d
-    Cuban Missile Crisis     :1962-10-22, 13d
-    Test Ban Treaty          :1963-08-05, 1d
-  section Johnson
-    Gulf of Tonkin           :1964-08-02, 2d
-    Vietnam escalation       :1965-03-08, 1460d
-    Tet Offensive            :1968-01-30, 10d
-    End of Escalation        :1968-03-31, 1d
--->
-
 <script>
-// ----- Data for Flashcards -----
+// Flashcards data
 const flashcards = [
-  {term: "Brown v. Board of Education (1954)", definition: "Supreme Court case that outlawed school segregation; declared 'separate but equal' in public education unconstitutional【27†L85-L94】."},
-  {term: "Montgomery Bus Boycott (1955–56)", definition: "Year-long bus boycott in Montgomery, Alabama after Rosa Parks' arrest; led by MLK; ended bus segregation【29†L225-L234】."},
-  {term: "Civil Rights Act (1964)", definition: "Signed by LBJ; banned segregation in public places and discrimination in employment; a major civil rights victory【35†L46-L54】."},
-  {term: "Voting Rights Act (1965)", definition: "Outlawed voting barriers (literacy tests) and enforced federal oversight of voter registration in the South【37†L75-L83】."},
-  {term: "Bay of Pigs (Apr 1961)", definition: "Failed US-backed invasion of Cuba by anti-Castro exiles; a major JFK administration embarrassment【12†L355-L363】."},
-  {term: "Berlin Wall (Aug 1961)", definition: "Concrete barrier built by East Germany to stop East→West Berlin migration; JFK responded by bolstering West Berlin defense【7†L478-L486】."},
-  {term: "Cuban Missile Crisis (Oct 1962)", definition: "13-day US-USSR confrontation over Soviet nuclear missiles in Cuba; ended with USSR withdrawing missiles after JFK's blockade【15†L312-L320】."},
-  {term: "Gulf of Tonkin Resolution (1964)", definition: "Authorized LBJ to use military force in Vietnam after alleged attacks on US ships; led to major war escalation【17†L198-L207】."},
-  {term: "Tet Offensive (Jan 1968)", definition: "Surprise NVN/Viet Cong attacks across South Vietnam; U.S. military victory but shattered US public confidence in the war【21†L91-L100】."},
-  // ... more flashcards ...
+  { term: "Brown v. Board of Education (1954)", def: "Supreme Court ruled school segregation unconstitutional【27†L85-L94】." },
+  { term: "Montgomery Bus Boycott (1955–56)", def: "Year-long boycott in Montgomery led by MLK ending bus segregation【29†L225-L234】." },
+  { term: "Civil Rights Act (1964)", def: "Outlawed segregation in public places and banned job discrimination【35†L46-L54】." },
+  { term: "Voting Rights Act (1965)", def: "Banned literacy tests and federalized voting registration【37†L75-L83】." },
+  { term: "Bay of Pigs Invasion (Apr 1961)", def: "CIA-backed Cuban invasion failed; ~1,200 exiles captured【58†L370-L373】." },
+  { term: "Berlin Wall (Aug 1961)", def: "Built by East Germany; JFK responded by reinforcing West Berlin【7†L478-L486】." },
+  { term: "Cuban Missile Crisis (Oct 1962)", def: "US naval blockade forced USSR to remove Cuban nukes【15†L312-L320】." },
+  { term: "Gulf of Tonkin (Aug 1964)", def: "Incident leading to US Congress giving LBJ war powers【17†L198-L207】." },
+  { term: "Tet Offensive (Jan 1968)", def: "Surprise attacks by NV/Viet Cong; shocked US media and weakened support【21†L91-L100】." }
 ];
-let currentCard = -1;
+let cardIndex = -1;
 const cardElem = document.getElementById('flashcard');
 const defElem = document.getElementById('definition');
-document.getElementById('nextBtn').addEventListener('click', ()=> {
-  currentCard = (currentCard + 1) % flashcards.length;
-  cardElem.textContent = flashcards[currentCard].term;
-  defElem.textContent = flashcards[currentCard].definition;
-  defElem.classList.add('hidden');
+document.getElementById('nextBtn').addEventListener('click', () => {
+  cardIndex = (cardIndex + 1) % flashcards.length;
+  cardElem.textContent = flashcards[cardIndex].term;
+  defElem.textContent = flashcards[cardIndex].def;
+  defElem.style.display = 'none';
 });
-document.getElementById('prevBtn').addEventListener('click', ()=> {
-  currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
-  cardElem.textContent = flashcards[currentCard].term;
-  defElem.textContent = flashcards[currentCard].definition;
-  defElem.classList.add('hidden');
+document.getElementById('prevBtn').addEventListener('click', () => {
+  cardIndex = (cardIndex - 1 + flashcards.length) % flashcards.length;
+  cardElem.textContent = flashcards[cardIndex].term;
+  defElem.textContent = flashcards[cardIndex].def;
+  defElem.style.display = 'none';
 });
-document.getElementById('showBtn').addEventListener('click', ()=> {
-  defElem.classList.remove('hidden');
+document.getElementById('showBtn').addEventListener('click', () => {
+  defElem.style.display = 'block';
 });
 
-// ----- Data for Timeline -----
-const timelineEvents = [
-  {date:"1954-05-17", event:"Brown v. Board of Education (school segregation ruled unconstitutional)【27†L85-L94】"},
-  {date:"1955-12-05", event:"Montgomery Bus Boycott begins (after Rosa Parks arrest)【29†L225-L234】"},
-  {date:"1957-09-24", event:"Little Rock Nine enter Central High, forced by federal troops【32†L42-L51】【32†L98-L104】"},
-  {date:"1963-08-28", event:"March on Washington (\"I Have a Dream\" speech)"},
-  {date:"1964-07-02", event:"Civil Rights Act signed (bans segregation)【35†L46-L54】"},
-  {date:"1965-08-06", event:"Voting Rights Act signed (bans literacy tests)【37†L75-L83】"},
-  {date:"1968-04-04", event:"Assassination of MLK Jr."},
-  {date:"1968-04-11", event:"Fair Housing Act signed (prohibits housing discrimination)【41†L221-L224】"},
-  {date:"1961-04-17", event:"Bay of Pigs invasion begins (US-backed attempt)【12†L355-L363】"},
-  {date:"1961-08-13", event:"Construction of the Berlin Wall begins【7†L478-L486】"},
-  {date:"1962-10-16", event:"Start of Cuban Missile Crisis (US-USSR naval blockade)【15†L312-L320】"},
-  {date:"1962-10-28", event:"Khrushchev agrees to remove missiles from Cuba【15†L312-L320】"},
-  {date:"1963-08-05", event:"Limited Nuclear Test Ban Treaty signed"},
-  {date:"1964-08-02", event:"Gulf of Tonkin incident (USS Maddox attacked)【17†L205-L213】"},
-  {date:"1964-08-07", event:"Tonkin Gulf Resolution passed (gives LBJ war powers)【17†L198-L207】"},
-  {date:"1968-01-30", event:"Tet Offensive (major NV attacks)【21†L91-L100】"},
+// Timeline data and search
+const timelineData = [
+  { date: "1948-07-26", event: "Truman signs Executive Order 9981 (military desegregation)【25†L45-L53】" },
+  { date: "1954-05-17", event: "Brown v. Board of Education (Segregated schools struck down)【27†L85-L94】" },
+  { date: "1955-12-05", event: "Montgomery Bus Boycott begins【29†L225-L234】" },
+  { date: "1957-09-24", event: "Little Rock Nine integrated Central High (US troops sent)【32†L42-L51】" },
+  { date: "1963-08-28", event: "March on Washington (MLK’s “I Have a Dream”)"},
+  { date: "1964-07-02", event: "Civil Rights Act signed (bans segregation)【35†L46-L54】" },
+  { date: "1965-08-06", event: "Voting Rights Act signed【37†L75-L83】" },
+  { date: "1968-04-11", event: "Fair Housing Act signed (housing discrimination banned)【41†L221-L224】" },
+  { date: "1961-04-17", event: "Bay of Pigs invasion (exiles land in Cuba)【58†L370-L373】" },
+  { date: "1961-08-13", event: "Berlin Wall construction begins【7†L478-L486】" },
+  { date: "1962-10-16", event: "Start of Cuban Missile Crisis【15†L312-L320】" },
+  { date: "1962-10-28", event: "Khrushchev agrees to remove missiles【15†L312-L320】" },
+  { date: "1963-07-25", event: "Limited Nuclear Test Ban Treaty signed【57†L335-L342】" },
+  { date: "1964-08-02", event: "Gulf of Tonkin Incident【17†L198-L207】" },
+  { date: "1964-08-07", event: "Tonkin Gulf Resolution passed【17†L198-L207】" },
+  { date: "1968-01-30", event: "Tet Offensive begins【21†L91-L100】" },
+  { date: "1968-03-31", event: "Johnson announces bombing halt above 20th parallel【21†L99-L107】" }
 ];
-const timelineTable = document.getElementById('timelineTable').querySelector('tbody');
-// populate timeline table
-timelineEvents.sort((a,b) => a.date.localeCompare(b.date))
-  .forEach(ev => {
-    const row = timelineTable.insertRow();
-    const cellDate = row.insertCell(), cellEvent = row.insertCell();
-    cellDate.textContent = ev.date;
-    cellEvent.textContent = ev.event;
-  });
-// Timeline search filter
-document.getElementById('timelineSearch').addEventListener('keyup', function(){
-  const filter = this.value.toLowerCase();
-  [...timelineTable.rows].forEach(row => {
-    const txt = row.cells[0].textContent + " " + row.cells[1].textContent;
-    row.style.display = txt.toLowerCase().includes(filter) ? "" : "none";
+const timelineTable = document.getElementById('timelineTable').getElementsByTagName('tbody')[0];
+timelineData.forEach(item => {
+  let row = timelineTable.insertRow();
+  row.insertCell(0).textContent = item.date;
+  row.insertCell(1).textContent = item.event;
+});
+document.getElementById('timelineSearch').addEventListener('input', () => {
+  let filter = document.getElementById('timelineSearch').value.toLowerCase();
+  Array.from(timelineTable.rows).forEach(row => {
+    let txt = row.cells[0].textContent + " " + row.cells[1].textContent;
+    row.style.display = txt.toLowerCase().includes(filter) ? '' : 'none';
   });
 });
 
-// ----- Personalities -----
+// Personalities data and search
 const persons = [
-  {name:"Martin Luther King Jr.", role:"Civil Rights Leader", sign:"Nonviolent activism; led Montgomery, Birmingham, Selma campaigns; Nobel Peace Prize 1964."},
-  {name:"Rosa Parks", role:"Civil Rights Activist", sign:"Refused to give up bus seat (Dec 1955), sparking Montgomery Bus Boycott."},
-  {name:"Malcolm X", role:"Black Nationalist Leader", sign:"Advocated Black empowerment; prominent in early 60s, assassinated 1965."},
-  {name:"Thurgood Marshall", role:"Attorney/Supreme Court Justice", sign:"Argued Brown v. Board (1954); first African American SCOTUS Justice."},
-  {name:"John F. Kennedy", role:"US President (1961–63)", sign:"Handled Berlin, Cuban crises; initiated civil rights bill and space race goals."},
-  {name:"Lyndon B. Johnson", role:"US President (1963–69)", sign:"Signed Civil Rights/Voting Rights Acts; escalated Vietnam War (1964–68)."},
-  {name:"Orval Faubus", role:"Governor of Arkansas", sign:"Resisted integration at Little Rock (1957) by deploying Nat’l Guard."},
-  {name:"Dwight D. Eisenhower", role:"US President (1953–61)", sign:"Enforced school integration at Little Rock (1957) by sending federal troops."},
-  {name:"Malcolm Gladwell", role:"Author", sign:"Not directly related; skip this example."},
-  {name:"Martin Luther King Sr.", role:"MLK Jr.'s father", sign:"Local pastor; involved in early Montgomery activism."}
+  {name: "Martin Luther King Jr.", role: "Civil Rights Leader", sig: "Led non-violent protests (e.g. Montgomery, Selma); Nobel Laureate."},
+  {name: "Rosa Parks", role: "Civil Rights Activist", sig: "Refused bus seat, sparking Montgomery boycott【29†L225-L234】."},
+  {name: "Malcolm X", role: "Black Nationalist", sig: "Advocated Black empowerment; influential in early 1960s."},
+  {name: "Thurgood Marshall", role: "Attorney/Supreme Court Justice", sig: "Argued Brown v. Board; later first Black SC justice."},
+  {name: "John F. Kennedy", role: "US President (1961–63)", sig: "Handled Berlin, Cuba crises; launched civil rights bill."},
+  {name: "Lyndon B. Johnson", role: "US President (1963–69)", sig: "Signed 1964/65 civil rights laws; escalated Vietnam War."},
+  {name: "Orval Faubus", role: "Arkansas Governor", sig: "Blocked school integration (Little Rock, 1957)."},
+  {name: "Dwight Eisenhower", role: "US President (1953–61)", sig: "Sent troops to enforce school desegregation (Little Rock)."}
 ];
-const personTable = document.getElementById('personTable').querySelector('tbody');
-persons.sort((a,b) => a.name.localeCompare(b.name))
-  .forEach(p => {
-    const row = personTable.insertRow();
-    row.insertCell().textContent = p.name;
-    row.insertCell().textContent = p.role;
-    row.insertCell().textContent = p.sign;
-  });
-// Person search filter
-document.getElementById('personSearch').addEventListener('keyup', function(){
-  const filter = this.value.toLowerCase();
-  [...personTable.rows].forEach(row => {
-    const cells = row.cells;
-    const txt = cells[0].textContent + cells[1].textContent + cells[2].textContent;
-    row.style.display = txt.toLowerCase().includes(filter) ? "" : "none";
+const personTable = document.getElementById('personTable').getElementsByTagName('tbody')[0];
+persons.forEach(p => {
+  let row = personTable.insertRow();
+  row.insertCell(0).textContent = p.name;
+  row.insertCell(1).textContent = p.role;
+  row.insertCell(2).textContent = p.sig;
+});
+document.getElementById('personSearch').addEventListener('input', () => {
+  let filter = document.getElementById('personSearch').value.toLowerCase();
+  Array.from(personTable.rows).forEach(row => {
+    let txt = row.cells[0].textContent + " " + row.cells[1].textContent + " " + row.cells[2].textContent;
+    row.style.display = txt.toLowerCase().includes(filter) ? '' : 'none';
   });
 });
 
-// ----- Question Generator -----
+// Question generator
 const questions = [
-  {q:"Assess the significance of the Voting Rights Act of 1965.", a:[
-    "Eliminated literacy tests and other barriers to Black voting【37†L75-L83】.",
-    "Provided for federal oversight/preclearance of elections in segregated areas.",
-    "Dramatically increased Black voter registration in the South.",
-    "Addressed problems left unresolved by the 15th Amendment and earlier laws."
-  ]},
-  {q:"Compare Kennedy and Johnson on Vietnam policy.", a:[
-    "Kennedy sent military advisers (up to ~16,000 by 1963) but avoided combat troops.",
-    "Johnson used the Tonkin Gulf Resolution (1964) to escalate the war massively【17†L198-L207】.",
-    "Under Kennedy, Vietnam was a limited Cold War front; under Johnson it became a full-scale conflict.",
-    "Kennedy still hoped for victory without war; Johnson prioritized stopping communism by force."
-  ]},
-  {q:"Explain why the Civil Rights Act of 1964 was passed.", a:[
-    "Pressure from civil rights campaigns and national outrage at Birmingham images (dogs/hose).",
-    "March on Washington (1963) built momentum and public support.",
-    "Political leadership: JFK proposed it (1963) and LBJ (after JFK’s death) pushed it through Congress【35†L46-L54】.",
-    "Congressional compromise overcame Southern filibuster; showed federal commitment to equality."
-  ]},
-  // ... more question objects ...
+  {
+    q: "Assess the importance of the Civil Rights Act of 1964.",
+    a: [
+      "Outlawed segregation in public places and facilities【35†L46-L54】.",
+      "Banned discrimination in employment and schools.",
+      "Established the EEOC to enforce civil rights laws.",
+      "Built on momentum from civil rights marches (e.g. 1963)."
+    ]
+  },
+  {
+    q: "How did Kennedy handle the Cuban Missile Crisis and what was the outcome?",
+    a: [
+      "Imposed naval quarantine around Cuba【15†L312-L320】.",
+      "Refused to invade, negotiated with Khrushchev.",
+      "Soviets agreed to remove missiles; US secretly removed its Turkish missiles.",
+      "Avoided nuclear war and established a direct hotline for future crises."
+    ]
+  },
+  {
+    q: "Compare the approaches of JFK and LBJ in Vietnam policy.",
+    a: [
+      "Kennedy increased advisers but avoided major combat deployments.",
+      "Johnson escalated war after 1964 (Tonkin), sending hundreds of thousands of troops【17†L198-L207】.",
+      "Kennedy was wary of a protracted war; Johnson was committed to defeating communism by force.",
+      "JFK emphasized ‘flexible response’; LBJ faced protests and the Tet shock by 1968【21†L91-L100】."
+    ]
+  }
 ];
-const qDisplay = document.getElementById('questionDisplay');
-const ansList = document.getElementById('answerList');
-document.getElementById('genQBtn').addEventListener('click', ()=>{
-  const i = Math.floor(Math.random()*questions.length);
-  const item = questions[i];
-  qDisplay.textContent = item.q;
+document.getElementById('genQBtn').addEventListener('click', () => {
+  let i = Math.floor(Math.random()*questions.length);
+  document.getElementById('questionDisplay').textContent = questions[i].q;
+  let answers = questions[i].a;
+  let ansList = document.getElementById('answerList');
   ansList.innerHTML = "";
-  item.a.forEach(answer => {
-    const li = document.createElement('li');
-    li.textContent = answer;
+  answers.forEach(ans => {
+    let li = document.createElement('li');
+    li.textContent = ans;
     ansList.appendChild(li);
   });
 });
 
-// ----- Keyboard Shortcuts (basic) -----
+// Keyboard navigation hints (focus shifts)
 document.addEventListener('keydown', function(e) {
   switch(e.key.toLowerCase()) {
-    case 'f': document.getElementById('flashcardSection').scrollIntoView(); break;
-    case 't': document.getElementById('timelineSection').scrollIntoView(); break;
-    case 'p': document.getElementById('personSection').scrollIntoView(); break;
-    case 'q': document.getElementById('quickFactsSection').scrollIntoView(); break;
-    case 'g': document.getElementById('questionSection').scrollIntoView(); break;
-    case 'c': document.getElementById('cheatsheetSection').scrollIntoView(); break;
-    default: break;
+    case 'f': document.getElementById('flashcards-section').scrollIntoView(); break;
+    case 't': document.getElementById('timeline-section').scrollIntoView(); break;
+    case 'p': document.getElementById('personalities-section').scrollIntoView(); break;
+    case 'q': document.getElementById('quickfacts-section').scrollIntoView(); break;
+    case 'g': document.getElementById('questions-section').scrollIntoView(); break;
+    case 'c': document.getElementById('cheatsheet-section').scrollIntoView(); break;
   }
 });
 </script>

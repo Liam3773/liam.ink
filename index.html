@@ -45,9 +45,9 @@ body{
 }
 
 
-/* PASSWORD */
 
-.password-box{
+
+
   position:absolute;
   top:14%;
   display:flex;
@@ -57,7 +57,7 @@ body{
   z-index:10;
 }
 
-.password-box input{
+
   width:220px;
   padding:9px 15px;
   border-radius:20px;
@@ -70,11 +70,11 @@ body{
   0 0 8px rgba(255,105,180,.4);
 }
 
-.password-box input::placeholder{
+
   color:#777;
 }
 
-.password-box button{
+
   padding:7px 22px;
   border-radius:20px;
   border:none;
@@ -85,7 +85,7 @@ body{
   0 0 10px #ff69b4;
 }
 
-.password-box button:hover{
+
   box-shadow:
   0 0 20px #ff69b4;
 }
@@ -237,12 +237,12 @@ hai laila.
 
 
 
-<div class="password-box">
+
 
 <input 
-type="password" 
-id="passwordInput"
-placeholder="enter password">
+
+
+
 
 
 
@@ -260,7 +260,7 @@ placeholder="enter password">
 
 <audio id="music" autoplay loop playsinline>
 
-<source src="imyourman.mp3" type="audio/mpeg">
+<source src="notlikeu.mp3" type="audio/mpeg">
 
 </audio>
 
@@ -408,12 +408,12 @@ heart.appendChild(span);
 
 
 
-function checkPassword(){
+
 
 
 const entered =
 document
-.getElementById("passwordInput")
+
 .value
 .trim()
 .toLowerCase();
@@ -433,7 +433,6 @@ document.getElementById("letterPage").style.display="flex";
 else{
 
 
-alert("wrong password ♡");
 
 
 }

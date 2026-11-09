@@ -6,42 +6,62 @@
 <meta name="theme-color" content="#10131b">
 <title>Leaving Cert History — Essay Plans</title>
 <style>
-:root{color-scheme:dark;--bg:#10131b;--panel:#191e2a;--panel2:#202737;--text:#edf1f8;--muted:#a8b2c4;--accent:#9bb8ff;--line:#30394b;--green:#a8dfc1}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
-.wrap{max-width:1000px;margin:auto;padding:32px 22px 70px}
-header{padding:26px 0 30px} .eyebrow{color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:10px 0}header p{color:var(--muted);max-width:650px;margin:12px 0 0}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 28px}
-input{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;color:var(--text);font:inherit;flex:1;min-width:220px}
-button,.back{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 14px;font:inherit;cursor:pointer;text-decoration:none}
-button:hover,.back:hover,.question:hover{border-color:var(--accent);background:#252f43}
-.year{margin:28px 0 12px;color:var(--muted);font-size:.85rem;letter-spacing:.12em;text-transform:uppercase}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:13px}
-.question{display:block;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px;color:var(--text);cursor:pointer;transition:.15s}
-.question .num{color:var(--accent);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
-.question h3{font-size:1.03rem;line-height:1.4;margin:8px 0 0}
-.question .topic{color:var(--muted);font-size:.85rem;margin-top:10px}
+:root{
+  color-scheme:light;
+  --paper:#f4f1e9;
+  --surface:#fbfaf6;
+  --surface-alt:#eeebe2;
+  --ink:#20231f;
+  --muted:#696d64;
+  --line:#d9d5ca;
+  --accent:#9a4e35;
+  --accent-soft:#f1e5dc;
+  --green:#536b58;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:54px 30px 76px}
+header{padding:24px 0 38px;border-bottom:1px solid var(--line);margin-bottom:28px}
+.eyebrow{color:var(--accent);font-size:.76rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+h1{font-size:clamp(2.5rem,6vw,4.3rem);letter-spacing:-.055em;line-height:1.02;font-weight:750;margin:15px 0 14px}
+header p{color:var(--muted);max-width:660px;margin:0;font-size:1.04rem}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 34px}
+input{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:13px 15px;color:var(--ink);font:inherit;flex:1;min-width:220px;outline:none}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+button,.back{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:4px;padding:11px 16px;font:inherit;font-size:.92rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .12s,border-color .12s}
+button:hover,.back:hover{background:#41463e;border-color:#41463e}
+.year{margin:34px 0 12px;color:var(--accent);font-size:.78rem;font-weight:750;letter-spacing:.14em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.question{display:block;width:100%;min-height:126px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:19px 20px;color:var(--ink);cursor:pointer;transition:background .12s,border-color .12s}
+.question:hover{background:#fff;border-color:#a9a397}
+.question .num{color:var(--accent);font-size:.75rem;font-weight:750;text-transform:uppercase;letter-spacing:.09em}
+.question h3{font-size:1.06rem;line-height:1.4;letter-spacing:-.015em;margin:9px 0 13px;font-weight:680}
+.question .topic{color:var(--muted);font-size:.83rem;margin-top:auto}
 .hidden{display:none!important}
-.detail-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 22px}
-.detail h1{font-size:clamp(1.7rem,4vw,2.5rem);margin:18px 0 8px}
-.topicline{color:var(--accent);font-weight:650}
-.intro{color:var(--muted);margin:0 0 24px}
-section.plan{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px;margin:13px 0}
-section.plan h2{font-size:1.08rem;margin:0 0 10px}
+.detail-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 34px}
+.detail-top button{background:transparent;color:var(--ink);border-color:var(--line)}
+.detail-top button:hover{background:var(--surface-alt);border-color:#aaa497}
+.detail h1{font-size:clamp(2rem,4.5vw,3.15rem);max-width:850px;margin:14px 0 15px}
+.topicline{color:var(--accent);font-size:.78rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+.intro{color:var(--muted);max-width:760px;margin:0 0 30px}
+section.plan{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:23px 26px;margin:11px 0}
+section.plan h2{font-size:1.08rem;line-height:1.35;letter-spacing:-.01em;margin:0 0 13px;font-weight:720}
 section.plan ul{padding-left:21px;margin:0}
-section.plan li{padding:3px 0;color:#dce3ef}
+section.plan li{padding:3px 0 3px 2px;color:#383c35}
 section.plan li::marker{color:var(--accent)}
-.note{border-left:3px solid var(--green);padding:10px 14px;color:var(--muted);background:#17241f;border-radius:0 9px 9px 0;margin-top:24px}
-footer{border-top:1px solid var(--line);margin-top:40px;padding-top:20px;color:var(--muted);font-size:.85rem}
-@media(max-width:600px){.wrap{padding:22px 15px 50px}section.plan{padding:16px}.question{padding:16px}}
+.note{border-left:3px solid var(--green);padding:10px 14px;color:var(--muted);background:#e9ede6;border-radius:0 3px 3px 0;margin-top:24px}
+footer{border-top:1px solid var(--line);margin-top:48px;padding-top:18px;color:var(--muted);font-size:.85rem}
+@media(max-width:680px){.wrap{padding:30px 17px 54px}header{padding:18px 0 28px}.grid{grid-template-columns:1fr}.question{min-height:0;padding:17px}section.plan{padding:18px 17px}.detail-top{margin-bottom:25px}}
+@media print{body{background:#fff;color:#111}.wrap{max-width:none;padding:0}.detail-top,header,.toolbar,footer{display:none!important}section.plan{break-inside:avoid;background:#fff;border:1px solid #bbb}.detail h1{font-size:25pt}.intro{color:#333}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header id="homeHeader">
-<div class="eyebrow">Leaving Certificate · History</div>
-<h1>Essay plans</h1>
-<p>Choose a past question to open its individual essay plan. Each plan is split into an introduction, body paragraphs and conclusion, with key facts, names and dates to learn.</p>
+<div class="eyebrow">Leaving Certificate / History</div>
+<h1>History essay plans</h1>
+<p>A collection of past Leaving Certificate questions, organised into clear essay plans. Open a question to explore its main arguments, supporting evidence and optional paragraph ideas.</p>
 </header>
 <main id="home">
 <div class="toolbar">
@@ -55,7 +75,7 @@ footer{border-top:1px solid var(--line);margin-top:40px;padding-top:20px;color:v
 <div class="detail">
 <div class="topicline" id="detailMeta"></div>
 <h1 id="detailTitle"></h1>
-<p class="intro">Use the bullet points as memory prompts. Expand each point into your own sentences in the exam.</p>
+<p class="intro">Use the headings to choose your essay structure. The extra paragraph options give you more angles to discuss; you do not need to use every section. Expand the bullet points into your own sentences in the exam.</p>
 <div id="sections"></div>
 </div>
 </main>
@@ -161,6 +181,84 @@ const plans = [
 ["Conclusion",["Propaganda and terror were extremely effective tools for maintaining dictatorship.","Mussolini and Hitler used propaganda to create loyalty and terror to eliminate opposition.","Together, these methods helped them remain in power throughout the inter-war period."]]
 ]}
 ];
+
+
+// Additional optional paragraph ideas give students more choice when building an essay.
+// These are kept separate from the core plan so the student can choose the strongest ones.
+const extraIdeas = {
+0: [
+ ["The Church and education in Italy",["The Catholic Church had a major influence over Italian schools and family life.","The Lateran settlement gave the Church a recognised place in Italian public life.","Religious teaching remained important in education, limiting the regime's ability to control every part of young people's lives.","Use this paragraph to show that Mussolini had to compromise with an institution he could not simply remove."]],
+ ["The Nazi attempt to create a Reich Church",["The German Christians supported a Nazified version of Protestantism.","They wanted Christianity reshaped to fit Nazi racial and nationalist ideas.","The Confessing Church rejected state interference in Christian belief and church independence.","The 1934 Barmen Declaration, associated with Karl Barth, rejected Nazi control of the Church."]],
+ ["Religious resistance and persecution in Germany",["Pastor Martin Niemöller became a prominent critic of interference in the churches.","He was arrested in 1937 and later imprisoned in concentration camps.","Bishop Clemens von Galen publicly criticised aspects of Nazi policy, including the killing of disabled people.","Religious opposition existed, but it rarely developed into a united political challenge to Hitler."]],
+ ["Comparison: compromise versus control",["Mussolini's settlement with the Vatican brought international legitimacy and Catholic support.","Hitler's Concordat was intended to neutralise Catholic political opposition, but was repeatedly violated.","Both leaders wanted loyalty to the state to come before independent organisations.","A strong comparison paragraph can explain why relations were more stable in Italy than in Germany."]]
+],
+1: [
+ ["The Russian Civil War and the creation of the USSR",["The Bolsheviks faced opposition from White armies and foreign intervention after 1917.","The Red Army was organised by Leon Trotsky.","The Bolsheviks used the Cheka, the secret police, to suppress opposition.","1922: The Union of Soviet Socialist Republics (USSR) was formally established."]],
+ ["The Kronstadt rebellion and the limits of Lenin's rule",["1921: Sailors at the Kronstadt naval base rebelled against Bolshevik rule.","They demanded greater political freedom and an end to forced grain requisitioning.","The Red Army crushed the rebellion, showing Lenin would use force to maintain power.","The rebellion helped persuade Lenin to introduce the New Economic Policy."]],
+ ["Stalin's methods of controlling the party",["Stalin used his position as General Secretary, gained in 1922, to appoint supporters to important posts.","He presented himself as Lenin's loyal successor after Lenin died in 1924.","He formed shifting alliances against rivals such as Trotsky, Zinoviev, Kamenev and Bukharin.","Trotsky was expelled from the USSR in 1929 and later murdered in Mexico in 1940."]],
+ ["The human cost of Stalin's economic policies",["Collectivisation disrupted farming and led to resistance from peasants.","The famine of 1932–33 caused millions of deaths across the Soviet Union, including Ukraine.","Rapid industrialisation involved harsh working conditions and strict labour discipline.","This provides a useful contrast between economic growth and the suffering caused by Stalin's methods."]]
+],
+2: [
+ ["The cult of the leader",["Mussolini was presented as Il Duce, a strong leader who could restore Roman greatness.","Hitler was promoted as the Führer, supposedly embodying the will of the German nation.","Portraits, rallies, speeches and carefully staged public appearances reinforced their images.","The leader cult encouraged people to identify the success of the country with the dictator personally."]],
+ ["Youth and education",["Fascist regimes used schools to teach obedience, nationalism and loyalty to the state.","The Hitler Youth trained boys for military service and Nazi values.","The League of German Girls promoted fitness, motherhood and traditional gender roles.","In Italy, the Opera Nazionale Balilla organised young people into Fascist youth groups."]],
+ ["Workers, trade unions and the corporate state",["Independent trade unions were suppressed in both regimes.","Mussolini promoted the Corporate State, claiming employers and workers would cooperate through state-controlled bodies.","In Germany, the German Labour Front (DAF) replaced independent trade unions in 1933.","The Strength Through Joy programme organised leisure activities for German workers, while independent bargaining was removed."]],
+ ["Racism and persecution",["Nazi ideology placed racial hierarchy and antisemitism at its centre.","The Nuremberg Laws of 1935 stripped German Jews of citizenship and rights.","Kristallnacht in November 1938 involved widespread attacks on Jewish homes, businesses and synagogues.","Italian Fascism adopted racial laws against Jews in 1938, especially under growing German influence."]]
+],
+3: [
+ ["Stalin's control of labour and industrial targets",["Workers were expected to meet demanding production targets set by the state.","The Stakhanovite movement, launched in 1935, celebrated workers said to exceed targets.","Propaganda used these model workers to encourage greater productivity.","Failure to meet targets could bring punishment, showing the coercive side of industrialisation."]],
+ ["The Gulag system",["The Gulag network used forced labour in mines, forests, canals and construction projects.","Prisoners included political opponents and people accused of ordinary crimes.","Harsh conditions, hunger and disease caused widespread suffering and deaths.","Forced labour contributed to some major projects but at a severe human cost."]],
+ ["The purges of the Communist Party and army",["Old Bolsheviks who had helped make the Revolution were accused of treason.","The 1937–38 purge severely weakened the officer corps of the Red Army.","Fear encouraged party officials to obey Stalin and avoid expressing independent opinions.","The purges removed possible rivals but damaged trust and competence within the state."]],
+ ["Why the show trials mattered",["Trials were staged as public performances, with defendants forced to confess to imaginary plots.","They portrayed Stalin's opponents as traitors working with foreign enemies.","They provided a public justification for executions and imprisonment.","Their wider effect was to warn officials and ordinary citizens that nobody was safe from suspicion."]]
+],
+4: [
+ ["Weakness of democracy in Italy",["Italy had frequent changes of government and weak parliamentary coalitions.","The electoral system and political divisions made decisive government difficult.","The police and army often failed to stop Fascist violence against socialists.","Conservative elites believed Mussolini could restore order while protecting property and privilege."]],
+ ["The Biennio Rosso and fear of communism",["The two red years of 1919–20 saw strikes, land occupations and factory takeovers.","Workers and peasants demanded better wages, conditions and land reform.","The Russian Revolution of 1917 made Italian elites fear a similar communist revolution.","Fascist squads gained support by attacking socialist organisations and trade unions."]],
+ ["The impact of the Great Depression on Germany",["The Wall Street Crash of 1929 triggered a severe economic crisis in Germany.","American loans were withdrawn, damaging German businesses and banks.","Unemployment reached around six million by 1932.","The Nazis gained votes by promising jobs, national recovery and an end to the weaknesses of Weimar democracy."]],
+ ["Nazi political tactics and elite support",["Hitler used mass rallies, modern propaganda and simple slogans to attract voters.","The SA disrupted opponents' meetings and created an atmosphere of intimidation.","The Nazi Party became the largest party in the Reichstag in July 1932, although it did not win an overall majority.","Conservative politicians, including Franz von Papen, helped persuade President Hindenburg to appoint Hitler Chancellor in January 1933."]]
+],
+5: [
+ ["Stalin's leadership during WWII",["In June 1941, Germany launched Operation Barbarossa and invaded the Soviet Union.","Stalin initially ignored warnings of the German attack and was badly shaken by the invasion.","He remained in Moscow during the crisis of 1941 and became the public symbol of resistance.","The State Defence Committee, formed in June 1941, concentrated enormous wartime power in his hands."]],
+ ["The Soviet war effort and industry",["Factories were evacuated eastwards beyond the reach of German forces.","Women and young people played a major role in wartime production.","The Soviet Union produced huge quantities of tanks, aircraft and weapons.","The T-34 tank became an important symbol of Soviet industrial and military strength."]],
+ ["Stalin's relationship with the Allies",["The USSR joined Britain and later the United States in the Grand Alliance after 1941.","The Allies supplied equipment and food through Lend-Lease, although the Soviet Union carried the main land fighting against Germany.","Stalin repeatedly demanded a second front in Western Europe to relieve pressure on Soviet forces.","Disagreements over Poland and Eastern Europe helped create tension before the war had even ended."]],
+ ["Victory and the expansion of Soviet influence",["The Red Army advanced through Eastern Europe between 1944 and 1945.","Soviet-backed communist governments gained influence in countries liberated by the Red Army.","At the Yalta and Potsdam conferences, Stalin negotiated with Roosevelt, Truman and Churchill/Attlee over post-war Europe.","By 1945 the USSR had become one of the world's two leading superpowers."]]
+],
+6: [
+ ["The March on Rome and the Acerbo Law",["October 1922: Fascists organised the March on Rome, pressuring the king and political establishment.","King Victor Emmanuel III appointed Mussolini Prime Minister rather than risk civil conflict.","1923: The Acerbo Law gave the party winning the largest vote, if it reached 25%, two-thirds of parliamentary seats.","The 1924 election was held amid intimidation and violence, helping Mussolini secure control of parliament."]],
+ ["The Matteotti crisis and dictatorship",["Giacomo Matteotti denounced Fascist violence and fraud after the 1924 election.","He was kidnapped and murdered in June 1924 by Fascist supporters.","Mussolini faced a serious political crisis, but opposition deputies withdrew from parliament in the Aventine Secession.","In January 1925 Mussolini accepted responsibility politically and moved towards open dictatorship."]],
+ ["The Corporate State and economic policy",["Independent trade unions and strikes were suppressed.","The Corporate State claimed to unite employers and workers under state supervision.","The Battle for Grain aimed to increase wheat production but encouraged land to be used for wheat instead of other crops.","The Battle for the Lira attempted to raise the value of the currency but harmed exports and industry."]],
+ ["The limits of Mussolini's control",["The monarchy and Catholic Church remained powerful institutions outside complete Fascist control.","The Lateran Treaties of 1929 settled the long-running dispute with the Vatican.","Mussolini's regime relied on traditional elites, including the army, business leaders and civil servants.","This means Italy was authoritarian, but not as completely totalitarian as Nazi Germany or Stalin's USSR."]]
+],
+7: [
+ ["The Treaty of Versailles and German resentment",["The treaty was signed in 1919 and was widely viewed in Germany as humiliating.","Article 231 placed responsibility for the war on Germany and its allies.","Germany lost territory and its overseas colonies, and its army was restricted to 100,000 men.","Hitler exploited resentment by promising to overturn the treaty and restore German greatness."]],
+ ["The Anschluss and the Sudeten crisis in more detail",["March 1938: German troops entered Austria and Hitler announced Anschluss, uniting Austria with Germany.","Britain and France did not intervene, despite the ban on Anschluss in the Treaty of Versailles.","Hitler then demanded the Sudetenland, where many German speakers lived.","At Munich in September 1938, Britain, France, Italy and Germany agreed to the transfer without Czechoslovakia having a meaningful say."]],
+ ["Appeasement and the failure to stop Hitler",["Neville Chamberlain believed concessions could preserve peace and address some German grievances.","Britain was militarily unprepared for a major war and public opinion strongly favoured peace.","The policy allowed Hitler to gain territory and strategic resources without fighting a major war.","The occupation of Prague in March 1939 showed that Hitler's ambitions went beyond uniting German-speaking people."]],
+ ["The role of the Nazi-Soviet Pact",["Germany and the Soviet Union signed the pact on 23 August 1939.","The agreement included a secret protocol dividing areas of Eastern Europe into spheres of influence.","It reduced Hitler's fear of a two-front war if he attacked Poland.","The pact was a direct step towards the invasion of Poland, although Hitler's expansionist aims and appeasement had created the wider crisis."]]
+],
+8: [
+ ["The transformation of everyday life",["The state expanded literacy, technical education and scientific training.","Industrialisation drew millions from the countryside into towns and factories.","Women increasingly worked in industry and professional roles, although traditional expectations remained.","The state controlled cultural life through censorship and socialist realism in the arts."]],
+ ["The transformation of agriculture and the countryside",["Collectivisation replaced many individual farms with state-controlled collective and state farms.","Peasants resisted by slaughtering livestock and refusing to cooperate.","The famine of 1932–33 caused catastrophic loss of life, particularly in Ukraine and other grain-producing regions.","The state gained control over grain supplies, but agricultural productivity remained a serious problem."]],
+ ["The transformation of the armed forces",["The Five-Year Plans built the industrial base needed to produce tanks, aircraft and weapons.","The Great Purge removed many experienced Red Army officers before WWII.","The invasion of 1941 exposed serious weaknesses, but Soviet industry and manpower helped the USSR recover.","By 1945 the Red Army had defeated Nazi Germany and occupied much of Eastern Europe."]],
+ ["How far was the transformation positive?",["The USSR became a major industrial and military power by 1945.","Education and technical training expanded, and social mobility increased for some groups.","These achievements came alongside famine, forced labour, executions and restrictions on freedom.","A balanced judgement should distinguish the scale of change from its human cost."]]
+],
+9: [
+ ["The siege of Leningrad",["German forces and their allies surrounded Leningrad in September 1941.","The siege lasted until January 1944, causing extreme hunger and civilian suffering.","The city continued to resist despite starvation, bombardment and enormous loss of life.","The survival of Leningrad became a symbol of Soviet endurance and resistance."]],
+ ["The Battle of Stalingrad: why it was decisive",["Hitler wanted Stalingrad partly because of its location on the Volga and its symbolic connection to Stalin.","Operation Uranus began in November 1942 and encircled the German Sixth Army.","German commander Friedrich Paulus surrendered in February 1943.","The defeat destroyed a major German army and shifted momentum decisively towards the Soviet Union."]],
+ ["The Soviet contribution compared with the Western Allies",["The Eastern Front tied down the majority of German land forces for much of the war.","Britain and the United States contributed through bombing, naval warfare, North Africa, Italy and the 1944 D-Day landings.","Lend-Lease aid supplied the USSR with vehicles, food, raw materials and other equipment.","A balanced answer recognises that Soviet ground fighting was central, while Allied cooperation also mattered."]],
+ ["The cost of victory",["Around 27 million Soviet citizens died during the war, including civilians and military personnel.","Large areas of western Soviet territory were devastated and millions were displaced.","Soviet forces liberated concentration camps and occupied Berlin in 1945.","Victory came at an extraordinary human and economic cost, but left the USSR as a superpower."]]
+],
+10: [
+ ["The Reichstag Fire and the Enabling Act",["27 February 1933: The Reichstag building was set on fire.","Hitler blamed Communists and used the crisis to justify emergency measures.","The Reichstag Fire Decree suspended important civil liberties and enabled mass arrests.","March 1933: The Enabling Act allowed Hitler's government to make laws without the Reichstag, establishing dictatorship by legal means backed by intimidation."]],
+ ["The Night of the Long Knives",["30 June–2 July 1934: Hitler ordered a purge of the SA leadership and other perceived opponents.","Ernst Röhm, leader of the SA, was murdered.","The SS and Gestapo helped carry out the killings.","The army leadership supported Hitler afterwards, strengthening his position before Hindenburg's death in August 1934."]],
+ ["Propaganda through rallies, radio and culture",["The annual Nuremberg rallies created dramatic displays of unity and loyalty.","The regime used the radio, including inexpensive Volksempfänger sets, to spread speeches and Nazi messages.","Films, posters, newspapers and school textbooks repeated Nazi ideas.","The 1936 Berlin Olympics were used to present Germany as successful and respectable to foreign audiences."]],
+ ["The limits of propaganda and terror",["Not everyone supported the dictators, and private criticism continued.","Some young Germans joined groups such as the Edelweiss Pirates in opposition to Nazi youth control.","Church leaders and individuals sometimes protested against particular policies.","Terror was highly effective at destroying organised opposition, but propaganda and coercion did not create complete or universal support."]]
+]
+};
+// Insert optional ideas immediately before each plan's conclusion.
+plans.forEach((plan, index) => {
+  const additions = extraIdeas[index] || [];
+  const conclusionIndex = plan.sections.length - 1;
+  plan.sections.splice(conclusionIndex, 0, ...additions);
+});
 
 const cards = document.getElementById('cards');
 const search = document.getElementById('search');

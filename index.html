@@ -1,1 +1,219 @@
-hello world
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10131b">
+<title>Leaving Cert History — Essay Plans</title>
+<style>
+:root{color-scheme:dark;--bg:#10131b;--panel:#191e2a;--panel2:#202737;--text:#edf1f8;--muted:#a8b2c4;--accent:#9bb8ff;--line:#30394b;--green:#a8dfc1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:32px 22px 70px}
+header{padding:26px 0 30px} .eyebrow{color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:10px 0}header p{color:var(--muted);max-width:650px;margin:12px 0 0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 28px}
+input{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;color:var(--text);font:inherit;flex:1;min-width:220px}
+button,.back{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 14px;font:inherit;cursor:pointer;text-decoration:none}
+button:hover,.back:hover,.question:hover{border-color:var(--accent);background:#252f43}
+.year{margin:28px 0 12px;color:var(--muted);font-size:.85rem;letter-spacing:.12em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:13px}
+.question{display:block;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:18px;color:var(--text);cursor:pointer;transition:.15s}
+.question .num{color:var(--accent);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.question h3{font-size:1.03rem;line-height:1.4;margin:8px 0 0}
+.question .topic{color:var(--muted);font-size:.85rem;margin-top:10px}
+.hidden{display:none!important}
+.detail-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 22px}
+.detail h1{font-size:clamp(1.7rem,4vw,2.5rem);margin:18px 0 8px}
+.topicline{color:var(--accent);font-weight:650}
+.intro{color:var(--muted);margin:0 0 24px}
+section.plan{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px;margin:13px 0}
+section.plan h2{font-size:1.08rem;margin:0 0 10px}
+section.plan ul{padding-left:21px;margin:0}
+section.plan li{padding:3px 0;color:#dce3ef}
+section.plan li::marker{color:var(--accent)}
+.note{border-left:3px solid var(--green);padding:10px 14px;color:var(--muted);background:#17241f;border-radius:0 9px 9px 0;margin-top:24px}
+footer{border-top:1px solid var(--line);margin-top:40px;padding-top:20px;color:var(--muted);font-size:.85rem}
+@media(max-width:600px){.wrap{padding:22px 15px 50px}section.plan{padding:16px}.question{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header id="homeHeader">
+<div class="eyebrow">Leaving Certificate · History</div>
+<h1>Essay plans</h1>
+<p>Choose a past question to open its individual essay plan. Each plan is split into an introduction, body paragraphs and conclusion, with key facts, names and dates to learn.</p>
+</header>
+<main id="home">
+<div class="toolbar">
+<input id="search" type="search" placeholder="Search questions or topics…" aria-label="Search questions">
+<button id="clear">Clear search</button>
+</div>
+<div id="cards"></div>
+</main>
+<main id="detail" class="hidden">
+<div class="detail-top"><button class="back" id="back">← All questions</button><button id="print">Print plan</button></div>
+<div class="detail">
+<div class="topicline" id="detailMeta"></div>
+<h1 id="detailTitle"></h1>
+<p class="intro">Use the bullet points as memory prompts. Expand each point into your own sentences in the exam.</p>
+<div id="sections"></div>
+</div>
+</main>
+<footer>Study tip: learn the paragraph headings first, then attach two or three dates or examples to each one. You do not need to memorise every sentence.</footer>
+</div>
+<script>
+const plans = [
+{year:"2026",topic:"Church and State",title:"How did church-state relations develop under Mussolini and Hitler?",sections:[
+["Introduction",["Mussolini in Italy and Hitler in Germany both wanted control over their countries.","Both recognised that religion was influential and tried to use churches to strengthen their regimes.","Their relationships with religious organisations were complicated."]],
+["Mussolini and the Catholic Church",["Mussolini initially had disagreements with the Catholic Church.","1929: Signed the Lateran Treaty with Pope Pius XI.","Catholicism became Italy's official state religion.","The Pope recognised Italy as an independent state and Mussolini's government.","Mussolini received support from many Catholics."]],
+["Mussolini's relationship with the Church",["Mussolini attempted to control Catholic organisations.","Conflict developed over Catholic Action, which the Church used to influence young people.","1931: Mussolini attempted to suppress Catholic Action.","An agreement was eventually reached allowing it to continue under restrictions."]],
+["Hitler and the Catholic Church",["1933: Hitler signed the Concordat with the Vatican.","He promised to respect Catholic Church rights in Germany.","In return, the Church agreed to withdraw from political activity.","Hitler later broke the agreement by interfering with Catholic schools and organisations."]],
+["Hitler and Protestant churches",["Hitler attempted to unite German Protestants into a pro-Nazi movement called the German Christians.","Some Protestant ministers opposed Nazi control.","Pastor Martin Niemöller helped establish the Confessing Church.","Hitler used intimidation and arrests against religious opponents."]],
+["Conclusion",["Both dictators initially cooperated with religious organisations to strengthen their power.","Mussolini achieved a more successful agreement through the Lateran Treaty.","Hitler increasingly attempted to control religious organisations and suppress opposition."]]
+]},
+{year:"2026",topic:"Soviet Union",title:"How did communism develop in the Soviet Union under Lenin and Stalin?",sections:[
+["Introduction",["Communism was established in Russia following the 1917 Russian Revolution.","Lenin introduced communist rule and attempted to create a socialist economy.","Stalin later developed a much more controlled and repressive communist state."]],
+["Lenin and the Bolshevik Revolution",["October 1917: Lenin and the Bolsheviks overthrew the Provisional Government.","Promised Peace, Land and Bread.","Established a communist government.","Nationalised banks and major industries.","Introduced one-party rule and banned political opposition."]],
+["War Communism and the NEP",["1918–1921: Civil War between the Reds (Bolsheviks) and Whites.","Lenin introduced War Communism.","Government took control of factories and seized grain from peasants.","This caused shortages and opposition.","1921: Introduced the New Economic Policy (NEP).","Allowed small businesses and farmers to sell surplus produce privately."]],
+["Stalin's rise to power",["Lenin died in 1924.","Stalin defeated rivals including Trotsky in the struggle for leadership.","By 1929, Stalin had established himself as dictator.","Created a highly centralised communist state with himself in control."]],
+["Stalin's economic policies",["Introduced Five-Year Plans from 1928.","Focused on heavy industry, coal, steel and electricity.","Introduced collectivisation, forcing peasants into large collective farms.","Peasants who resisted, especially the kulaks, were persecuted.","Industrial production increased but millions suffered from famine and repression."]],
+["Stalin's dictatorship",["Used propaganda to create a personality cult.","Used secret police, purges and show trials to eliminate opponents.","Great Purge (1936–1938) resulted in mass arrests and executions.","Stalin controlled almost every aspect of Soviet life."]],
+["Conclusion",["Lenin established communism and introduced the first major socialist policies.","Stalin transformed it into a highly industrialised but extremely repressive dictatorship.","Both established one-party rule, but Stalin exercised much greater personal control."]]
+]},
+{year:"2023",topic:"Fascism",title:"What were the main characteristics of fascist regimes in Europe, 1920–1945?",sections:[
+["Introduction",["Fascism was an extreme nationalist political ideology that developed in Europe after WWI.","It rejected democracy, communism and individual freedoms.","Mussolini in Italy and Hitler in Germany were its most important examples."]],
+["Totalitarian government",["Fascist dictators wanted complete control over their countries.","Opposition parties were banned.","Mussolini established a one-party state in Italy.","Hitler banned other political parties after becoming Chancellor in 1933.","Both used secret police to eliminate opposition."]],
+["Propaganda and censorship",["Controlled newspapers, radio, films and education.","Used propaganda to glorify the dictator.","Hitler used Joseph Goebbels as Minister for Propaganda.","Mussolini promoted himself as Il Duce (the leader).","Both censored criticism of their governments."]],
+["Terror and violence",["Used intimidation and violence to maintain power.","Mussolini's Blackshirts attacked political opponents.","Hitler's SA and SS intimidated opponents.","Gestapo arrested suspected enemies.","Concentration camps were used to imprison political opponents."]],
+["Extreme nationalism and militarism",["Promoted national pride and military strength.","Believed their nations deserved greater power and territory.","Hitler promoted the idea of Lebensraum (living space).","Mussolini invaded Abyssinia (Ethiopia) in 1935.","Both glorified war and military discipline."]],
+["Control of society and the economy",["Controlled education and youth organisations.","Hitler Youth prepared German boys for military service.","League of German Girls prepared girls for traditional roles.","Mussolini encouraged women to have large families.","Both attempted to control trade unions and workers."]],
+["Conclusion",["Fascist regimes shared nationalism, dictatorship, propaganda, terror and militarism.","Although Italy and Germany had differences, both placed the state and dictator above individual freedom.","These characteristics allowed them to maintain control until their defeat in WWII."]]
+]},
+{year:"2023",topic:"Stalin and the Soviet economy",title:"How did Josef Stalin transform the Soviet economy and/or use show trials to consolidate his power?",sections:[
+["Introduction",["Stalin became leader of the Soviet Union following Lenin's death in 1924.","He wanted to transform the Soviet economy and eliminate anyone who threatened his leadership.","He achieved this through industrialisation, collectivisation and political terror."]],
+["Five-Year Plans",["First Five-Year Plan introduced in 1928.","Focused on heavy industry, including coal, steel and electricity.","Second Five-Year Plan began in 1933.","Third Five-Year Plan began in 1938 but was interrupted by WWII.","Soviet industrial production increased dramatically.","Workers faced long hours, poor conditions and strict targets."]],
+["Collectivisation",["Introduced from 1929.","Forced peasants to combine their farms into collective farms called kolkhozes.","Government controlled agricultural production.","Kulaks (wealthier peasants) were labelled enemies and persecuted.","Resistance and poor harvests contributed to famine, particularly in Ukraine in 1932–33."]],
+["The Great Purge",["Stalin became increasingly suspicious of potential enemies.","1936–1938: Great Purge.","Used the NKVD (secret police) to arrest and execute opponents.","Many Communist Party members, military leaders and ordinary citizens were targeted.","Millions were imprisoned or sent to labour camps known as Gulags."]],
+["Show Trials",["Public trials were organised to make Stalin's opponents appear guilty.","1936: Zinoviev and Kamenev were tried and executed.","1937: Trial of military leaders.","1938: Trial of Bukharin.","Defendants made forced confessions.","Stalin used these trials to remove rivals and frighten the population."]],
+["Conclusion",["Stalin transformed the Soviet economy through industrialisation and collectivisation.","However, these policies caused enormous suffering.","Show trials and the Great Purge removed opposition and helped Stalin establish absolute control."]]
+]},
+{year:"2022",topic:"Rise of dictatorship",title:"Why did Italy and/or Germany embrace dictatorship in the inter-war period?",sections:[
+["Introduction",["Following WWI, Italy and Germany experienced economic problems, political instability and social unrest.","Many people lost faith in democracy.","Mussolini and Hitler exploited these conditions to gain power."]],
+["Italy after WWI",["Italy suffered economic problems, unemployment and inflation.","Many Italians were disappointed with the Treaty of Versailles.","They believed Italy had not received enough territory despite fighting for the Allies.","This became known as the Mutilated Victory.","Communist revolution seemed possible following strikes and factory occupations during the Biennio Rosso (1919–1920)."]],
+["Mussolini's rise",["Mussolini founded the Fascist movement in 1919.","His Blackshirts attacked socialists and trade unionists.","Wealthy landowners and businessmen supported him because they feared communism.","October 1922: March on Rome.","King Victor Emmanuel III appointed Mussolini Prime Minister."]],
+["Germany after WWI",["Germany was weakened by defeat in WWI.","Treaty of Versailles (1919) imposed reparations, territorial losses and military restrictions.","Weimar Republic faced political instability.","Hyperinflation in 1923 destroyed people's savings.","Great Depression from 1929 caused mass unemployment."]],
+["Hitler's rise",["Hitler joined the Nazi Party and became its leader.","Promised to overturn the Treaty of Versailles, create jobs and restore German pride.","Used propaganda and mass rallies to gain support.","Nazi Party became the largest party in the Reichstag in July 1932.","January 1933: President Hindenburg appointed Hitler Chancellor."]],
+["Establishment of dictatorship",["February 1933: Reichstag Fire.","Hitler used emergency powers to arrest Communists.","March 1933: Enabling Act gave Hitler power to pass laws without the Reichstag.","Opposition parties and trade unions were eliminated.","Hitler established a dictatorship."]],
+["Conclusion",["Economic crises, fear of communism, nationalism and political instability weakened democracy in both countries.","Mussolini and Hitler exploited these problems to gain power.","Both used violence, propaganda and political manipulation to establish dictatorships."]]
+]},
+{year:"2022",topic:"Stalin's leadership",title:"What were the characteristics of Stalin's leadership during peace and war?",sections:[
+["Introduction",["Stalin ruled the Soviet Union from the 1920s until his death in 1953.","His leadership was characterised by total control, industrialisation, terror and extreme suspicion.","During WWII, he became an important military leader who helped defeat Nazi Germany."]],
+["Economic leadership during peace",["Introduced Five-Year Plans in 1928.","Focused on heavy industry and modernising the Soviet economy.","Introduced collectivisation of agriculture.","Industrial production increased significantly.","However, collectivisation contributed to famine and millions of deaths."]],
+["Political control during peace",["Established a one-party dictatorship.","Used propaganda and a personality cult.","Great Purge (1936–1938) eliminated real and imagined enemies.","Show trials removed important Communist Party members.","Used the NKVD and Gulags to maintain fear."]],
+["Stalin and the beginning of WWII",["August 1939: Signed the Nazi-Soviet Pact with Hitler.","Agreed not to attack each other and secretly divided parts of Eastern Europe.","Soviet Union invaded eastern Poland in September 1939.","June 1941: Hitler launched Operation Barbarossa and invaded the Soviet Union.","Stalin was initially caught off guard."]],
+["Stalin's wartime leadership",["Moved Soviet factories eastwards away from German forces.","Encouraged patriotism and resistance.","Battle of Stalingrad (1942–1943) was a major turning point.","Battle of Kursk (1943) helped destroy German offensive power.","Soviet forces captured Berlin in May 1945."]],
+["After WWII",["Stalin emerged as one of the world's most powerful leaders.","Soviet Union controlled much of Eastern Europe.","Established communist governments in countries such as Poland and Hungary.","Increased Soviet influence and contributed to the beginning of the Cold War."]],
+["Conclusion",["During peace, Stalin transformed the Soviet Union through industrialisation and terror.","During war, he showed strong military leadership and helped defeat Nazi Germany.","His leadership made the USSR a superpower but came at an enormous human cost."]]
+]},
+{year:"2021",topic:"Italian Fascism",title:"What were the main characteristics of Italian fascism under Mussolini?",sections:[
+["Introduction",["Benito Mussolini established a fascist dictatorship in Italy.","His regime was based on nationalism, obedience, violence and complete loyalty to the state.","He attempted to control Italian political, economic and social life."]],
+["Political dictatorship",["October 1922: March on Rome.","King Victor Emmanuel III appointed Mussolini Prime Minister.","Acerbo Law (1923) helped Fascists win a large parliamentary majority.","Matteotti, a socialist politician, criticised election violence and was murdered in 1924.","By 1926, opposition parties had been banned.","Mussolini became dictator, known as Il Duce."]],
+["Propaganda and censorship",["Mussolini controlled newspapers, radio and education.","Promoted the slogan 'Mussolini is always right'.","Used speeches, posters and public rallies.","Encouraged the cult of personality.","Attempted to portray himself as a strong and heroic leader."]],
+["Terror and violence",["Used Blackshirts to intimidate opponents.","Opposition politicians and trade unionists were attacked.","Secret police monitored suspected enemies.","Special tribunals punished political opponents.","Many opponents were imprisoned or exiled."]],
+["Economic policies",["Introduced the Battle for Grain in 1925 to increase wheat production.","Battle for the Lira in 1926 attempted to strengthen Italian currency.","Battle for Births encouraged larger families.","Corporate State attempted to bring workers and employers together under government control.","Economic policies had mixed results."]],
+["Social control and foreign policy",["Youth organisations taught children to obey Mussolini.","Women were encouraged to become mothers and homemakers.","Lateran Treaty (1929) improved relations with the Catholic Church.","Invaded Abyssinia in 1935 to expand the Italian Empire.","Allied Italy with Nazi Germany."]],
+["Conclusion",["Mussolini's fascism was based on dictatorship, nationalism, propaganda and violence.","He attempted to control all areas of Italian life.","However, his economic policies and military ambitions were not always successful."]]
+]},
+{year:"2021",topic:"Hitler's foreign policy",title:"To what extent did Hitler's foreign policy, 1933–1939, contribute to the outbreak of WWII?",sections:[
+["Introduction",["Hitler's foreign policy was based on overturning the Treaty of Versailles and expanding German territory.","He pursued rearmament, territorial expansion and Lebensraum.","His aggressive policies were a major cause of WWII in 1939."]],
+["Rearmament",["1933: Germany left the League of Nations.","1935: Hitler announced conscription and expanded the German army.","Built up the Luftwaffe (German air force).","Britain, France and Italy protested but took little action.","Hitler was increasingly confident that other countries would not stop him."]],
+["Rhineland",["March 1936: Hitler sent German troops into the Rhineland.","This broke the Treaty of Versailles and Locarno Treaty.","The area was supposed to remain demilitarised.","France and Britain did not intervene.","Hitler gained confidence to pursue further expansion."]],
+["Expansion and alliances",["1936: Germany and Italy formed the Rome-Berlin Axis.","1936: Anti-Comintern Pact with Japan.","March 1938: Anschluss, Germany annexed Austria.","September 1938: Munich Agreement allowed Germany to take the Sudetenland from Czechoslovakia.","Britain and France followed appeasement, hoping to avoid war."]],
+["Destruction of Czechoslovakia",["March 1939: Hitler occupied the rest of Czechoslovakia.","This proved he wanted more than just German-speaking territory.","Britain and France realised appeasement had failed.","Britain guaranteed Poland's independence."]],
+["Invasion of Poland",["August 1939: Nazi-Soviet Pact signed between Hitler and Stalin.","Secret agreement divided parts of Eastern Europe.","1 September 1939: Germany invaded Poland.","3 September: Britain and France declared war on Germany.","WWII began."]],
+["Conclusion",["Hitler's aggressive foreign policy was the main cause of WWII in Europe.","His repeated violations of international agreements and invasion of Poland made war unavoidable.","Appeasement also contributed by allowing Hitler to become increasingly powerful."]]
+]},
+{year:"2021",topic:"Stalin and transformation",title:"Would you agree that Stalin transformed the Soviet Union, 1924–1945?",sections:[
+["Introduction",["Stalin became leader of the Soviet Union after Lenin's death in 1924.","Between 1924 and 1945, he transformed the country's economy, political system and international position.","Although the transformation was significant, it involved enormous suffering."]],
+["Industrial transformation",["First Five-Year Plan began in 1928.","Focused on heavy industry, including coal, steel and electricity.","Built major industrial projects, including the Magnitogorsk steelworks.","Soviet Union became a major industrial power.","Industrialisation helped prepare the USSR for WWII."]],
+["Agricultural transformation",["Introduced collectivisation in 1929.","Forced peasants into collective farms.","Wealthier peasants (kulaks) were persecuted.","Resistance and disruption contributed to famine in 1932–1933.","Agriculture became controlled by the state."]],
+["Political transformation",["Stalin created a dictatorship.","Used propaganda to develop a personality cult.","Great Purge (1936–1938) eliminated opponents.","Show trials and secret police maintained control.","Millions were imprisoned, executed or sent to labour camps."]],
+["Social transformation",["Expanded education and literacy.","More people received technical and scientific training.","Women entered the workforce in greater numbers.","Government controlled newspapers, arts and education.","Religious organisations were restricted."]],
+["Military and international transformation",["1939: Nazi-Soviet Pact.","1941: Germany invaded the Soviet Union.","Soviet victories at Stalingrad and Kursk helped defeat Germany.","Soviet troops captured Berlin in 1945.","USSR emerged as a major world power."]],
+["Conclusion",["Stalin transformed the Soviet Union from a largely agricultural country into an industrial and military superpower.","He also created a highly controlled dictatorship.","Therefore, Stalin unquestionably transformed the USSR, although the human cost was enormous."]]
+]},
+{year:"2020",topic:"Soviet Union in WWII",title:"How significant was the role played by the Soviet Union in WWII?",sections:[
+["Introduction",["The Soviet Union played a crucial role in the defeat of Nazi Germany.","It suffered enormous losses but made major military and economic contributions.","Its role was arguably the most important in the defeat of Germany on land."]],
+["Operation Barbarossa",["June 1941: Hitler invaded the Soviet Union.","German forces advanced rapidly and captured large areas.","Stalin initially underestimated the invasion.","Soviet people were encouraged to defend their homeland.","Soviet factories were moved eastwards to continue producing weapons."]],
+["Battle of Moscow",["1941: German forces approached Moscow.","Soviet forces resisted the German advance.","Winter conditions and Soviet counterattacks forced German troops back.","This was Hitler's first major failure of the war."]],
+["Battle of Stalingrad",["1942–1943: One of the most important battles of WWII.","German army attempted to capture Stalingrad.","Soviet forces surrounded and defeated the German Sixth Army.","Major turning point in the war.","Germany began losing the initiative on the Eastern Front."]],
+["Battle of Kursk",["July 1943: Largest tank battle in history.","Soviet forces defeated the German offensive.","Germany lost the ability to launch major attacks in the East.","Soviet forces began advancing westwards."]],
+["Final victory",["Soviet forces liberated much of Eastern Europe.","Advanced into Germany in 1945.","Captured Berlin in May 1945.","Germany surrendered shortly afterwards.","Soviet Union suffered approximately 27 million military and civilian deaths."]],
+["Conclusion",["The Soviet Union played an extremely significant role in defeating Nazi Germany.","Battles such as Stalingrad and Kursk destroyed German military strength.","Its enormous sacrifices and military contribution made it essential to Allied victory."]]
+]},
+{year:"2020",topic:"Propaganda and terror",title:"How successfully did one or more dictators use propaganda and/or terror to maintain power during the inter-war period?",sections:[
+["Introduction",["Dictators such as Mussolini and Hitler used propaganda and terror to maintain power.","Propaganda encouraged loyalty, while terror discouraged opposition.","Both methods were highly successful in keeping their regimes in power."]],
+["Mussolini's propaganda",["Mussolini controlled newspapers, radio and education.","Presented himself as Il Duce.","Used posters, speeches and mass rallies.","Promoted the idea that he had restored Italian greatness.","Encouraged loyalty to the Fascist state."]],
+["Mussolini's terror",["Blackshirts attacked socialists and political opponents.","1924: Socialist politician Giacomo Matteotti murdered.","1926: Opposition parties banned.","Secret police and special tribunals targeted opponents.","Created an atmosphere of fear."]],
+["Hitler's propaganda",["Joseph Goebbels became Minister for Propaganda in 1933.","Controlled newspapers, radio, cinema and education.","Used cheap radios to spread Nazi messages.","Mass rallies at Nuremberg promoted Hitler's power.","Used propaganda to promote anti-Semitism and German nationalism."]],
+["Hitler's terror",["SA and SS intimidated political opponents.","Gestapo monitored and arrested suspected enemies.","February 1933: Reichstag Fire used as an excuse to arrest Communists.","March 1933: Enabling Act gave Hitler dictatorial powers.","Dachau concentration camp opened in 1933 for political prisoners."]],
+["Overall success",["Both dictators eliminated organised opposition.","Propaganda encouraged people to support their regimes.","Terror made people afraid to challenge the government.","Opposition never disappeared completely.","Both regimes depended on violence as well as popular support."]],
+["Conclusion",["Propaganda and terror were extremely effective tools for maintaining dictatorship.","Mussolini and Hitler used propaganda to create loyalty and terror to eliminate opposition.","Together, these methods helped them remain in power throughout the inter-war period."]]
+]}
+];
+
+const cards = document.getElementById('cards');
+const search = document.getElementById('search');
+function renderCards(){
+  const q=search.value.trim().toLowerCase();
+  cards.innerHTML='';
+  const years=[...new Set(plans.map(p=>p.year))];
+  years.forEach(year=>{
+    const matches=plans.map((p,i)=>({...p,index:i})).filter(p=>p.year===year && (p.title+' '+p.topic+' '+p.sections.flat(2).join(' ')).toLowerCase().includes(q));
+    if(!matches.length)return;
+    const heading=document.createElement('div');heading.className='year';heading.textContent=year;cards.appendChild(heading);
+    const grid=document.createElement('div');grid.className='grid';
+    matches.forEach(p=>{
+      const b=document.createElement('button');b.className='question';
+      b.innerHTML=`<div class="num">${p.year} · ${p.topic}</div><h3></h3><div class="topic">Open essay plan →</div>`;
+      b.querySelector('h3').textContent=p.title;
+      b.addEventListener('click',()=>openPlan(p.index));grid.appendChild(b);
+    });
+    cards.appendChild(grid);
+  });
+  if(!cards.children.length)cards.textContent='No matching questions found.';
+}
+function openPlan(index){
+  const p=plans[index];
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('homeHeader').classList.add('hidden');
+  document.getElementById('detail').classList.remove('hidden');
+  document.getElementById('detailMeta').textContent=p.year+' · '+p.topic;
+  document.getElementById('detailTitle').textContent=p.title;
+  const target=document.getElementById('sections');target.innerHTML='';
+  p.sections.forEach((s,i)=>{
+    const section=document.createElement('section');section.className='plan';
+    const h=document.createElement('h2');h.textContent=(i===0?'Introduction':i===p.sections.length-1?'Conclusion':`Body paragraph ${i}`)+' — '+s[0];
+    const ul=document.createElement('ul');
+    s[1].forEach(point=>{const li=document.createElement('li');li.textContent=point;ul.appendChild(li)});
+    section.append(h,ul);target.appendChild(section);
+  });
+  history.pushState({index},'',`#question-${index+1}`);window.scrollTo(0,0);
+}
+function home(){
+ document.getElementById('detail').classList.add('hidden');
+ document.getElementById('home').classList.remove('hidden');
+ document.getElementById('homeHeader').classList.remove('hidden');
+ history.pushState({},'',location.pathname);window.scrollTo(0,0);
+}
+document.getElementById('back').addEventListener('click',home);
+document.getElementById('print').addEventListener('click',()=>window.print());
+document.getElementById('clear').addEventListener('click',()=>{search.value='';renderCards();search.focus()});
+search.addEventListener('input',renderCards);
+window.addEventListener('popstate',()=>{const n=location.hash.match(/question-(\d+)/);if(n)openFromHash(Number(n[1])-1);else{document.getElementById('detail').classList.add('hidden');document.getElementById('home').classList.remove('hidden');document.getElementById('homeHeader').classList.remove('hidden')}});
+function openFromHash(i){if(i>=0&&i<plans.length){const p=plans[i];document.getElementById('home').classList.add('hidden');document.getElementById('homeHeader').classList.add('hidden');document.getElementById('detail').classList.remove('hidden');document.getElementById('detailMeta').textContent=p.year+' · '+p.topic;document.getElementById('detailTitle').textContent=p.title;const t=document.getElementById('sections');t.innerHTML='';p.sections.forEach((s,j)=>{const a=document.createElement('section');a.className='plan';const h=document.createElement('h2');h.textContent=(j===0?'Introduction':j===p.sections.length-1?'Conclusion':`Body paragraph ${j}`)+' — '+s[0];const ul=document.createElement('ul');s[1].forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.appendChild(li)});a.append(h,ul);t.appendChild(a)})}}
+renderCards();
+if(location.hash.startsWith('#question-')){const i=Number(location.hash.split('-')[1])-1;openFromHash(i)}
+</script>
+</body>
+</html>

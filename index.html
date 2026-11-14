@@ -12,15 +12,18 @@ header{background:linear-gradient(125deg,#242b58,#535bd7);color:white;padding:48
 h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:10px 0}.hero p{max-width:680px;color:#e5e7ff;margin:12px 0 0}
 nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;gap:8px;justify-content:center;align-items:center;padding:10px;flex-wrap:wrap}
 nav a{color:var(--ink);text-decoration:none;padding:8px 13px;border-radius:9px;font-size:.9rem;font-weight:650}nav a:hover{background:var(--accent2);color:var(--accent)}
-.toggle-btn{margin-left:6px;padding:7px 13px;font-size:.86rem;border-radius:9px;background:var(--accent);color:white;border:0;font-weight:700;cursor:pointer}
+.toggle-group{display:flex;gap:6px;margin-left:6px;flex-wrap:wrap}
+.toggle-btn{padding:7px 13px;font-size:.86rem;border-radius:9px;background:var(--accent);color:white;border:0;font-weight:700;cursor:pointer}
 .toggle-btn.active{background:#242b58}
 main{max-width:1100px;margin:30px auto;padding:0 18px 70px}.intro{background:var(--panel);padding:20px 23px;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-bottom:28px}
 section{scroll-margin-top:80px;margin:36px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:16px}h2{font-size:1.8rem;line-height:1.2;margin:0}h3{font-size:1.12rem;margin:0 0 12px}.sub{color:var(--muted);margin:5px 0 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:19px;box-shadow:var(--shadow)}.card p:last-child{margin-bottom:0}
 table{width:100%;border-collapse:collapse;font-size:.94rem}td,th{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}
-.fr{font-weight:750;color:#303a9e}.en{color:var(--muted);transition:opacity .15s}
-body.hide-translations .en{opacity:0;user-select:none}
-body.hide-translations .en:hover{opacity:1}
+.fr{font-weight:750;color:#303a9e;transition:opacity .15s}.en{color:var(--muted);transition:opacity .15s}
+body.hide-french .fr{opacity:0;user-select:none}
+body.hide-french .fr:hover{opacity:1}
+body.hide-english .en{opacity:0;user-select:none}
+body.hide-english .en:hover{opacity:1}
 .pill{display:inline-block;background:var(--accent2);color:#4149bd;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:750}
 .callout{border-left:4px solid var(--accent);background:#f0f1ff;padding:14px 16px;border-radius:0 10px 10px 0;margin:14px 0}
 .phrase-list{display:grid;gap:10px}.phrase{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line)}.phrase:last-child{border:0}.phrase .fr{flex:1}.phrase .en{flex:1}
@@ -37,9 +40,9 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 </head>
 <body>
 <header><div class="hero"><div class="eyebrow">Leaving Cert French · Revision hub</div><h1>French Test Revision</h1><p>Two flexible writing topics: an opinion piece about the French riots and a holiday diary or blog. Learn adaptable phrases, recognise question keywords and practise the vocabulary.</p></div></header>
-<nav><a href="#riots">French riots</a><a href="#holiday">Holiday diary</a><a href="#grammar">Grammar</a><a href="#samples">Samples</a><a href="#learn">Memorise</a><a href="#quiz">Quiz</a><button id="toggleTrans" class="toggle-btn" type="button">Hide translations</button></nav>
+<nav><a href="#riots">French riots</a><a href="#holiday">Holiday diary</a><a href="#grammar">Grammar</a><a href="#samples">Samples</a><a href="#learn">Memorise</a><a href="#quiz">Quiz</a><div class="toggle-group"><button id="toggleFr" class="toggle-btn" type="button">Hide French</button><button id="toggleEn" class="toggle-btn" type="button">Hide English</button></div></nav>
 <main>
-<div class="intro"><strong>How to use this guide</strong><p>Don't memorise two complete essays. Learn a bank of flexible phrases, understand the trigger words in the question, and build your answer around the exact prompt. Use the checklists to track what you know — or click <strong>Hide translations</strong> in the top bar to test yourself (hover over any hidden translation to peek).</p></div>
+<div class="intro"><strong>How to use this guide</strong><p>Don't memorise two complete essays. Learn a bank of flexible phrases, understand the trigger words in the question, and build your answer around the exact prompt. Use the checklists to track what you know — or use <strong>Hide French</strong> and <strong>Hide English</strong> in the top bar to test yourself (hover over any hidden text to peek).</p></div>
 
 <section id="riots">
 <div class="section-head"><div><span class="pill">Topic 1 · Opinion piece</span><h2>Les émeutes en France</h2><p class="sub">The riots, the suburbs and French society</p></div></div>
@@ -231,15 +234,15 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 <div class="card"><h3>Futur simple</h3><p>For what will happen in the future.</p><p class="fr">J'y retournerai.</p><p class="en">I will return there.</p></div></div>
 <div class="card" style="margin-top:15px"><h3>Put all three together</h3><p class="fr">Il faisait très beau et nous étions très heureux. Nous avons visité plusieurs monuments et nous avons pris beaucoup de photos. Je garderai de merveilleux souvenirs.</p><p class="en">It was very sunny and we were very happy. We visited several monuments and took lots of photos. I will keep wonderful memories.</p></div>
 <div class="card" style="margin-top:15px"><h3>Useful verbs</h3><table><tr><th>Infinitive</th><th>Meaning</th><th>Passé composé (Past)</th><th>Future (Futur simple)</th></tr>
-<tr><td class="fr">Aller</td><td class="en">to go</td><td>Je suis allé(e) <span class="en">(I went)</span></td><td>J'irai <span class="en">(I will go)</span></td></tr>
-<tr><td class="fr">Faire</td><td class="en">to do / make</td><td>J'ai fait <span class="en">(I did / made)</span></td><td>Je ferai <span class="en">(I will do / make)</span></td></tr>
-<tr><td class="fr">Visiter</td><td class="en">to visit</td><td>J'ai visité <span class="en">(I visited)</span></td><td>Je visiterai <span class="en">(I will visit)</span></td></tr>
-<tr><td class="fr">Prendre</td><td class="en">to take</td><td>J'ai pris <span class="en">(I took)</span></td><td>Je prendrai <span class="en">(I will take)</span></td></tr>
-<tr><td class="fr">Voir</td><td class="en">to see</td><td>J'ai vu <span class="en">(I saw)</span></td><td>Je verrai <span class="en">(I will see)</span></td></tr>
-<tr><td class="fr">Être</td><td class="en">to be</td><td>J'ai été <span class="en">(I was)</span></td><td>Je serai <span class="en">(I will be)</span></td></tr>
-<tr><td class="fr">Avoir</td><td class="en">to have</td><td>J'ai eu <span class="en">(I had)</span></td><td>J'aurai <span class="en">(I will have)</span></td></tr>
-<tr><td class="fr">Partir</td><td class="en">to leave</td><td>Je suis parti(e) <span class="en">(I left)</span></td><td>Je partirai <span class="en">(I will leave)</span></td></tr>
-<tr><td class="fr">Rentrer</td><td class="en">to return home</td><td>Je suis rentré(e) <span class="en">(I returned home)</span></td><td>Je rentrerai <span class="en">(I will return home)</span></td></tr>
+<tr><td class="fr">Aller</td><td class="en">to go</td><td><span class="fr">Je suis allé(e)</span> <span class="en">(I went)</span></td><td><span class="fr">J'irai</span> <span class="en">(I will go)</span></td></tr>
+<tr><td class="fr">Faire</td><td class="en">to do / make</td><td><span class="fr">J'ai fait</span> <span class="en">(I did / made)</span></td><td><span class="fr">Je ferai</span> <span class="en">(I will do / make)</span></td></tr>
+<tr><td class="fr">Visiter</td><td class="en">to visit</td><td><span class="fr">J'ai visité</span> <span class="en">(I visited)</span></td><td><span class="fr">Je visiterai</span> <span class="en">(I will visit)</span></td></tr>
+<tr><td class="fr">Prendre</td><td class="en">to take</td><td><span class="fr">J'ai pris</span> <span class="en">(I took)</span></td><td><span class="fr">Je prendrai</span> <span class="en">(I will take)</span></td></tr>
+<tr><td class="fr">Voir</td><td class="en">to see</td><td><span class="fr">J'ai vu</span> <span class="en">(I saw)</span></td><td><span class="fr">Je verrai</span> <span class="en">(I will see)</span></td></tr>
+<tr><td class="fr">Être</td><td class="en">to be</td><td><span class="fr">J'ai été</span> <span class="en">(I was)</span></td><td><span class="fr">Je serai</span> <span class="en">(I will be)</span></td></tr>
+<tr><td class="fr">Avoir</td><td class="en">to have</td><td><span class="fr">J'ai eu</span> <span class="en">(I had)</span></td><td><span class="fr">J'aurai</span> <span class="en">(I will have)</span></td></tr>
+<tr><td class="fr">Partir</td><td class="en">to leave</td><td><span class="fr">Je suis parti(e)</span> <span class="en">(I left)</span></td><td><span class="fr">Je partirai</span> <span class="en">(I will leave)</span></td></tr>
+<tr><td class="fr">Rentrer</td><td class="en">to return home</td><td><span class="fr">Je suis rentré(e)</span> <span class="en">(I returned home)</span></td><td><span class="fr">Je rentrerai</span> <span class="en">(I will return home)</span></td></tr>
 </table></div>
 </section>
 
@@ -266,11 +269,17 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 </main>
 <footer>French Test Revision · Read, practise, and adapt the phrases to the question.</footer>
 <script>
-const toggleBtn=document.getElementById('toggleTrans');
-toggleBtn.addEventListener('click',()=>{
-  const hidden=document.body.classList.toggle('hide-translations');
-  toggleBtn.classList.toggle('active',hidden);
-  toggleBtn.textContent=hidden?'Show translations':'Hide translations';
+const toggleFr=document.getElementById('toggleFr');
+const toggleEn=document.getElementById('toggleEn');
+toggleFr.addEventListener('click',()=>{
+  const hidden=document.body.classList.toggle('hide-french');
+  toggleFr.classList.toggle('active',hidden);
+  toggleFr.textContent=hidden?'Show French':'Hide French';
+});
+toggleEn.addEventListener('click',()=>{
+  const hidden=document.body.classList.toggle('hide-english');
+  toggleEn.classList.toggle('active',hidden);
+  toggleEn.textContent=hidden?'Show English':'Hide English';
 });
 const opinion=[
 "À mon avis, il est indéniable que...","Les jeunes se sentent exclus de la société.","La pauvreté et le chômage jouent un grand rôle.","Il existe un fossé entre les riches et les pauvres.","Les réseaux sociaux peuvent influencer les jeunes.","Les gens ne se sentent plus en sécurité.","La violence ne résout jamais rien.","Il faut prendre les mesures nécessaires.","Il est essentiel de lutter contre les inégalités.","Nous devons construire une société plus juste."
@@ -278,7 +287,7 @@ const opinion=[
 const holiday=[
 "Je viens de rentrer après des vacances inoubliables !","Je n'arrive pas à croire que les vacances soient déjà terminées !","C'était un long voyage qui a duré plusieurs heures.","Il faisait beau et il y avait beaucoup de soleil.","Nous avons logé dans un hôtel très confortable.","La cuisine locale était délicieuse.","Nous avons visité plusieurs endroits magnifiques.","Nous nous sommes vraiment bien amusés.","Malheureusement, tout ne s'est pas passé comme prévu.","Malgré les problèmes, j'ai passé un séjour inoubliable.","J'espère pouvoir y retourner l'année prochaine.","Je garderai de merveilleux souvenirs."
 ];
-function buildChecks(items,id,prefix){const root=document.getElementById(id);items.forEach((s,i)=>{const label=document.createElement('label');label.className='check';label.innerHTML=`<input type="checkbox" id="${prefix}${i}"><span>${s}</span>`;root.appendChild(label);label.querySelector('input').addEventListener('change',()=>{label.classList.toggle('done',label.querySelector('input').checked);updateProgress(items.length,prefix,prefix==='op'?'opbar':'holbar',prefix==='op'?'opcount':'holcount')})})}
+function buildChecks(items,id,prefix){const root=document.getElementById(id);items.forEach((s,i)=>{const label=document.createElement('label');label.className='check';label.innerHTML=`<input type="checkbox" id="${prefix}${i}"><span class="fr">${s}</span>`;root.appendChild(label);label.querySelector('input').addEventListener('change',()=>{label.classList.toggle('done',label.querySelector('input').checked);updateProgress(items.length,prefix,prefix==='op'?'opbar':'holbar',prefix==='op'?'opcount':'holcount')})})}
 function updateProgress(total,prefix,bar,count){const n=[...document.querySelectorAll(`input[id^="${prefix}"]`)].filter(x=>x.checked).length;document.getElementById(bar).style.width=(n/total*100)+'%';document.getElementById(count).textContent=`${n} / ${total} learned`}
 buildChecks(opinion,'oplist','op');buildChecks(holiday,'hollist','hol');
 const qs=[

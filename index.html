@@ -10,13 +10,17 @@
 header{background:linear-gradient(125deg,#242b58,#535bd7);color:white;padding:48px 22px 42px}
 .hero{max-width:1100px;margin:auto}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.75rem;font-weight:800;opacity:.75}
 h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:10px 0}.hero p{max-width:680px;color:#e5e7ff;margin:12px 0 0}
-nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;gap:8px;justify-content:center;padding:10px;flex-wrap:wrap}
+nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;gap:8px;justify-content:center;align-items:center;padding:10px;flex-wrap:wrap}
 nav a{color:var(--ink);text-decoration:none;padding:8px 13px;border-radius:9px;font-size:.9rem;font-weight:650}nav a:hover{background:var(--accent2);color:var(--accent)}
+.toggle-btn{margin-left:6px;padding:7px 13px;font-size:.86rem;border-radius:9px;background:var(--accent);color:white;border:0;font-weight:700;cursor:pointer}
+.toggle-btn.active{background:#242b58}
 main{max-width:1100px;margin:30px auto;padding:0 18px 70px}.intro{background:var(--panel);padding:20px 23px;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-bottom:28px}
 section{scroll-margin-top:80px;margin:36px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:16px}h2{font-size:1.8rem;line-height:1.2;margin:0}h3{font-size:1.12rem;margin:0 0 12px}.sub{color:var(--muted);margin:5px 0 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:19px;box-shadow:var(--shadow)}.card p:last-child{margin-bottom:0}
 table{width:100%;border-collapse:collapse;font-size:.94rem}td,th{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}
-.fr{font-weight:750;color:#303a9e}.en{color:var(--muted)}
+.fr{font-weight:750;color:#303a9e}.en{color:var(--muted);transition:opacity .15s}
+body.hide-translations .en{opacity:0;user-select:none}
+body.hide-translations .en:hover{opacity:1}
 .pill{display:inline-block;background:var(--accent2);color:#4149bd;border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:750}
 .callout{border-left:4px solid var(--accent);background:#f0f1ff;padding:14px 16px;border-radius:0 10px 10px 0;margin:14px 0}
 .phrase-list{display:grid;gap:10px}.phrase{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line)}.phrase:last-child{border:0}.phrase .fr{flex:1}.phrase .en{flex:1}
@@ -33,9 +37,9 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 </head>
 <body>
 <header><div class="hero"><div class="eyebrow">Leaving Cert French · Revision hub</div><h1>French Test Revision</h1><p>Two flexible writing topics: an opinion piece about the French riots and a holiday diary or blog. Learn adaptable phrases, recognise question keywords and practise the vocabulary.</p></div></header>
-<nav><a href="#riots">French riots</a><a href="#holiday">Holiday diary</a><a href="#grammar">Grammar</a><a href="#samples">Samples</a><a href="#learn">Memorise</a><a href="#quiz">Quiz</a></nav>
+<nav><a href="#riots">French riots</a><a href="#holiday">Holiday diary</a><a href="#grammar">Grammar</a><a href="#samples">Samples</a><a href="#learn">Memorise</a><a href="#quiz">Quiz</a><button id="toggleTrans" class="toggle-btn" type="button">Hide translations</button></nav>
 <main>
-<div class="intro"><strong>How to use this guide</strong><p>Don't memorise two complete essays. Learn a bank of flexible phrases, understand the trigger words in the question, and build your answer around the exact prompt. Use the checklists to track what you know.</p></div>
+<div class="intro"><strong>How to use this guide</strong><p>Don't memorise two complete essays. Learn a bank of flexible phrases, understand the trigger words in the question, and build your answer around the exact prompt. Use the checklists to track what you know — or click <strong>Hide translations</strong> in the top bar to test yourself (hover over any hidden translation to peek).</p></div>
 
 <section id="riots">
 <div class="section-head"><div><span class="pill">Topic 1 · Opinion piece</span><h2>Les émeutes en France</h2><p class="sub">The riots, the suburbs and French society</p></div></div>
@@ -124,23 +128,23 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 <div class="phrase"><span class="fr">Faire face à un problème</span><span class="en">To face a problem</span></div>
 </div></div></div>
 <div class="callout"><strong>Three especially useful lines to learn:</strong><br><span class="fr">La violence ne résout jamais rien ; au contraire, elle aggrave la situation.</span><br><span class="en">Violence never solves anything; on the contrary, it makes the situation worse.</span><br><br><span class="fr">Il est essentiel de lutter contre les inégalités et de promouvoir l'égalité.</span><br><span class="en">It is essential to fight inequality and promote equality.</span><br><br><span class="fr">Tant que les jeunes n'auront pas d'espoir pour l'avenir, ce problème continuera.</span><br><span class="en">As long as young people have no hope for the future, this problem will continue.</span></div>
-<div class="card"><h3>Flexible opinion-piece structure</h3><ol><li><strong>Introduction:</strong> introduce the issue and give your opinion.</li><li><strong>Causes:</strong> poverty, unemployment, discrimination and exclusion.</li><li><strong>Consequences:</strong> violence, crime, damage and fear.</li><li><strong>Solutions:</strong> education, opportunities and government investment.</li><li><strong>Conclusion:</strong> restate your opinion and call for change.</li></ol><p class="en">Adapt the paragraphs to the exact question. You do not need to include every theme.</p></div>
+<div class="card"><h3>Flexible opinion-piece structure</h3><ol><li><strong>Introduction:</strong> introduce the issue and give your opinion.</li><li><strong>Causes:</strong> poverty, unemployment, discrimination and exclusion.</li><li><strong>Consequences:</strong> violence, crime, damage and fear.</li><li><strong>Solutions:</strong> education, opportunities and government investment.</li><li><strong>Conclusion:</strong> restate your opinion and call for change.</li></ol><p class="sub">Adapt the paragraphs to the exact question. You do not need to include every theme.</p></div>
 </section>
 
 <section id="holiday">
 <div class="section-head"><div><span class="pill">Topic 2 · Diary / blog</span><h2>Les vacances</h2><p class="sub">Understanding the prompt and writing about a holiday</p></div></div>
 <div class="card"><h3>Recognise what the question is asking</h3><table><tr><th>French trigger phrase</th><th>Meaning</th><th>What to write about</th></tr>
-<tr><td class="fr">Vous venez de rentrer chez vous</td><td>You have just returned home</td><td>Recap the holiday</td></tr>
-<tr><td class="fr">De retour chez vous</td><td>Back at home</td><td>Memories and experiences</td></tr>
-<tr><td class="fr">Vous venez d'arriver</td><td>You have just arrived</td><td>First impressions</td></tr>
-<tr><td class="fr">Votre première journée</td><td>Your first day</td><td>Arrival and activities</td></tr>
-<tr><td class="fr">Votre dernière journée</td><td>Your last day</td><td>Packing and saying goodbye</td></tr>
-<tr><td class="fr">Vous partez demain</td><td>You're leaving tomorrow</td><td>Final day and preparations</td></tr>
-<tr><td class="fr">Des vacances inoubliables</td><td>An unforgettable holiday</td><td>Positive experiences</td></tr>
-<tr><td class="fr">Quel désastre ! / Quel cauchemar !</td><td>What a disaster / nightmare!</td><td>Problems and complaints</td></tr>
-<tr><td class="fr">Un malentendu</td><td>A misunderstanding</td><td>An argument or confusion</td></tr>
-<tr><td class="fr">Un séjour à l'étranger</td><td>A stay abroad</td><td>Travel and culture</td></tr>
-<tr><td class="fr">Un article pour le blog</td><td>A blog article</td><td>Write for an audience</td></tr>
+<tr><td class="fr">Vous venez de rentrer chez vous</td><td class="en">You have just returned home</td><td>Recap the holiday</td></tr>
+<tr><td class="fr">De retour chez vous</td><td class="en">Back at home</td><td>Memories and experiences</td></tr>
+<tr><td class="fr">Vous venez d'arriver</td><td class="en">You have just arrived</td><td>First impressions</td></tr>
+<tr><td class="fr">Votre première journée</td><td class="en">Your first day</td><td>Arrival and activities</td></tr>
+<tr><td class="fr">Votre dernière journée</td><td class="en">Your last day</td><td>Packing and saying goodbye</td></tr>
+<tr><td class="fr">Vous partez demain</td><td class="en">You're leaving tomorrow</td><td>Final day and preparations</td></tr>
+<tr><td class="fr">Des vacances inoubliables</td><td class="en">An unforgettable holiday</td><td>Positive experiences</td></tr>
+<tr><td class="fr">Quel désastre ! / Quel cauchemar !</td><td class="en">What a disaster / nightmare!</td><td>Problems and complaints</td></tr>
+<tr><td class="fr">Un malentendu</td><td class="en">A misunderstanding</td><td>An argument or confusion</td></tr>
+<tr><td class="fr">Un séjour à l'étranger</td><td class="en">A stay abroad</td><td>Travel and culture</td></tr>
+<tr><td class="fr">Un article pour le blog</td><td class="en">A blog article</td><td>Write for an audience</td></tr>
 </table></div>
 <div class="callout"><strong>Likely scenario to prepare for:</strong> you've just returned home after a holiday and are writing a diary entry about it. Start in the present (you've just got home), use the past to recap what happened, and finish with a future thought.</div>
 <div class="grid">
@@ -250,8 +254,8 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 <section id="learn">
 <div class="section-head"><div><span class="pill">Revision checklist</span><h2>What to memorise</h2><p class="sub">Tick phrases off as you learn them. Your progress stays in this page while it remains open.</p></div></div>
 <div class="grid">
-<div class="card"><h3>Opinion piece · 10 phrases</h3><div class="progress"><div class="bar" id="opbar"></div></div><div id="opcount" class="en">0 / 10 learned</div><div class="checklist" id="oplist"></div></div>
-<div class="card"><h3>Holiday diary · 12 phrases</h3><div class="progress"><div class="bar" id="holbar"></div></div><div id="holcount" class="en">0 / 12 learned</div><div class="checklist" id="hollist"></div></div>
+<div class="card"><h3>Opinion piece · 10 phrases</h3><div class="progress"><div class="bar" id="opbar"></div></div><div id="opcount" class="sub" style="margin-bottom:10px">0 / 10 learned</div><div class="checklist" id="oplist"></div></div>
+<div class="card"><h3>Holiday diary · 12 phrases</h3><div class="progress"><div class="bar" id="holbar"></div></div><div id="holcount" class="sub" style="margin-bottom:10px">0 / 12 learned</div><div class="checklist" id="hollist"></div></div>
 </div>
 </section>
 
@@ -262,6 +266,12 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:25px}
 </main>
 <footer>French Test Revision · Read, practise, and adapt the phrases to the question.</footer>
 <script>
+const toggleBtn=document.getElementById('toggleTrans');
+toggleBtn.addEventListener('click',()=>{
+  const hidden=document.body.classList.toggle('hide-translations');
+  toggleBtn.classList.toggle('active',hidden);
+  toggleBtn.textContent=hidden?'Show translations':'Hide translations';
+});
 const opinion=[
 "À mon avis, il est indéniable que...","Les jeunes se sentent exclus de la société.","La pauvreté et le chômage jouent un grand rôle.","Il existe un fossé entre les riches et les pauvres.","Les réseaux sociaux peuvent influencer les jeunes.","Les gens ne se sentent plus en sécurité.","La violence ne résout jamais rien.","Il faut prendre les mesures nécessaires.","Il est essentiel de lutter contre les inégalités.","Nous devons construire une société plus juste."
 ];
